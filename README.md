@@ -78,6 +78,10 @@ Install the binaries once: `npm i -g @fusengine/browser-mcp` (provides `fuse-bro
 # One-shot probe of a real page
 fuse-browser probe https://example.com --extract-prices --observe-visual
 
+# HTTP fast-path — browser TLS impersonation, NO browser launch (~10x faster)
+# For server-rendered HTML (price lists, indexes). Falls back to probe for JS/SPA.
+fuse-browser fetch https://books.toscrape.com/ --extract-prices --proxy http://user:pass@host:port
+
 # Hotels with country identity, proxy routing, replay
 fuse-browser probe 'https://www.booking.com/searchresults.html?ss=Tokyo' \
   --country JP --proxy-map proxies.json --replay --auto-consent --extract-prices
