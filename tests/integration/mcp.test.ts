@@ -40,6 +40,7 @@ const EXPECTED = [
   "browser_login",
   "browser_snapshot",
   "browser_act",
+  "browser_collect",
   "browser_extract",
   "browser_extract_schema",
   "browser_screenshot",

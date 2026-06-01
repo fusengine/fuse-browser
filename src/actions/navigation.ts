@@ -3,10 +3,39 @@
  * @module actions/navigation
  */
 import type { Page } from "playwright";
+import { SCROLL_SCRIPT } from "../extraction/scroll-script.js";
 import type { ActionResult } from "../interfaces/types.js";
+import { evalScriptArg } from "../lib/evaluate.js";
 
-/** Scroll the page by a pixel delta (positive = down/right). */
-export async function scroll(page: Page, deltaY: number, deltaX = 0): Promise<ActionResult> {
+/** Geometry returned by the in-page container scroll. */
+interface ScrollGeo {
+  found: boolean;
+  scrollTop?: number;
+  moved?: number;
+  atEnd?: boolean;
+}
+
+/** Optional scroll target: a specific container and/or jump to its end. */
+export interface ScrollOpts {
+  selector?: string;
+  to?: "end";
+}
+
+/**
+ * Scroll by a pixel delta (window, positive = down/right). With `selector` or
+ * `to:"end"`, scroll the matching (or auto-detected) scrollable container.
+ */
+export async function scroll(
+  page: Page,
+  deltaY: number,
+  deltaX = 0,
+  opts: ScrollOpts = {},
+): Promise<ActionResult> {
+  if (opts.selector || opts.to === "end") {
+    const arg = { selector: opts.selector ?? null, to: opts.to ?? null, delta: deltaY };
+    const geo = await evalScriptArg<ScrollGeo, typeof arg>(page, SCROLL_SCRIPT, arg);
+    return { type: "scroll", ok: geo.found, deltaY, selector: opts.selector ?? null, scrollTop: geo.scrollTop, atEnd: geo.atEnd };
+  }
   await page.mouse.wheel(deltaX, deltaY);
   return { type: "scroll", ok: true, deltaX, deltaY };
 }

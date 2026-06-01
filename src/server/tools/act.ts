@@ -42,10 +42,12 @@ export function registerActTools(server: McpServer, sessions: SessionManager): v
     target: String(a.target),
     value: String(a.value),
   }));
-  actTool(server, sessions, "browser_scroll", "Scroll the page by a pixel delta (positive deltaY scrolls down).", { sessionId, deltaY: z.number().optional(), deltaX: z.number().optional() }, (a) => ({
+  actTool(server, sessions, "browser_scroll", "Scroll by a pixel delta (positive deltaY scrolls down). Pass `selector` to scroll a specific scrollable container (auto-detected if omitted with `to`), or `to:\"end\"` to jump to its bottom.", { sessionId, deltaY: z.number().optional(), deltaX: z.number().optional(), selector: z.string().optional(), to: z.enum(["end"]).optional() }, (a) => ({
     type: "scroll",
     deltaY: a.deltaY ?? 600,
     deltaX: a.deltaX ?? 0,
+    selector: a.selector as string | undefined,
+    to: a.to as string | undefined,
   }));
   actTool(server, sessions, "browser_press", "Press a key or shortcut (Enter, ArrowDown, Control+a...).", { sessionId, key: z.string() }, (a) => ({
     type: "press",

@@ -29,7 +29,10 @@ export async function performAction(
     case "login":
       return login(page, action as LoginAction, humanMode);
     case "scroll":
-      return scroll(page, Number(action.deltaY ?? 600), Number(action.deltaX ?? 0));
+      return scroll(page, Number(action.deltaY ?? 600), Number(action.deltaX ?? 0), {
+        selector: typeof action.selector === "string" ? action.selector : undefined,
+        to: action.to === "end" ? "end" : undefined,
+      });
     case "press":
       return pressKey(page, String(action.key ?? ""));
     case "select":

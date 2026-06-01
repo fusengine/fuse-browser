@@ -132,7 +132,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 `FUSE_HEADLESS`, `FUSE_COUNTRY`, `FUSE_CURRENCY`, `FUSE_USER_DATA_DIR`,
 `FUSE_STORAGE_STATE`, `FUSE_OUTPUT_DIR`.
 
-### Tools (25)
+### Tools (26)
 
 | Group | Tools |
 | --- | --- |
@@ -140,8 +140,8 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 | **Fast-path** | `browser_fetch` — HTTP fetch with browser TLS/HTTP2 impersonation, **no browser launch** (~10× faster) for server-rendered HTML |
 | **Session** | `browser_open`, `browser_connect`, `browser_status`, `browser_close` |
 | **Navigate** | `browser_navigate`, `browser_back`, `browser_forward`, `browser_wait`, `browser_wait_for` |
-| **Act** | `browser_click`, `browser_fill`, `browser_login`, `browser_scroll`, `browser_press`, `browser_select` |
-| **Agentic** | `browser_snapshot` (indexed refs), `browser_act` (by ref + page diff), `browser_run` (multi-step plan) |
+| **Act** | `browser_click`, `browser_fill`, `browser_login`, `browser_scroll` (window or a container via `selector`/`to:"end"`), `browser_press`, `browser_select` |
+| **Agentic** | `browser_snapshot` (indexed refs), `browser_act` (by ref + page diff), `browser_run` (multi-step plan), `browser_collect` (exhaust a virtualized/infinite list) |
 | **Extract** | `browser_extract` (text/prices/hotels/challenges), `browser_extract_schema` (typed, by CSS selectors) |
 | **SERP** | `browser_serp_batch` — multi-query Google search in one session, per-query organic results + domain rank |
 | **Vision** | `browser_screenshot` (page, single element by `ref`, or responsive set via `viewport`/`viewports`) |
@@ -156,6 +156,11 @@ Key agentic patterns:
   checkouts are visible and actionable.
 - **`browser_wait_for`** — wait on a condition (`text` / `selector` / `gone` / `urlContains`),
   not a fixed delay.
+- **`browser_collect`** — exhaust a **virtualized / infinite-scroll** list (hotel/flight
+  results, feeds): auto-detects the scroll container, scrolls incrementally and **dedups
+  rows by stable key** until the list ends. Returns the full set of rows (text / url /
+  optional prices) — data, not refs (virtualization recycles nodes), so to act on a found
+  row use `browser_act` by text or `browser_scroll` then `browser_snapshot`.
 - **`browser_run`** — execute an ordered plan (navigate/act/wait/extract) in one call,
   stopping at the first failure. Guardrails apply to the whole plan.
 

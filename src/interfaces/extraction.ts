@@ -61,6 +61,14 @@ export interface InteractiveElement {
   obscured?: boolean;
 }
 
+/** A row harvested from a (possibly virtualized) list via scroll-collect. */
+export interface CollectedItem {
+  key: string;
+  text: string;
+  url: string | null;
+  prices?: Price[];
+}
+
 /** Visual observation (screenshot + interactive elements). */
 export interface Visual {
   screenshotPath?: string;

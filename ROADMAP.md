@@ -5,7 +5,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 25 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 26 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
@@ -13,6 +13,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ Google SERP: structured organic/ads/related, multi-page aggregation, domain **rank tracker**, `browser_serp_batch`
 - ✅ Agentic perception: enriched snapshot (value, placeholder, options, checked, disabled, combobox `aria-*`, occlusion)
 - ✅ Cross-boundary snapshot: open **Shadow DOM** piercing + **iframe** traversal (same/cross-origin), frame-scoped refs (`"<frame>:<local>"`)
+- ✅ Virtualized/infinite lists: `browser_collect` (auto-detect scroll container, incremental scroll + dedup until end) + container-targeted `browser_scroll`
 - ✅ Rotating proxy pool + SessionPool (round-robin, auto-retire on block) + WebRTC leak guard
 - ✅ HTTP fast-path (`browser_fetch`): browser TLS/JA3 impersonation via `impit`, no browser launch
 - ✅ Agentic action: `browser_act` `pick` (combobox/autocomplete in one call)
@@ -32,7 +33,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ⬜ **CDP-disconnect during sensitive actions** — evade CDP-connection sniffing (PerimeterX/Shape) *(medium)*
 - ⬜ **Action caching** — remember resolved `ref`→selector for repeat visits, cut LLM round-trips *(low/medium)*
 - ✅ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(shipped 0.1.15)*
-- ⬜ **Scroll/virtualized-list hints** — surface off-screen results without dumping 10k nodes *(medium)*
+- ✅ **Scroll/virtualized-list hints** — `browser_collect` surfaces off-screen results *(shipped 0.1.16)*
 
 ## ⬜ v0.4 — Design & data tooling
 

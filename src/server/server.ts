@@ -7,6 +7,7 @@ import { VERSION } from "../lib/version.js";
 import { SessionManager } from "../session/manager.js";
 import { registerResources } from "./resources.js";
 import { registerActTools } from "./tools/act.js";
+import { registerCollectTool } from "./tools/collect.js";
 import { registerConnectTool } from "./tools/connect.js";
 import { registerExtractTool } from "./tools/extract.js";
 import { registerExtractSchemaTool } from "./tools/extract-schema.js";
@@ -38,6 +39,7 @@ export function createServer(): BuiltServer {
   registerNavigateTool(server, sessions);
   registerActTools(server, sessions);
   registerSnapshotTools(server, sessions);
+  registerCollectTool(server, sessions);
   registerWaitTool(server, sessions);
   registerRunTool(server, sessions);
   registerExtractTool(server, sessions);
