@@ -41,7 +41,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ⬜ **Visual diff** (`browser_visual_diff`) — compare two captures / vs baseline, pixel diff + changed zones *(medium)*
 - ⬜ **HAR record/replay** — deterministic offline re-extraction, CI fixtures *(low)*
 - ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium)*
-- ⬜ **CSV export** for SERP/rank batches *(low)*
+- ✅ **CSV export** for SERP/rank batches — `serp-batch --csv` *(shipped 0.1.18)*
 
 ## ⬜ Later / optional
 

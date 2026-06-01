@@ -89,9 +89,9 @@ fuse-browser probe 'https://www.booking.com/searchresults.html?ss=Tokyo' \
 # Use the installed Chrome
 fuse-browser probe https://example.com --channel chrome
 
-# SEO rank tracking across many keywords (one session)
+# SEO rank tracking across many keywords (one session) — add --csv for a spreadsheet
 fuse-browser serp-batch "agence web vevey" "création site web lausanne" \
-  --rank-domain fusengine.ch --serp-pages 2 --hl fr --gl ch
+  --rank-domain fusengine.ch --serp-pages 2 --hl fr --gl ch --csv > ranks.csv
 
 # Responsive screenshots (saved PNGs) — works on localhost too
 fuse-browser shots http://localhost:8000 --viewports mobile,desktop,1280x720

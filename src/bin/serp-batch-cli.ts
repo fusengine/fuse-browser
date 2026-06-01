@@ -5,6 +5,7 @@
 import { resolveConfig } from "../agent/config.js";
 import { serpBatch } from "../agent/serp-batch.js";
 import type { EngineName } from "../interfaces/engine-types.js";
+import { serpBatchToCsv } from "../lib/serp-csv.js";
 
 type Values = Record<string, unknown>;
 const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
@@ -30,5 +31,5 @@ export async function runSerpBatch(queries: string[], values: Values): Promise<v
     gl: str(values.gl),
     delayMs: values["delay-ms"] ? Number(values["delay-ms"]) : undefined,
   });
-  process.stdout.write(`${JSON.stringify(rows, null, 2)}\n`);
+  process.stdout.write(values.csv ? serpBatchToCsv(rows) : `${JSON.stringify(rows, null, 2)}\n`);
 }

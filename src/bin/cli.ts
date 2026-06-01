@@ -23,6 +23,7 @@ const { positionals, values } = parseArgs({
     "extract-serp": { type: "boolean" },
     "serp-pages": { type: "string" },
     "rank-domain": { type: "string" },
+    csv: { type: "boolean" },
     viewports: { type: "string" },
     "settle-ms": { type: "string" },
     hl: { type: "string" },
