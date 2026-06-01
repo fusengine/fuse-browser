@@ -7,9 +7,10 @@
 import type { Page } from "playwright";
 import type { ActionResult } from "../interfaces/types.js";
 import { REF_ATTRIBUTE } from "../extraction/snapshot.js";
+import { pickAutocomplete } from "./autocomplete.js";
 
 /** Action kinds that can target a snapshot ref. */
-export type RefActionKind = "click" | "fill" | "select";
+export type RefActionKind = "click" | "fill" | "select" | "pick";
 
 /** Run `kind` on the element carrying `data-fuse-ref="ref"`. */
 export async function actByRef(
@@ -17,6 +18,7 @@ export async function actByRef(
   ref: number,
   kind: RefActionKind,
   value = "",
+  option = "",
 ): Promise<ActionResult> {
   const selector = `[${REF_ATTRIBUTE}="${ref}"]`;
   const locator = page.locator(selector).first();
@@ -24,6 +26,7 @@ export async function actByRef(
     if ((await locator.count()) === 0) {
       return { type: kind, ok: false, ref, error: "ref_not_found" };
     }
+    if (kind === "pick") return { ...(await pickAutocomplete(page, locator, value, option)), ref };
     if (kind === "click") {
       await locator.click({ timeout: 5_000 });
     } else if (kind === "fill") {

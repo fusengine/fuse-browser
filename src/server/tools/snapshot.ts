@@ -9,6 +9,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Page } from "playwright";
 import { z } from "zod";
 import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
+import { pickAutocomplete } from "../../actions/autocomplete.js";
 import { smartClick } from "../../actions/smart-click.js";
 import { smartFill } from "../../actions/smart-fill.js";
 import { captureSnapshot } from "../../extraction/snapshot.js";
@@ -18,14 +19,16 @@ import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
-const KIND = z.enum(["click", "fill", "select"]);
+const KIND = z.enum(["click", "fill", "select", "pick"]);
 
 /** Run the chosen action (by ref or text fallback). */
 async function runAct(page: Page, a: Record<string, unknown>, human: boolean): Promise<ActionResult | null> {
   const kind = a.kind as RefActionKind;
   const value = a.value ? String(a.value) : "";
-  if (typeof a.ref === "number") return actByRef(page, a.ref, kind, value);
+  const option = a.option ? String(a.option) : "";
+  if (typeof a.ref === "number") return actByRef(page, a.ref, kind, value, option);
   if (typeof a.target !== "string") return null;
+  if (kind === "pick") return pickAutocomplete(page, page.locator(a.target).first(), value, option);
   return kind === "fill"
     ? smartFill(page, a.target, value, "", human)
     : smartClick(page, a.target, "", human);
@@ -55,13 +58,14 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Act on element",
       description:
-        "Execute click/fill/select on an element by `ref` (from browser_snapshot) or by `target` text. Returns a diff of what changed (added/removed/text/url).",
+        "Execute click/fill/select/pick on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. Returns a diff of what changed.",
       inputSchema: {
         sessionId: z.string(),
         kind: KIND,
         ref: z.number().int().optional(),
         target: z.string().optional(),
         value: z.string().optional(),
+        option: z.string().optional(),
       },
     },
     async (args) => {

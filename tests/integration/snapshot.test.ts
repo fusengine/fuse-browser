@@ -51,3 +51,26 @@ test("snapshot tags refs and act-by-ref clicks the right element", { timeout: 12
     await sessions.close(session.id);
   }
 });
+
+const COMBO =
+  '<input role="combobox" placeholder="From"><ul role="listbox"></ul><div id="picked">none</div>' +
+  "<script>const i=document.querySelector('input'),l=document.querySelector('ul'),p=document.getElementById('picked');" +
+  "i.addEventListener('input',function(){l.innerHTML='';['Geneva (GVA)','Genoa (GOA)'].forEach(function(t){" +
+  "var o=document.createElement('li');o.setAttribute('role','option');o.textContent=t;" +
+  "o.addEventListener('click',function(){p.textContent=t});l.appendChild(o)})})</script>";
+const COMBO_URL = `data:text/html,${encodeURIComponent(COMBO)}`;
+
+test("pick types into a combobox and clicks the matching suggestion", { timeout: 120_000 }, async () => {
+  const sessions = new SessionManager();
+  const session = await sessions.open(resolveConfig({ headless: true, engine: "patchright" }));
+  try {
+    await session.page.goto(COMBO_URL, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    const input = (await captureSnapshot(session.page)).find((e) => e.tag === "input");
+    assert.ok(input, "combobox input present");
+    const res = await actByRef(session.page, input.index, "pick", "Gen", "Geneva");
+    assert.equal(res.ok, true, "pick should succeed");
+    assert.equal(await session.page.locator("#picked").innerText(), "Geneva (GVA)");
+  } finally {
+    await sessions.close(session.id);
+  }
+});

@@ -4,6 +4,7 @@
  */
 import type { Page } from "playwright";
 import type { ActionResult } from "../interfaces/types.js";
+import { pickAutocomplete } from "./autocomplete.js";
 import { login, type LoginAction } from "./login.js";
 import { navigateHistory, pressKey, scroll, selectOption } from "./navigation.js";
 import { smartClick } from "./smart-click.js";
@@ -33,6 +34,8 @@ export async function performAction(
       return pressKey(page, String(action.key ?? ""));
     case "select":
       return selectOption(page, target, String(action.value ?? ""));
+    case "pick":
+      return pickAutocomplete(page, page.locator(target).first(), String(action.value ?? ""), String(action.option ?? ""));
     case "back":
     case "forward":
       return navigateHistory(page, action.type);
