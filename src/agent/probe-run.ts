@@ -9,14 +9,17 @@ import { handleCommonConsent } from "../consent/consent.js";
 import { applyCurrencyPreference } from "../consent/currency.js";
 import { urlWithCurrency } from "../consent/currency-url.js";
 import { selectEngine } from "../engine/registry.js";
-import { detectChallenges } from "../extraction/challenges.js";
+import { mainText } from "../extraction/main-text.js";
 import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
+import { gotoWithRetry } from "../net/navigate.js";
+import { throttleHost } from "../net/throttle.js";
 import { domSignature } from "../state/dom-signature.js";
 import { runActions } from "./actions-loop.js";
 import type { ResolvedConfig } from "./config.js";
+import { detectAndSolve } from "./detect.js";
 import { attachListeners } from "./network.js";
 import { buildReport } from "./report.js";
 
@@ -38,7 +41,8 @@ export async function runProbe(
     if (targetUrl.includes("booking.com") && config.currency) {
       await prepareBookingCurrency(page, config.currency);
     }
-    await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await throttleHost(targetUrl, config.retry.throttleMs);
+    await gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
     try {
       await page.waitForLoadState("networkidle", { timeout: 10_000 });
     } catch {
@@ -53,8 +57,8 @@ export async function runProbe(
     const outcome = await runActions(page, config, actions, targetUrl, runId);
     if (options.waitMs) await page.waitForTimeout(options.waitMs);
     const after = await domSignature(page);
-    const text = await page.locator("body").innerText({ timeout: 3_000 });
-    const challenges = options.detectChallenges ? await detectChallenges(page, text) : {};
+    const text = await mainText(page);
+    const { challenges, captcha } = await detectAndSolve(page, text, options, config);
     const title = await page.title();
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};
@@ -79,6 +83,7 @@ export async function runProbe(
       screenshotPath,
       reportPath,
       extractPricesFlag: Boolean(options.extractPrices),
+      captcha,
     });
   } finally {
     await context.close();

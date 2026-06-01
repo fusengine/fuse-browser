@@ -107,13 +107,46 @@ bun run build           # emit dist/ (JS + .d.ts)
 
 CI (`.github/workflows/ci.yml`) runs typecheck + unit + build + integration on every push.
 
+## Output & data location
+
+Artifacts (reports, screenshots, site-memory, replay) are written **outside the repo by default**:
+
+- nested under the detected host-agent config dir when present —
+  `.claude/fuse-browser/`, `.cursor/`, `.codex/`, `.windsurf/`, `.gemini/`, `.continue/`, `.junie/`, `.github/`;
+- otherwise `~/.fuse-browser/`.
+
+Override per run with `outputDir` (library / MCP arg) or `--output-dir` (CLI). Cookies
+(`storageStatePath`) and the Chromium profile (`userDataDir`) are separate paths you set explicitly.
+
+> ⚠️ Reports and `storage-state` files contain page content, screenshots and **session cookies in
+> clear text** — never commit them. The bundled `.gitignore` already excludes the defaults.
+
 ## Guardrails & limits
 
 - No payment/booking/ticketing/card action without explicit human approval.
 - Passwords masked in reports; proxy credentials redacted.
-- CAPTCHA / 2FA: detection + human handoff, never a magic bypass.
+- CAPTCHA / 2FA: detection by default; an **opt-in** solver is available for authorized testing only — see *Resilience & captcha*.
 - Concurrent sessions are capped (`maxSessions`, default 8) to avoid OOM.
 - CDP attach: the remote-debugging port is a local attack surface — use a dedicated profile.
+
+## Resilience & captcha
+
+- **Navigation retry** (on by default): transient failures and HTTP `429/502/503/504`
+  are retried with full-jitter exponential backoff, honoring `Retry-After`. Tune via
+  `retry: { maxAttempts, baseMs, capMs, throttleMs }` (defaults `3 / 300 / 10000 / 0`).
+  `throttleMs` enforces a minimum gap between hits on the same host.
+- **Captcha solver** (off by default, **opt-in**): set `solveCaptcha: true` on a probe and
+  provide `captcha: { provider, apiKey }` (`2captcha` | `anticaptcha` | `capmonster`). It
+  solves reCAPTCHA v2 / Cloudflare Turnstile via the provider's API; the result is reported
+  as `captcha: { attempted, solved, kind, provider, reason }`. Failures are reported, never thrown.
+
+## Disclaimer
+
+Provided **as-is** under MIT, with no warranty. `fuse-browser` is a neutral, dual-use
+automation tool. **You alone are responsible** for how you use it and for complying with
+applicable law, the target sites' Terms of Service, `robots.txt`, and data-protection rules
+(e.g. GDPR). The opt-in captcha solver is intended for **authorized testing only** — on
+systems you own or are explicitly permitted to test.
 
 ## License
 

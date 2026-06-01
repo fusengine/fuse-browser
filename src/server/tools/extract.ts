@@ -6,6 +6,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { detectChallenges } from "../../extraction/challenges.js";
 import { extractHotelOffers } from "../../extraction/hotel-offers.js";
+import { mainText } from "../../extraction/main-text.js";
 import { extractPrices } from "../../extraction/prices.js";
 import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
@@ -26,7 +27,7 @@ export function registerExtractTool(server: McpServer, sessions: SessionManager)
       const a = args as Record<string, unknown>;
       const kind = (a.kind as string) ?? "all";
       return withSession(sessions, String(a.sessionId), async (s) => {
-        const text = await s.page.locator("body").innerText({ timeout: 3_000 });
+        const text = await mainText(s.page);
         const out: Record<string, unknown> = { url: s.page.url() };
         if (kind === "text" || kind === "all") out.text = text;
         if (kind === "prices" || kind === "all") {

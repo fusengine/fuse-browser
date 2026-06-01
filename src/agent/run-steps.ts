@@ -9,7 +9,9 @@ import { type ActionInput, performAction } from "../actions/perform.js";
 import { waitForCondition } from "../actions/wait-for.js";
 import { detectChallenges } from "../extraction/challenges.js";
 import { extractHotelOffers } from "../extraction/hotel-offers.js";
+import { mainText } from "../extraction/main-text.js";
 import { extractPrices } from "../extraction/prices.js";
+import { gotoWithRetry } from "../net/navigate.js";
 
 /** A single step. `type` selects the operation; other fields are step args. */
 export type RunStep = Record<string, unknown> & { type: string };
@@ -35,7 +37,7 @@ async function runWait(page: Page, step: RunStep): Promise<StepResult> {
 }
 
 async function runExtract(page: Page, step: RunStep): Promise<StepResult> {
-  const text = await page.locator("body").innerText({ timeout: 3_000 });
+  const text = await mainText(page);
   const data: Record<string, unknown> = { url: page.url() };
   const kind = step.kind ?? "all";
   if (kind === "text" || kind === "all") data.text = text;
@@ -49,7 +51,7 @@ async function runExtract(page: Page, step: RunStep): Promise<StepResult> {
 
 async function runOne(page: Page, step: RunStep, humanMode: boolean): Promise<StepResult> {
   if (step.type === "navigate") {
-    await page.goto(String(step.url), { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await gotoWithRetry(page, String(step.url), { waitUntil: "domcontentloaded", timeout: 30_000 });
     return { index: 0, type: "navigate", ok: true, data: { url: page.url(), title: await page.title() } };
   }
   if (step.type === "wait_for") return runWait(page, step);

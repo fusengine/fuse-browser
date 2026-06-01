@@ -25,6 +25,17 @@ describe("extractPrices", () => {
     expect(has("BRL", 899)).toBe(true);
     expect(has("EUR", 149)).toBe(true);
   });
+
+  test("does not mistake the trailing R of a code (EUR) for ZAR", () => {
+    const prices = extractPrices("Total EUR 42");
+    expect(prices.some((p) => p.currency === "EUR" && p.amount === 42)).toBe(true);
+    expect(prices.some((p) => p.currency === "ZAR")).toBe(false);
+  });
+
+  test("still matches a genuine ZAR rand prefix", () => {
+    const prices = extractPrices("Price R 350");
+    expect(prices.some((p) => p.currency === "ZAR" && p.amount === 350)).toBe(true);
+  });
 });
 
 describe("normaliseAmount", () => {

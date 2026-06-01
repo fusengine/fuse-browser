@@ -5,14 +5,16 @@
  */
 import type { ResolvedConfig } from "../agent/config.js";
 import type { BrowserEngine } from "../interfaces/engine.js";
-import type { EngineName } from "../interfaces/types.js";
+import type { EngineName } from "../interfaces/engine-types.js";
 import { cdpEngine } from "./cdp-engine.js";
 import { patchrightEngine } from "./patchright-engine.js";
-import { playwrightEngine } from "./playwright-engine.js";
+import { firefoxEngine, playwrightEngine, webkitEngine } from "./playwright-engine.js";
 
 const ENGINES: Record<EngineName, BrowserEngine> = {
   playwright: playwrightEngine,
   patchright: patchrightEngine,
+  firefox: firefoxEngine,
+  webkit: webkitEngine,
 };
 
 /** Select the launch engine for `name`, defaulting to Patchright (stealth). */

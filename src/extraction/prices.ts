@@ -30,7 +30,7 @@ const CURRENCY_PREFIXES: Array<[string, string]> = [
   ["PLN", "PLN|zł"],
   ["CZK", "CZK|Kč"],
   ["ILS", "ILS|₪"],
-  ["ZAR", "ZAR|R"],
+  ["ZAR", "ZAR|(?<![A-Za-z])R"],
   ["USD", "USD|US\\$|\\$"],
 ];
 

@@ -2,7 +2,8 @@
  * Map raw tool arguments to typed agent/probe options.
  * @module server/map-options
  */
-import type { AgentOptions, BrowserAction, BrowserChannel, ProbeOptions } from "../interfaces/types.js";
+import type { BrowserChannel } from "../interfaces/engine-types.js";
+import type { AgentOptions, BrowserAction, ProbeOptions } from "../interfaces/types.js";
 
 /** Extract {@link AgentOptions} from raw tool arguments. */
 export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
@@ -26,6 +27,8 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     replayDir: a.replayDir as string | undefined,
     siteMemoryDir: a.siteMemoryDir as string | undefined,
     outputDir: a.outputDir as string | undefined,
+    retry: a.retry as AgentOptions["retry"],
+    captcha: a.captcha as AgentOptions["captcha"],
   };
 }
 
@@ -39,5 +42,6 @@ export function toProbeOptions(a: Record<string, unknown>): ProbeOptions {
     waitMs: a.waitMs as number | undefined,
     detectChallenges: a.detectChallenges as boolean | undefined,
     observeVisual: a.observeVisual as boolean | undefined,
+    solveCaptcha: a.solveCaptcha as boolean | undefined,
   };
 }

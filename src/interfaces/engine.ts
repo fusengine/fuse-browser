@@ -6,7 +6,7 @@
  */
 import type { Browser, BrowserContext, Page } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
-import type { EngineName } from "./types.js";
+import type { EngineId } from "./engine-types.js";
 
 /**
  * An opened context plus its owning browser.
@@ -25,7 +25,7 @@ export interface OpenedContext {
 /** A swappable browser engine that knows how to open a ready context. */
 export interface BrowserEngine {
   /** Stable engine identifier. */
-  readonly name: EngineName;
+  readonly name: EngineId;
   /** Launch or attach the engine and open a context configured from `config`. */
   open(config: ResolvedConfig): Promise<OpenedContext>;
 }

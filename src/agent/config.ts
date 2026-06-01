@@ -4,8 +4,11 @@
  */
 import { join } from "node:path";
 import { resolveIdentity, type ResolvedIdentity } from "../identity/resolve.js";
-import type { AgentOptions, BrowserChannel, EngineName } from "../interfaces/types.js";
+import type { BrowserChannel, EngineName } from "../interfaces/engine-types.js";
+import type { CaptchaConfig, RetryConfig } from "../interfaces/net.js";
+import type { AgentOptions } from "../interfaces/types.js";
 import { ensureDir } from "../lib/fs.js";
+import { resolveDefaultOutputDir } from "../lib/output-dir.js";
 import { loadProxyCountryMap, type ProxySource, resolveProxy } from "../proxy/country-map.js";
 
 /** Effective configuration used by every probe run. */
@@ -27,11 +30,13 @@ export interface ResolvedConfig {
   replayEnabled: boolean;
   replayDir: string;
   siteMemoryDir: string;
+  retry: RetryConfig;
+  captcha: CaptchaConfig | null;
 }
 
 /** Build the resolved configuration, creating required directories. */
 export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
-  const outputDir = opts.outputDir ?? "runs";
+  const outputDir = opts.outputDir ?? resolveDefaultOutputDir();
   ensureDir(outputDir);
   const identity = resolveIdentity(opts);
   const map = loadProxyCountryMap(opts.proxyCountryMap, opts.proxyMapPath);
@@ -58,5 +63,12 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     replayEnabled: opts.replayEnabled ?? false,
     replayDir: opts.replayDir ?? join(outputDir, "replay"),
     siteMemoryDir,
+    retry: {
+      maxAttempts: opts.retry?.maxAttempts ?? 3,
+      baseMs: opts.retry?.baseMs ?? 300,
+      capMs: opts.retry?.capMs ?? 10_000,
+      throttleMs: opts.retry?.throttleMs ?? 0,
+    },
+    captcha: opts.captcha ?? null,
   };
 }

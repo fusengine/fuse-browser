@@ -5,6 +5,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { SessionManager } from "../../session/manager.js";
+import { gotoWithRetry } from "../../net/navigate.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
@@ -20,7 +21,7 @@ export function registerNavigateTool(server: McpServer, sessions: SessionManager
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        await s.page.goto(String(a.url), { waitUntil: "domcontentloaded", timeout: 30_000 });
+        await gotoWithRetry(s.page, String(a.url), { waitUntil: "domcontentloaded", timeout: 30_000 });
         try {
           await s.page.waitForLoadState("networkidle", { timeout: 10_000 });
         } catch {

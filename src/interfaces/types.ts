@@ -3,22 +3,8 @@
  * @module interfaces/types
  */
 
-/** Underlying browser engine. */
-export type EngineName = "playwright" | "patchright";
-
-/**
- * Installed-browser channel. Lets the agent drive the user's real Chrome/Edge
- * instead of the bundled Chromium (better stealth; Patchright recommends "chrome").
- */
-export type BrowserChannel =
-  | "chrome"
-  | "chrome-beta"
-  | "chrome-dev"
-  | "chrome-canary"
-  | "msedge"
-  | "msedge-beta"
-  | "msedge-dev"
-  | "msedge-canary";
+import type { BrowserChannel, EngineName } from "./engine-types.js";
+import type { CaptchaConfig, RetryConfig } from "./net.js";
 
 /** Geographic coordinates for location emulation. */
 export interface Geolocation {
@@ -82,6 +68,10 @@ export interface AgentOptions {
   replayEnabled?: boolean;
   replayDir?: string;
   siteMemoryDir?: string;
+  /** Navigation retry/backoff overrides. */
+  retry?: Partial<RetryConfig>;
+  /** Captcha solver config (opt-in; authorized testing only). */
+  captcha?: CaptchaConfig;
 }
 
 /** Per-probe options. */
@@ -93,4 +83,6 @@ export interface ProbeOptions {
   waitMs?: number;
   detectChallenges?: boolean;
   observeVisual?: boolean;
+  /** Attempt to solve a detected captcha (requires `captcha` config). */
+  solveCaptcha?: boolean;
 }

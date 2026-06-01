@@ -3,6 +3,7 @@
  * @module interfaces/report
  */
 import type { Challenges, HotelOffers, Price, Visual } from "./extraction.js";
+import type { CaptchaOutcome } from "./net.js";
 import type { ActionResult, Geolocation } from "./types.js";
 
 /** Rapport d'identité du navigateur (pays, proxy masqué...). */
@@ -63,6 +64,7 @@ export interface ProbeReport {
   prices: Price[];
   hotelOffers: HotelOffers | Record<string, never>;
   challenges: Challenges | Record<string, never>;
+  captcha?: CaptchaOutcome;
   visual: Visual | Record<string, never>;
   consent: ConsentResult;
   currency: CurrencyResult;

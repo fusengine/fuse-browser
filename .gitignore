@@ -5,3 +5,15 @@ runs/
 .DS_Store
 proxies.json
 *.local.json
+
+# Local agent/tooling state (not for the public repo)
+.claude/
+.cartographer/
+
+# Runtime artifacts — contain page content, screenshots and session cookies in clear text
+.fuse-browser/
+**/fuse-browser/
+*storage-state*.json
+user-data-dir/
+.env
+.env.*

@@ -7,7 +7,8 @@ import { parseArgs } from "node:util";
 import { BrowserAgent } from "../agent/browser-agent.js";
 import { compactReport } from "../agent/compact.js";
 import { GuardrailViolation } from "../lib/errors.js";
-import type { BrowserAction, EngineName } from "../interfaces/types.js";
+import type { EngineName } from "../interfaces/engine-types.js";
+import type { BrowserAction } from "../interfaces/types.js";
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
