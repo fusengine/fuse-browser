@@ -42,6 +42,7 @@ const EXPECTED = [
   "browser_extract",
   "browser_extract_schema",
   "browser_screenshot",
+  "browser_serp_batch",
 ];
 
 test("MCP exposes the expected tool set with no duplicates", async () => {
