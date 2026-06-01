@@ -9,6 +9,7 @@ proxies.json
 # Local agent/tooling state (not for the public repo)
 .claude/
 .cartographer/
+personal-roadmap.md
 
 # Runtime artifacts — contain page content, screenshots and session cookies in clear text
 .fuse-browser/

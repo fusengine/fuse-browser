@@ -1,0 +1,124 @@
+# Configuration
+
+fuse-browser reads configuration from three places, in increasing priority:
+
+1. **`FUSE_*` environment variables** — server-wide defaults, useful to pin an engine, channel, or CDP endpoint once in your MCP config.
+2. **Library `AgentOptions`** — passed to the agent when used as a library.
+3. **Per-call MCP tool arguments** — every field of `AgentOptions` is also accepted as an argument on `browser_probe` / `browser_probe_html`.
+
+A **per-call argument always wins** over a library option, which always wins over a `FUSE_*` env default. Any value left unset falls back to the resolved default described below.
+
+See [./anti-bot.md](./anti-bot.md) for proxy and captcha details, and [./sessions.md](./sessions.md) for HAR recording/replay and `storageState`.
+
+## AgentOptions
+
+Every field is optional. Defaults are applied by `resolveConfig` (`src/agent/config.ts`); identity-derived defaults are resolved by `resolveIdentity` (`src/identity/resolve.ts`).
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `outputDir` | `string` | detected host-agent dir (e.g. `.claude/fuse-browser`) else `~/.fuse-browser` | Root directory for all artifacts (reports, screenshots, site-memory, replay). See [Output location](#output-location). |
+| `engine` | `"playwright" \| "patchright" \| "firefox" \| "webkit"` | `"patchright"` | Browser automation engine. `patchright` is the stealth-patched Chromium driver. |
+| `channel` | `"chrome" \| "chrome-beta" \| "chrome-dev" \| "chrome-canary" \| "msedge" \| "msedge-beta" \| "msedge-dev" \| "msedge-canary"` | `null` (bundled browser) | Use a real installed browser channel instead of the bundled one. |
+| `executablePath` | `string` | `null` | Absolute path to a browser binary, overriding `channel` / the bundled browser. |
+| `cdpEndpoint` | `string` | `null` | Connect over the Chrome DevTools Protocol to an already-running browser instead of launching one. |
+| `storageStatePath` | `string` | `null` | Path to a Playwright storage-state JSON (cookies + localStorage) to load/persist a logged-in session. See [./sessions.md](./sessions.md). |
+| `harPath` | `string` | `null` | Record network traffic to this HAR file. See [./sessions.md](./sessions.md). |
+| `harMode` | `"minimal" \| "full"` | `"minimal"` | HAR recording detail. `minimal` records metadata only; `full` records response bodies. |
+| `harReplay` | `string` | `null` | Replay network traffic from this HAR file instead of hitting the live network. |
+| `humanMode` | `boolean` | `false` | Enable human-like interaction pacing for actions. |
+| `headless` | `boolean` | `true` | Run the browser without a visible window. |
+| `locale` | `string` | derived from `countryCode` profile | BCP-47 locale (e.g. `fr-FR`). Overrides the country profile's locale individually. |
+| `timezoneId` | `string` | derived from `countryCode` profile | IANA timezone (e.g. `Europe/Zurich`). Overrides the country profile's timezone individually. |
+| `countryCode` | `string` | `"CH"` | ISO country code driving the identity profile (locale, timezone, geolocation, currency, accept-language). See [Identity](#identity). |
+| `currency` | `string` | derived from `countryCode` profile | Currency code (e.g. `CHF`). Uppercased. Overrides the country profile's currency individually. |
+| `userDataDir` | `string` | `null` | Persistent browser user-data directory (created if missing). |
+| `proxyUrl` | `string` | `null` | Explicit proxy URL for all traffic. See [./anti-bot.md](./anti-bot.md). |
+| `proxyCountryMap` | `Record<string, string>` | none | Inline map of country code → proxy URL; the entry matching the resolved country is selected. |
+| `proxyMapPath` | `string` | none | Path to a JSON country→proxy map (merged with `proxyCountryMap`). |
+| `proxiesPath` | `string` | none | Path to a JSON array of proxy URLs used as a fallback pool when no explicit/mapped proxy resolves. |
+| `realisticProfile` | `boolean` | `true` | Apply a realistic desktop user-agent and fingerprint defaults. See [Identity](#identity). |
+| `replayEnabled` | `boolean` | `false` | Enable the action replay subsystem. |
+| `replayDir` | `string` | `<outputDir>/replay` | Directory for replay artifacts. |
+| `siteMemoryDir` | `string` | `<outputDir>/site-memory` | Directory for per-site memory (created if missing). |
+| `retry` | `Partial<RetryConfig>` | see [Retry](#retry) | Navigation retry/backoff overrides. |
+| `captcha` | `CaptchaConfig` | `null` | Opt-in captcha solver config (authorized testing only). See [./anti-bot.md](./anti-bot.md). |
+
+## Identity
+
+The browser identity is derived from `countryCode` by `resolveIdentity`. The country code selects a `CountryProfile` that supplies `locale`, `timezoneId`, `currency`, `geolocation`, and `acceptLanguage`. The default country is **`CH`** (Switzerland).
+
+- **`countryCode`** drives all identity fields. If unset, it is inferred from `locale` (via locale→country hints), and otherwise defaults to `CH`. The value is uppercased.
+- **`locale`** and **`timezoneId`** override their profile values individually without changing the rest of the profile.
+- **`currency`** overrides the profile currency individually (uppercased).
+- **`realisticProfile`** (default `true`) applies a realistic desktop user-agent and fingerprint so the session looks like an ordinary browser.
+
+`geolocation` and `acceptLanguage` always come from the resolved country profile (they have no per-call override).
+
+## Environment variables (FUSE_*)
+
+Read by `envAgentDefaults` (`src/server/env-defaults.ts`) and the proxy loader (`src/proxy/load.ts`). Each is a fallback that a per-call argument overrides. Unset variables stay undefined (the resolved default then applies).
+
+| Variable | Maps to / effect | Notes |
+|----------|------------------|-------|
+| `FUSE_ENGINE` | `engine` | One of `playwright` / `patchright` / `firefox` / `webkit`. |
+| `FUSE_CHANNEL` | `channel` | Installed-browser channel (e.g. `chrome`, `msedge`). |
+| `FUSE_CDP_ENDPOINT` | `cdpEndpoint` | CDP URL of a running browser to connect to. |
+| `FUSE_EXECUTABLE_PATH` | `executablePath` | Path to a browser binary. |
+| `FUSE_HEADLESS` | `headless` | Boolean-ish: any value except `"false"` is `true`; unset leaves it undefined. |
+| `FUSE_COUNTRY` | `countryCode` | ISO country code for the identity profile. |
+| `FUSE_CURRENCY` | `currency` | Currency code. |
+| `FUSE_USER_DATA_DIR` | `userDataDir` | Persistent user-data directory. |
+| `FUSE_STORAGE_STATE` | `storageStatePath` | Path to a storage-state JSON. |
+| `FUSE_OUTPUT_DIR` | `outputDir` | Override the artifact output directory. |
+| `FUSE_PROXIES` | proxy pool | Comma- or newline-separated proxy URLs; deduped, blanks dropped. Merged with `proxiesPath`. Treat as a secret. |
+
+### MCP config example
+
+```json
+{
+  "mcpServers": {
+    "fuse-browser": {
+      "command": "npx",
+      "args": ["-y", "fuse-browser"],
+      "env": {
+        "FUSE_ENGINE": "patchright",
+        "FUSE_CHANNEL": "chrome",
+        "FUSE_HEADLESS": "true",
+        "FUSE_COUNTRY": "CH",
+        "FUSE_CURRENCY": "CHF",
+        "FUSE_OUTPUT_DIR": "/path/to/artifacts",
+        "FUSE_PROXIES": "http://user:pass@host1:8080,http://user:pass@host2:8080"
+      }
+    }
+  }
+}
+```
+
+## Retry
+
+`RetryConfig` (`src/interfaces/net.ts`) controls navigation resilience. Pass a partial object via `retry`; unset keys keep their defaults.
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `maxAttempts` | `number` | `3` | Maximum navigation attempts. `1` disables retry. |
+| `baseMs` | `number` | `300` | Base backoff in ms (full-jitter exponential). |
+| `capMs` | `number` | `10000` | Backoff ceiling in ms. |
+| `throttleMs` | `number` | `0` | Minimum gap between hits on the same host in ms. `0` disables throttling. |
+
+Backoff uses **full-jitter exponential** delay and honors a server `Retry-After` header when present. `throttleMs` enforces a minimum per-host gap between requests.
+
+## Output location
+
+`outputDir` defaults to a directory chosen by `resolveDefaultOutputDir` (`src/lib/output-dir.ts`):
+
+- If the current working directory contains a known host-agent config dir, artifacts go under `<agent-dir>/fuse-browser`. Detected dirs, in order of preference: `.claude`, `.cursor`, `.codex`, `.windsurf`, `.gemini`, `.continue`, `.junie`, `.github`.
+- Otherwise, artifacts go under `~/.fuse-browser`.
+
+The output directory holds:
+
+- `reports/` — probe reports
+- screenshots
+- `site-memory/` — per-site memory (`siteMemoryDir`)
+- `replay/` — action replay artifacts (`replayDir`)
+
+> **Security warning:** Reports and the `storageState` file contain **cookies and session tokens in clear text**. Keep `outputDir` out of version control — the default locations are gitignored. Never commit reports or storage-state files.
