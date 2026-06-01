@@ -1,0 +1,9 @@
+{
+  "CH": "http://user:password@ch-proxy.example:8080",
+  "US": "http://user:password@us-proxy.example:8080",
+  "GB": "http://user:password@gb-proxy.example:8080",
+  "FR": "http://user:password@fr-proxy.example:8080",
+  "DE": "http://user:password@de-proxy.example:8080",
+  "JP": "http://user:password@jp-proxy.example:8080",
+  "AE": "http://user:password@ae-proxy.example:8080"
+}

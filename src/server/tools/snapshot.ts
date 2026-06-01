@@ -1,0 +1,80 @@
+/**
+ * Snapshot + act-by-ref tools: the agentic targeting layer.
+ * `browser_snapshot` returns indexed interactive elements (each with a `ref`);
+ * `browser_act` executes an action on a chosen `ref` (or text fallback) and
+ * returns a diff of what changed on the page (added/removed/text/url).
+ * @module server/tools/snapshot
+ */
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { Page } from "playwright";
+import { z } from "zod";
+import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
+import { smartClick } from "../../actions/smart-click.js";
+import { smartFill } from "../../actions/smart-fill.js";
+import { captureSnapshot } from "../../extraction/snapshot.js";
+import { diffSnapshots } from "../../extraction/snapshot-diff.js";
+import type { ActionResult } from "../../interfaces/types.js";
+import type { SessionManager } from "../../session/manager.js";
+import { errorResult, jsonResult } from "../result.js";
+import { withSession } from "./with-session.js";
+
+const KIND = z.enum(["click", "fill", "select"]);
+
+/** Run the chosen action (by ref or text fallback). */
+async function runAct(page: Page, a: Record<string, unknown>, human: boolean): Promise<ActionResult | null> {
+  const kind = a.kind as RefActionKind;
+  const value = a.value ? String(a.value) : "";
+  if (typeof a.ref === "number") return actByRef(page, a.ref, kind, value);
+  if (typeof a.target !== "string") return null;
+  return kind === "fill"
+    ? smartFill(page, a.target, value, "", human)
+    : smartClick(page, a.target, "", human);
+}
+
+/** Register `browser_snapshot` and `browser_act`. */
+export function registerSnapshotTools(server: McpServer, sessions: SessionManager): void {
+  server.registerTool(
+    "browser_snapshot",
+    {
+      title: "Snapshot",
+      description:
+        "Return the indexed interactive elements of the live page. Each element gets a stable `ref` to use with browser_act for deterministic targeting.",
+      inputSchema: { sessionId: z.string() },
+    },
+    async (args) => {
+      const a = args as Record<string, unknown>;
+      return withSession(sessions, String(a.sessionId), async (s) => {
+        const elements = await captureSnapshot(s.page);
+        return jsonResult({ url: s.page.url(), count: elements.length, elements });
+      });
+    },
+  );
+
+  server.registerTool(
+    "browser_act",
+    {
+      title: "Act on element",
+      description:
+        "Execute click/fill/select on an element by `ref` (from browser_snapshot) or by `target` text. Returns a diff of what changed (added/removed/text/url).",
+      inputSchema: {
+        sessionId: z.string(),
+        kind: KIND,
+        ref: z.number().int().optional(),
+        target: z.string().optional(),
+        value: z.string().optional(),
+      },
+    },
+    async (args) => {
+      const a = args as Record<string, unknown>;
+      return withSession(sessions, String(a.sessionId), async (s) => {
+        const before = await captureSnapshot(s.page);
+        const urlBefore = s.page.url();
+        const result = await runAct(s.page, a, s.config.humanMode);
+        if (!result) return errorResult("browser_act requires either `ref` or `target`");
+        const after = await captureSnapshot(s.page);
+        const diff = diffSnapshots(before, after, s.page.url() !== urlBefore);
+        return jsonResult({ result, url: s.page.url(), diff });
+      });
+    },
+  );
+}

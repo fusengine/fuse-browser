@@ -1,0 +1,25 @@
+/**
+ * Helpers to build MCP CallToolResult payloads.
+ * @module server/result
+ */
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+
+/** Text + structured JSON result. */
+export function jsonResult(payload: Record<string, unknown>): CallToolResult {
+  return {
+    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+    structuredContent: payload,
+  };
+}
+
+/** Error result (isError flag set). */
+export function errorResult(message: string): CallToolResult {
+  return { content: [{ type: "text", text: message }], isError: true };
+}
+
+/** Image result (PNG base64) with an optional text note. */
+export function imageResult(base64: string, note?: string): CallToolResult {
+  const image = { type: "image" as const, data: base64, mimeType: "image/png" };
+  const text = note ? [{ type: "text" as const, text: note }] : [];
+  return { content: [image, ...text] };
+}

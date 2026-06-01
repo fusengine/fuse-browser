@@ -1,0 +1,38 @@
+/**
+ * Execute an action on an element referenced by its `data-fuse-ref`
+ * (produced by {@link captureSnapshot}). Deterministic counterpart to the
+ * text/heuristic targeting of smart-click/smart-fill.
+ * @module actions/act-by-ref
+ */
+import type { Page } from "playwright";
+import type { ActionResult } from "../interfaces/types.js";
+import { REF_ATTRIBUTE } from "../extraction/snapshot.js";
+
+/** Action kinds that can target a snapshot ref. */
+export type RefActionKind = "click" | "fill" | "select";
+
+/** Run `kind` on the element carrying `data-fuse-ref="ref"`. */
+export async function actByRef(
+  page: Page,
+  ref: number,
+  kind: RefActionKind,
+  value = "",
+): Promise<ActionResult> {
+  const selector = `[${REF_ATTRIBUTE}="${ref}"]`;
+  const locator = page.locator(selector).first();
+  try {
+    if ((await locator.count()) === 0) {
+      return { type: kind, ok: false, ref, error: "ref_not_found" };
+    }
+    if (kind === "click") {
+      await locator.click({ timeout: 5_000 });
+    } else if (kind === "fill") {
+      await locator.fill(value, { timeout: 5_000 });
+    } else {
+      await locator.selectOption(value, { timeout: 5_000 });
+    }
+    return { type: kind, ok: true, ref, strategy: "ref" };
+  } catch (err) {
+    return { type: kind, ok: false, ref, error: String(err).split("\n")[0] ?? "error" };
+  }
+}
