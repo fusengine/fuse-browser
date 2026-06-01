@@ -5,7 +5,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 27 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 28 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
@@ -39,14 +39,15 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 ## ⬜ v0.4 — Design & data tooling
 
 - ✅ **Visual diff** (`browser_visual_diff`) — pixel diff vs baseline + changed-region boxes (pixelmatch + fast-png) *(shipped 0.1.19)*
+- ✅ **HAR record/replay** — `harPath`/`harMode` record (flushed on close), `harReplay` serves responses offline *(shipped 0.1.20)*
 - ⬜ **HAR record/replay** — deterministic offline re-extraction, CI fixtures *(low)*
 - ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium)*
 - ✅ **CSV export** for SERP/rank batches — `serp-batch --csv` *(shipped 0.1.18)*
 
 ## ⬜ Later / optional
 
-- ⬜ **Live view + human-in-the-loop** takeover (WebRTC iframe) for login/2FA/hard captcha *(medium/high)*
-- ⬜ Session persistence: auto-save `storageState` on `browser_close`
+- ✅ **Human-in-the-loop** takeover — `browser_handoff` pauses for a human (headed) to finish login/2FA/captcha, resumes on a url/selector condition *(shipped 0.1.20; streaming live-view intentionally skipped — overkill for a local MCP, headed handoff covers ~95%)*
+- ✅ Session persistence: auto-save `storageState` on `browser_close` (when `storageStatePath` set) *(shipped 0.1.20)*
 - ⬜ Hosted endpoint (open-core) — managed sessions + proxies + scheduling *(product decision)*
 
 ## Known limits (today)

@@ -20,6 +20,9 @@ export interface ResolvedConfig {
   executablePath: string | null;
   cdpEndpoint: string | null;
   storageStatePath: string | null;
+  harPath: string | null;
+  harMode: "minimal" | "full";
+  harReplay: string | null;
   humanMode: boolean;
   headless: boolean;
   identity: ResolvedIdentity;
@@ -60,6 +63,9 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     executablePath: opts.executablePath ?? null,
     cdpEndpoint: opts.cdpEndpoint ?? null,
     storageStatePath: opts.storageStatePath ?? null,
+    harPath: opts.harPath ?? null,
+    harMode: opts.harMode ?? "minimal",
+    harReplay: opts.harReplay ?? null,
     humanMode: opts.humanMode ?? false,
     headless: opts.headless ?? true,
     identity,

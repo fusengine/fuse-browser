@@ -2,10 +2,12 @@
  * A live browser session: a context + page kept alive between MCP calls.
  * @module session/session
  */
+import { dirname } from "node:path";
 import type { Browser, BrowserContext, Page } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import { attachListeners, type NetworkLog } from "../agent/network.js";
 import { selectEngineForConfig } from "../engine/registry.js";
+import { ensureDir } from "../lib/fs.js";
 
 /** Live session state. */
 export interface SessionData {
@@ -28,6 +30,11 @@ export async function openSession(
 ): Promise<SessionData> {
   const opened = await selectEngineForConfig(config).open(config);
   const page = opened.page ?? (await opened.context.newPage());
+  if (config.harReplay) {
+    await page
+      .routeFromHAR(config.harReplay, { url: "**/*", update: false, notFound: "fallback" })
+      .catch(() => {});
+  }
   const logs = attachListeners(page);
   const now = Date.now();
   return {
@@ -56,6 +63,14 @@ export async function closeSession(session: SessionData): Promise<void> {
       /* ignore: detaching from a user browser */
     }
     return;
+  }
+  if (session.config.storageStatePath) {
+    try {
+      ensureDir(dirname(session.config.storageStatePath));
+      await session.context.storageState({ path: session.config.storageStatePath });
+    } catch {
+      /* best-effort: never block teardown */
+    }
   }
   try {
     await session.context.close();

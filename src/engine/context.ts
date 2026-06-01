@@ -9,10 +9,17 @@ import type { ResolvedIdentity } from "../identity/resolve.js";
 /** Shared viewport/screen dimensions (context + visual observation). */
 export const VIEWPORT = { width: 1365, height: 900 } as const;
 
+/** Optional HAR recording for the context. */
+export interface HarRecord {
+  path: string;
+  mode: "minimal" | "full";
+}
+
 /** Assemble `newContext` options from the resolved identity. */
 export function buildContextOptions(
   identity: ResolvedIdentity,
   realisticProfile: boolean,
+  har?: HarRecord | null,
 ): BrowserContextOptions {
   const opts: BrowserContextOptions = {
     viewport: { ...VIEWPORT },
@@ -27,5 +34,6 @@ export function buildContextOptions(
     extraHTTPHeaders: { "Accept-Language": identity.acceptLanguage },
   };
   if (realisticProfile) opts.userAgent = REALISTIC_DESKTOP_UA;
+  if (har) opts.recordHar = { path: har.path, mode: har.mode };
   return opts;
 }

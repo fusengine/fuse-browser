@@ -132,7 +132,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 `FUSE_HEADLESS`, `FUSE_COUNTRY`, `FUSE_CURRENCY`, `FUSE_USER_DATA_DIR`,
 `FUSE_STORAGE_STATE`, `FUSE_OUTPUT_DIR`.
 
-### Tools (27)
+### Tools (28)
 
 | Group | Tools |
 | --- | --- |
@@ -145,6 +145,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 | **Extract** | `browser_extract` (text/prices/hotels/challenges), `browser_extract_schema` (typed, by CSS selectors) |
 | **SERP** | `browser_serp_batch` — multi-query Google search in one session, per-query organic results + domain rank |
 | **Vision** | `browser_screenshot` (page, single element by `ref`, or responsive set via `viewport`/`viewports`), `browser_visual_diff` (pixel diff vs baseline + changed-region boxes) |
+| **Human** | `browser_handoff` — pause for a human to finish login/2FA/captcha in the live (headed) browser, resume on a `url`/`selector` condition (same session → auth carries over) |
 
 Key agentic patterns:
 
@@ -209,6 +210,9 @@ Artifacts (reports, screenshots, site-memory, replay) are written **outside the 
 
 Override per run with `outputDir` (library / MCP arg) or `--output-dir` (CLI). Cookies
 (`storageStatePath`) and the Chromium profile (`userDataDir`) are separate paths you set explicitly.
+When `storageStatePath` is set, the session **auto-saves cookies + localStorage on close** and
+restores them on the next open. Set `harPath` (+ `harMode` `minimal`/`full`) to **record network
+traffic** (flushed on close), or `harReplay` to **serve responses from a HAR offline** (CI fixtures).
 
 > ⚠️ Reports and `storage-state` files contain page content, screenshots and **session cookies in
 > clear text** — never commit them. The bundled `.gitignore` already excludes the defaults.

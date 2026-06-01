@@ -54,6 +54,10 @@ export interface AgentOptions {
   executablePath?: string;
   cdpEndpoint?: string;
   storageStatePath?: string;
+  /** HAR: record traffic to `harPath` (`harMode` minimal/full), or replay from `harReplay`. */
+  harPath?: string;
+  harMode?: "minimal" | "full";
+  harReplay?: string;
   humanMode?: boolean;
   headless?: boolean;
   locale?: string;

@@ -45,7 +45,8 @@ export async function launchBrowser(
   config: ResolvedConfig,
 ): Promise<OpenedContext> {
   const launchOptions = buildLaunchOptions(config);
-  const contextOptions = buildContextOptions(config.identity, config.realisticProfile);
+  const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
+  const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
 
   if (config.userDataDir) {
     const context = await browserType
