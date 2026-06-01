@@ -59,6 +59,8 @@ export interface InteractiveElement {
   ariaExpanded?: string | null;
   ariaControls?: string | null;
   obscured?: boolean;
+  /** Robust, reusable CSS selector (only when snapshot is asked for `selectors`). */
+  selector?: string | null;
 }
 
 /** A row harvested from a (possibly virtualized) list via scroll-collect. */

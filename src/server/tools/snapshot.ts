@@ -16,22 +16,30 @@ import { captureSnapshot } from "../../extraction/snapshot.js";
 import { diffSnapshots } from "../../extraction/snapshot-diff.js";
 import type { ActionResult } from "../../interfaces/types.js";
 import type { SessionManager } from "../../session/manager.js";
+import { runWithMemory } from "../../state/action-memory.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
 const KIND = z.enum(["click", "fill", "select", "pick"]);
 
-/** Run the chosen action (by ref or text fallback). */
-async function runAct(page: Page, a: Record<string, unknown>, human: boolean): Promise<ActionResult | null> {
+/** Run the chosen action (by ref or text fallback), with site-memory assist. */
+async function runAct(
+  page: Page,
+  a: Record<string, unknown>,
+  human: boolean,
+  dir: string,
+): Promise<ActionResult | null> {
   const kind = a.kind as RefActionKind;
   const value = a.value ? String(a.value) : "";
   const option = a.option ? String(a.option) : "";
   if (typeof a.ref === "number" || typeof a.ref === "string") return actByRef(page, a.ref, kind, value, option);
   if (typeof a.target !== "string") return null;
-  if (kind === "pick") return pickAutocomplete(page, page.locator(a.target).first(), value, option);
-  return kind === "fill"
-    ? smartFill(page, a.target, value, "", human)
-    : smartClick(page, a.target, "", human);
+  const target = a.target;
+  if (kind === "pick") return pickAutocomplete(page, page.locator(target).first(), value, option);
+  return runWithMemory(dir, page, { type: kind, target }, (act) => {
+    const pref = String(act.preferredStrategy ?? "");
+    return kind === "fill" ? smartFill(page, target, value, pref, human) : smartClick(page, target, pref, human);
+  });
 }
 
 /** Register `browser_snapshot` and `browser_act`. */
@@ -41,13 +49,13 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Snapshot",
       description:
-        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting.",
-      inputSchema: { sessionId: z.string() },
+        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting. Pass `selectors:true` to also get a durable CSS `selector` per element (cacheable to act later without re-snapshotting).",
+      inputSchema: { sessionId: z.string(), selectors: z.boolean().optional() },
     },
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        const elements = await captureSnapshot(s.page);
+        const elements = await captureSnapshot(s.page, a.selectors === true);
         return jsonResult({ url: s.page.url(), count: elements.length, elements });
       });
     },
@@ -73,7 +81,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
       return withSession(sessions, String(a.sessionId), async (s) => {
         const before = await captureSnapshot(s.page);
         const urlBefore = s.page.url();
-        const result = await runAct(s.page, a, s.config.humanMode);
+        const result = await runAct(s.page, a, s.config.humanMode, s.config.siteMemoryDir);
         if (!result) return errorResult("browser_act requires either `ref` or `target`");
         const after = await captureSnapshot(s.page);
         const diff = diffSnapshots(before, after, s.page.url() !== urlBefore);

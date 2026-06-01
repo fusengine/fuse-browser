@@ -7,6 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { type ActionInput, performAction } from "../../actions/perform.js";
 import type { SessionManager } from "../../session/manager.js";
+import { runWithMemory } from "../../state/action-memory.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
@@ -24,7 +25,10 @@ function actTool(
   server.registerTool(name, { title: name, description, inputSchema }, async (args) => {
     const a = args as Record<string, unknown>;
     return withSession(sessions, String(a.sessionId), async (s) => {
-      const result = await performAction(s.page, build(a), s.config.humanMode);
+      const action = build(a);
+      const result = await runWithMemory(s.config.siteMemoryDir, s.page, action, (act) =>
+        performAction(s.page, act, s.config.humanMode),
+      );
       return jsonResult({ result, url: s.page.url() });
     });
   });

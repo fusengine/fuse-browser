@@ -156,6 +156,11 @@ Key agentic patterns:
   checkouts are visible and actionable.
 - **`browser_wait_for`** — wait on a condition (`text` / `selector` / `gone` / `urlContains`),
   not a fixed delay.
+- **`browser_snapshot` `selectors:true`** — each element also gets a **durable CSS `selector`**
+  (finder-style: prefers `data-testid`/stable id/semantic class, rejects generated hashes,
+  validated unique). Cache it to act on later visits via `browser_click target=<selector>`
+  without re-snapshotting. The act tools also **remember the winning locator strategy per
+  site** (under the output dir) and replay it first on repeat actions.
 - **`browser_collect`** — exhaust a **virtualized / infinite-scroll** list (hotel/flight
   results, feeds): auto-detects the scroll container, scrolls incrementally and **dedups
   rows by stable key** until the list ends. Returns the full set of rows (text / url /

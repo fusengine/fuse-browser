@@ -9,7 +9,7 @@
  */
 import type { Page } from "playwright";
 import type { InteractiveElement } from "../interfaces/extraction.js";
-import { evalScript } from "../lib/evaluate.js";
+import { evalScriptArg } from "../lib/evaluate.js";
 import { SNAPSHOT_SCRIPT } from "./snapshot-walk.js";
 
 export { REF_ATTRIBUTE } from "./snapshot-walk.js";
@@ -23,16 +23,17 @@ const MAX_ELEMENTS = 400;
  * Detached frames and frames that reject evaluation (e.g. mid-navigation) are
  * skipped rather than aborting the whole snapshot.
  */
-export async function captureSnapshot(page: Page): Promise<InteractiveElement[]> {
+export async function captureSnapshot(page: Page, selectors = false): Promise<InteractiveElement[]> {
   const frames = page.frames();
   const all: InteractiveElement[] = [];
+  const arg = { selectors };
   let global = 0;
   for (let f = 0; f < frames.length && all.length < MAX_ELEMENTS; f++) {
     const frame = frames[f];
     if (!frame || frame.isDetached()) continue;
     let local: InteractiveElement[];
     try {
-      local = await evalScript<InteractiveElement[]>(frame, SNAPSHOT_SCRIPT);
+      local = await evalScriptArg<InteractiveElement[], typeof arg>(frame, SNAPSHOT_SCRIPT, arg);
     } catch {
       continue;
     }

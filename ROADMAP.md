@@ -14,6 +14,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ Agentic perception: enriched snapshot (value, placeholder, options, checked, disabled, combobox `aria-*`, occlusion)
 - ✅ Cross-boundary snapshot: open **Shadow DOM** piercing + **iframe** traversal (same/cross-origin), frame-scoped refs (`"<frame>:<local>"`)
 - ✅ Virtualized/infinite lists: `browser_collect` (auto-detect scroll container, incremental scroll + dedup until end) + container-targeted `browser_scroll`
+- ✅ Action caching: durable CSS selectors per snapshot element (`selectors:true`, finder-style, rejects generated ids) + per-site winning-strategy memory wired into the act tools
 - ✅ Rotating proxy pool + SessionPool (round-robin, auto-retire on block) + WebRTC leak guard
 - ✅ HTTP fast-path (`browser_fetch`): browser TLS/JA3 impersonation via `impit`, no browser launch
 - ✅ Agentic action: `browser_act` `pick` (combobox/autocomplete in one call)
@@ -30,8 +31,8 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ⬜ v0.3 — Agentic robustness
 
-- ⬜ **CDP-disconnect during sensitive actions** — evade CDP-connection sniffing (PerimeterX/Shape) *(medium)*
-- ⬜ **Action caching** — remember resolved `ref`→selector for repeat visits, cut LLM round-trips *(low/medium)*
+- ❌ **CDP-disconnect during sensitive actions** — *won't fix (misconception)*: Playwright/Patchright **is** the CDP connection (dropping it = losing control), and the real signals (`Runtime.enable`, `navigator.webdriver`, injected scripts) are already neutralized at the source by Patchright. Residual hardening = residential proxies + timing + coherent profile, not CDP.
+- ✅ **Action caching** — durable selectors + per-site strategy memory *(shipped 0.1.17)*
 - ✅ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(shipped 0.1.15)*
 - ✅ **Scroll/virtualized-list hints** — `browser_collect` surfaces off-screen results *(shipped 0.1.16)*
 
