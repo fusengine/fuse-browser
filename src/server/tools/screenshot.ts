@@ -8,6 +8,7 @@ import { z } from "zod";
 import { REF_ATTRIBUTE } from "../../extraction/snapshot.js";
 import { type ViewportInput, resolveViewport, viewportLabel } from "../../engine/viewport.js";
 import type { SessionManager } from "../../session/manager.js";
+import { settleForCapture } from "../../state/settle-capture.js";
 import { errorResult, imageResult, multiImageResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
@@ -51,7 +52,8 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
         const shots: Array<{ base64: string; note: string }> = [];
         for (const v of list) {
           await s.page.setViewportSize(resolveViewport(v));
-          const buf = await s.page.screenshot({ fullPage });
+          await settleForCapture(s.page);
+          const buf = await s.page.screenshot({ fullPage, animations: "disabled" });
           shots.push({ base64: buf.toString("base64"), note: viewportLabel(v) });
         }
         if (original) await s.page.setViewportSize(original);

@@ -9,6 +9,7 @@ import { teardownOpened } from "../engine/teardown.js";
 import { type ViewportInput, resolveViewport } from "../engine/viewport.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
 import { gotoWithRetry } from "../net/navigate.js";
+import { settleForCapture } from "../state/settle-capture.js";
 import type { ResolvedConfig } from "./config.js";
 
 /** One saved responsive screenshot. */
@@ -24,6 +25,7 @@ export async function captureShots(
   config: ResolvedConfig,
   url: string,
   viewports: ViewportInput[],
+  settleMs = 400,
 ): Promise<Shot[]> {
   ensureDir(config.outputDir);
   const runId = sha1(`${url}-shots`).slice(0, 10);
@@ -35,9 +37,10 @@ export async function captureShots(
     for (const v of viewports) {
       const size = resolveViewport(v);
       await page.setViewportSize(size);
+      await settleForCapture(page, settleMs);
       const name = typeof v === "string" ? v : `${size.width}x${size.height}`;
       const path = join(config.outputDir, `${runId}-${name}.png`);
-      await page.screenshot({ path, fullPage: true });
+      await page.screenshot({ path, fullPage: true, animations: "disabled" });
       shots.push({ viewport: name, width: size.width, height: size.height, path });
     }
   } finally {

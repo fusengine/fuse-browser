@@ -23,6 +23,7 @@ const { positionals, values } = parseArgs({
     "serp-pages": { type: "string" },
     "rank-domain": { type: "string" },
     viewports: { type: "string" },
+    "settle-ms": { type: "string" },
     hl: { type: "string" },
     gl: { type: "string" },
     "delay-ms": { type: "string" },

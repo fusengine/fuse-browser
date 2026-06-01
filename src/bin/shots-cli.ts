@@ -32,6 +32,7 @@ export async function runShots(url: string, values: Values): Promise<void> {
     headless: !values.headed,
     outputDir: str(values["output-dir"]),
   });
-  const shots = await captureShots(config, url, parseViewports(str(values.viewports)));
+  const settleMs = values["settle-ms"] ? Number(values["settle-ms"]) : undefined;
+  const shots = await captureShots(config, url, parseViewports(str(values.viewports)), settleMs);
   process.stdout.write(`${JSON.stringify(shots, null, 2)}\n`);
 }
