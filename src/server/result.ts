@@ -23,3 +23,12 @@ export function imageResult(base64: string, note?: string): CallToolResult {
   const text = note ? [{ type: "text" as const, text: note }] : [];
   return { content: [image, ...text] };
 }
+
+/** Several images (PNG base64), each preceded by a label note. No structuredContent. */
+export function multiImageResult(items: Array<{ base64: string; note: string }>): CallToolResult {
+  const content = items.flatMap((it) => [
+    { type: "text" as const, text: it.note },
+    { type: "image" as const, data: it.base64, mimeType: "image/png" },
+  ]);
+  return { content };
+}

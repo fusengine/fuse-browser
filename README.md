@@ -51,6 +51,9 @@ npx fuse-browser probe https://example.com --channel chrome
 # SEO rank tracking across many keywords (one session)
 npx fuse-browser serp-batch "agence web vevey" "création site web lausanne" \
   --rank-domain fusengine.ch --serp-pages 2 --hl fr --gl ch
+
+# Responsive screenshots (saved PNGs) — works on localhost too
+npx fuse-browser shots http://localhost:8000 --viewports mobile,desktop,1280x720
 ```
 
 Sensitive actions (`pay`, `book`, `checkout`, `confirm`, …) are **blocked** unless
@@ -99,7 +102,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 | **Agentic** | `browser_snapshot` (indexed refs), `browser_act` (by ref + page diff), `browser_run` (multi-step plan) |
 | **Extract** | `browser_extract` (text/prices/hotels/challenges), `browser_extract_schema` (typed, by CSS selectors) |
 | **SERP** | `browser_serp_batch` — multi-query Google search in one session, per-query organic results + domain rank |
-| **Vision** | `browser_screenshot` (page or single element by `ref`) |
+| **Vision** | `browser_screenshot` (page, single element by `ref`, or responsive set via `viewport`/`viewports`) |
 
 Key agentic patterns:
 

@@ -6,6 +6,7 @@
 import { parseArgs } from "node:util";
 import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
+import { runShots } from "./shots-cli.js";
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -21,6 +22,7 @@ const { positionals, values } = parseArgs({
     "extract-serp": { type: "boolean" },
     "serp-pages": { type: "string" },
     "rank-domain": { type: "string" },
+    viewports: { type: "string" },
     hl: { type: "string" },
     gl: { type: "string" },
     "delay-ms": { type: "string" },
@@ -44,11 +46,13 @@ const opts = values as Record<string, unknown>;
 
 if (command === "serp-batch") {
   await runSerpBatch(rest, opts);
+} else if (command === "shots" && rest[0]) {
+  await runShots(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
   await runProbeCli(rest[0], opts);
 } else {
   process.stderr.write(
-    "usage: fuse-browser probe <url> [...] | fuse-browser serp-batch <query...> --rank-domain <d> [--serp-pages N] [--hl fr] [--gl ch]\n",
+    "usage: fuse-browser probe <url> [...] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n",
   );
   process.exit(1);
 }
