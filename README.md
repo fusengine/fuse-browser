@@ -14,10 +14,45 @@ TypeScript port of the original Python `fusengine-browser-agent`, redesigned aro
 official MCP SDK with a persistent session model, image-content screenshots, and a
 swappable engine layer (Playwright / Patchright / CDP attach).
 
+## Quick start (Claude Code / any MCP client)
+
+```bash
+# 1. register the published server (user scope = all projects)
+claude mcp add fuse-browser --scope user -- npx -y @fusengine/browser-mcp
+```
+
+```jsonc
+// or add it manually to your MCP config:
+{ "mcpServers": {
+  "fuse-browser": { "command": "npx", "args": ["-y", "@fusengine/browser-mcp"] }
+}}
+```
+
+Then just ask your agent in natural language — it drives the browser via the tools:
+
+> "Find a hotel in Annemasse this Friday under CHF 100."
+> "What's my Google rank for 'agence web vevey' (CH)?"
+> "Screenshot localhost:3000 in mobile and desktop."
+
+## How it works
+
+An LLM agent runs a **perceive → decide → act** loop through the MCP tools:
+
+1. `browser_open` → a real (stealth) browser session
+2. `browser_navigate` → load the page (JS/SPA rendered, animations settled)
+3. `browser_snapshot` → indexed interactive elements with `ref` + form state
+   (value, placeholder, options, checked, disabled, combobox `aria-*`, occlusion)
+4. `browser_act` → click / fill / select / **pick** (autocomplete) a `ref`; returns a page diff
+5. `browser_wait_for` → wait on a real condition, then loop back to snapshot
+6. `browser_extract` / `browser_screenshot` → structured data or vision
+
+Guardrails block pay/book/checkout unless the agent passes `humanApproved`.
+
 ## Requirements
 
 - Node.js >= 20 (runtime). Bun is the dev toolchain.
-- A Chromium build for the bundled engine:
+- Chromium is **installed automatically** on `npm install` (soft postinstall).
+  To install it manually or in CI:
 
 ```bash
 npx patchright install chromium   # stealth engine (default)
@@ -37,23 +72,25 @@ to it automatically. Verified end-to-end against **Dia** (Chromium 148).
 
 ## CLI
 
+Install the binaries once: `npm i -g @fusengine/browser-mcp` (provides `fuse-browser` + `browser-mcp`). Then:
+
 ```bash
 # One-shot probe of a real page
-npx fuse-browser probe https://example.com --extract-prices --observe-visual
+fuse-browser probe https://example.com --extract-prices --observe-visual
 
 # Hotels with country identity, proxy routing, replay
-npx fuse-browser probe 'https://www.booking.com/searchresults.html?ss=Tokyo' \
+fuse-browser probe 'https://www.booking.com/searchresults.html?ss=Tokyo' \
   --country JP --proxy-map proxies.json --replay --auto-consent --extract-prices
 
 # Use the installed Chrome
-npx fuse-browser probe https://example.com --channel chrome
+fuse-browser probe https://example.com --channel chrome
 
 # SEO rank tracking across many keywords (one session)
-npx fuse-browser serp-batch "agence web vevey" "création site web lausanne" \
+fuse-browser serp-batch "agence web vevey" "création site web lausanne" \
   --rank-domain fusengine.ch --serp-pages 2 --hl fr --gl ch
 
 # Responsive screenshots (saved PNGs) — works on localhost too
-npx fuse-browser shots http://localhost:8000 --viewports mobile,desktop,1280x720
+fuse-browser shots http://localhost:8000 --viewports mobile,desktop,1280x720
 ```
 
 Sensitive actions (`pay`, `book`, `checkout`, `confirm`, …) are **blocked** unless
@@ -114,12 +151,13 @@ Key agentic patterns:
 - **`browser_run`** — execute an ordered plan (navigate/act/wait/extract) in one call,
   stopping at the first failure. Guardrails apply to the whole plan.
 
-A `runs` resource exposes the JSON reports and screenshots written under `runs/`.
+A `runs` resource exposes the JSON reports and screenshots written under the output dir
+(see *Output & data location*).
 
 ## Library
 
 ```ts
-import { BrowserAgent } from "fuse-browser";
+import { BrowserAgent } from "@fusengine/browser-mcp";
 
 const agent = new BrowserAgent({ countryCode: "CH", engine: "patchright" });
 const report = await agent.probe("https://example.com", { extractPrices: true });
