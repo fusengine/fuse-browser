@@ -1,56 +1,48 @@
 /**
  * Accessibility-style snapshot: tag each interactive element with a stable
- * `data-fuse-ref` and return an indexed list the LLM can reason about.
- * The ref survives until the page re-renders, enabling deterministic
- * `browser_act` targeting via `[data-fuse-ref="N"]`.
+ * `data-fuse-ref` and return an indexed list the LLM can reason about. The walk
+ * runs in EVERY frame (`page.frames()`) and pierces open Shadow DOM, so refs
+ * cover iframes (same- and cross-origin) and web components. Each element's
+ * `ref` is frame-scoped (`"<frame>:<local>"`, bare `"<local>"` for the main
+ * frame) and resolves via {@link refLocator}.
  * @module extraction/snapshot
  */
 import type { Page } from "playwright";
 import type { InteractiveElement } from "../interfaces/extraction.js";
 import { evalScript } from "../lib/evaluate.js";
+import { SNAPSHOT_SCRIPT } from "./snapshot-walk.js";
 
-/** Attribute injected on each interactive element to anchor a stable ref. */
-export const REF_ATTRIBUTE = "data-fuse-ref";
+export { REF_ATTRIBUTE } from "./snapshot-walk.js";
 
-const SELECTOR =
-  "button,a,input,select,textarea,[role=button],[role=combobox],[role=checkbox],[role=radio],[role=switch],[role=tab],[role=menuitem],[role=option],[contenteditable=true]";
+/** Soft cap on total elements across all frames, to bound output size. */
+const MAX_ELEMENTS = 400;
 
-const SNAPSHOT_SCRIPT = `() => {
-  const obscured = (el, r) => {
-    const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
-    if (r.width === 0 || cx < 0 || cy < 0 || cx > innerWidth || cy > innerHeight) return false;
-    const top = document.elementFromPoint(cx, cy);
-    return !!top && top !== el && !el.contains(top) && !top.contains(el);
-  };
-  return [...document.querySelectorAll('${SELECTOR}')].slice(0, 200).map((el, index) => {
-    el.setAttribute('${REF_ATTRIBUTE}', String(index));
-    const r = el.getBoundingClientRect();
-    const val = typeof el.value === 'string' ? el.value : null;
-    const isCheck = el.type === 'checkbox' || el.type === 'radio';
-    return {
-      index,
-      tag: el.tagName.toLowerCase(),
-      text: (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || '').trim().slice(0, 120),
-      role: el.getAttribute('role'),
-      id: el.id || null,
-      name: el.getAttribute('name'),
-      type: el.getAttribute('type'),
-      href: el.getAttribute('href'),
-      value: val ? val.slice(0, 120) : null,
-      placeholder: el.getAttribute('placeholder'),
-      disabled: !!el.disabled || el.getAttribute('aria-disabled') === 'true',
-      checked: isCheck ? !!el.checked : undefined,
-      options: el.tagName === 'SELECT' ? [...el.options].slice(0, 12).map((o) => o.label || o.value) : undefined,
-      ariaExpanded: el.getAttribute('aria-expanded'),
-      ariaControls: el.getAttribute('aria-controls'),
-      visible: r.width > 0 && r.height > 0,
-      obscured: obscured(el, r),
-      box: {x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height)}
-    };
-  });
-}`;
-
-/** Capture the indexed interactive snapshot, tagging each element with a ref. */
+/**
+ * Capture the indexed interactive snapshot across all frames, tagging each
+ * element with a (frame-local) ref attribute and exposing a frame-scoped `ref`.
+ * Detached frames and frames that reject evaluation (e.g. mid-navigation) are
+ * skipped rather than aborting the whole snapshot.
+ */
 export async function captureSnapshot(page: Page): Promise<InteractiveElement[]> {
-  return evalScript<InteractiveElement[]>(page, SNAPSHOT_SCRIPT);
+  const frames = page.frames();
+  const all: InteractiveElement[] = [];
+  let global = 0;
+  for (let f = 0; f < frames.length && all.length < MAX_ELEMENTS; f++) {
+    const frame = frames[f];
+    if (!frame || frame.isDetached()) continue;
+    let local: InteractiveElement[];
+    try {
+      local = await evalScript<InteractiveElement[]>(frame, SNAPSHOT_SCRIPT);
+    } catch {
+      continue;
+    }
+    for (const el of local) {
+      if (all.length >= MAX_ELEMENTS) break;
+      el.ref = f === 0 ? String(el.index) : `${f}:${el.index}`;
+      if (f > 0) el.frame = f;
+      el.index = global++;
+      all.push(el);
+    }
+  }
+  return all;
 }

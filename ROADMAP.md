@@ -5,13 +5,16 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 24 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 25 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
 - ✅ Extraction: main text, multi-currency prices, hotel offers
 - ✅ Google SERP: structured organic/ads/related, multi-page aggregation, domain **rank tracker**, `browser_serp_batch`
 - ✅ Agentic perception: enriched snapshot (value, placeholder, options, checked, disabled, combobox `aria-*`, occlusion)
+- ✅ Cross-boundary snapshot: open **Shadow DOM** piercing + **iframe** traversal (same/cross-origin), frame-scoped refs (`"<frame>:<local>"`)
+- ✅ Rotating proxy pool + SessionPool (round-robin, auto-retire on block) + WebRTC leak guard
+- ✅ HTTP fast-path (`browser_fetch`): browser TLS/JA3 impersonation via `impit`, no browser launch
 - ✅ Agentic action: `browser_act` `pick` (combobox/autocomplete in one call)
 - ✅ Responsive screenshots: multi-viewport + JS-animation settle (auto-scroll, `animations:disabled`)
 - ✅ Captcha: detection + opt-in solver (2captcha/anti-captcha/capmonster) — provider HTTP path live, paid solve unverified
@@ -20,15 +23,15 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ⬜ v0.2 — Anti-bot & scale
 
-- ⬜ **Rotating residential proxies + SessionPool** — fingerprint+proxy+cookies bound per session, auto-retire on block *(high value / medium effort)*
+- ✅ **Rotating residential proxies + SessionPool** — auto-retire on block *(shipped 0.1.13)*
 - ⬜ **Real captcha solve, validated** — end-to-end with a paid provider key (reCAPTCHA v2 / Turnstile) *(low effort once a key exists)*
-- ⬜ **HTTP fast-path with TLS/JA3 impersonation** (`impit`) — skip the browser for pure-HTML SERP/price/rank, fall back to Patchright on JS *(high value / low effort)*
+- ✅ **HTTP fast-path with TLS/JA3 impersonation** (`impit`) — `browser_fetch`, no browser launch *(shipped 0.1.14)*
 
 ## ⬜ v0.3 — Agentic robustness
 
 - ⬜ **CDP-disconnect during sensitive actions** — evade CDP-connection sniffing (PerimeterX/Shape) *(medium)*
 - ⬜ **Action caching** — remember resolved `ref`→selector for repeat visits, cut LLM round-trips *(low/medium)*
-- ⬜ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(medium)*
+- ✅ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(shipped 0.1.15)*
 - ⬜ **Scroll/virtualized-list hints** — surface off-screen results without dumping 10k nodes *(medium)*
 
 ## ⬜ v0.4 — Design & data tooling

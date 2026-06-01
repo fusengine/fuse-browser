@@ -9,15 +9,18 @@
  * `(arg) => {...}` scripts while staying isolated from Node DOM typing.
  * @module lib/evaluate
  */
-import type { Page } from "playwright";
+import type { Frame, Page } from "playwright";
+
+/** A context that can evaluate browser scripts — a page or one of its frames. */
+type EvalTarget = Pick<Page, "evaluate"> | Pick<Frame, "evaluate">;
 
 /** Evaluate an arrow-function browser script with no argument; returns `R`. */
-export function evalScript<R>(page: Page, script: string): Promise<R> {
-  return page.evaluate(`(${script})()` as unknown as () => R);
+export function evalScript<R>(ctx: EvalTarget, script: string): Promise<R> {
+  return ctx.evaluate(`(${script})()` as unknown as () => R);
 }
 
 /** Evaluate an arrow-function browser script with one serializable argument. */
-export function evalScriptArg<R, A>(page: Page, script: string, arg: A): Promise<R> {
+export function evalScriptArg<R, A>(ctx: EvalTarget, script: string, arg: A): Promise<R> {
   const expression = `(${script})(${JSON.stringify(arg)})`;
-  return page.evaluate(expression as unknown as () => R);
+  return ctx.evaluate(expression as unknown as () => R);
 }

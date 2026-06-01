@@ -38,6 +38,10 @@ export interface Challenges {
 /** An interactive element observed visually. Optional fields enrich snapshots. */
 export interface InteractiveElement {
   index: number;
+  /** Frame-scoped ref for targeting: `"<frame>:<local>"`, or `"<local>"` for the main frame. */
+  ref?: string;
+  /** Owning frame ordinal in `page.frames()` (omitted for the main frame). */
+  frame?: number;
   tag: string;
   text: string;
   role: string | null;
@@ -64,36 +68,4 @@ export interface Visual {
   interactiveElements?: InteractiveElement[];
 }
 
-/** A single Google SERP entry (organic result or ad). */
-export interface SerpResult {
-  position: number;
-  title: string;
-  url: string;
-  displayUrl?: string;
-  snippet?: string;
-}
-
-/** Where a domain ranks within a SERP. */
-export interface DomainRank {
-  domain: string;
-  organic: number[];
-  ads: number[];
-  best: number | null;
-  found: boolean;
-}
-
-/** Parsed Google search results page. */
-export interface Serp {
-  organic: SerpResult[];
-  ads: SerpResult[];
-  related: string[];
-  rank?: DomainRank;
-}
-
-/** One query's outcome in a SERP batch. */
-export interface SerpBatchRow {
-  query: string;
-  rank?: DomainRank;
-  results: SerpResult[];
-  error?: string;
-}
+export type { DomainRank, Serp, SerpBatchRow, SerpResult } from "./serp.js";

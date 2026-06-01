@@ -1,6 +1,6 @@
 {
   "name": "@fusengine/browser-mcp",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "MCP server + CLI giving AI agents a real, stealth browser (Patchright/Playwright) — per-country identity, self-healing actions, snapshots, multi-step plans, structured extraction, CDP attach.",
   "license": "MIT",
   "author": "Fusengine",
@@ -54,7 +54,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "bun test tests/unit",
-    "test:integration": "node --test --import tsx tests/integration/mcp.test.ts tests/integration/probe.test.ts tests/integration/snapshot.test.ts tests/integration/run.test.ts tests/integration/extract-schema.test.ts",
+    "test:integration": "node --test --import tsx tests/integration/mcp.test.ts tests/integration/probe.test.ts tests/integration/snapshot.test.ts tests/integration/snapshot-frames.test.ts tests/integration/run.test.ts tests/integration/extract-schema.test.ts",
     "browsers": "patchright install chromium",
     "mcp": "node --import tsx src/bin/mcp.ts",
     "cli": "node --import tsx src/bin/cli.ts"

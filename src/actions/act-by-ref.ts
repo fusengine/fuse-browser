@@ -6,24 +6,23 @@
  */
 import type { Page } from "playwright";
 import type { ActionResult } from "../interfaces/types.js";
-import { REF_ATTRIBUTE } from "../extraction/snapshot.js";
 import { pickAutocomplete } from "./autocomplete.js";
+import { refLocator } from "./ref-locator.js";
 
 /** Action kinds that can target a snapshot ref. */
 export type RefActionKind = "click" | "fill" | "select" | "pick";
 
-/** Run `kind` on the element carrying `data-fuse-ref="ref"`. */
+/** Run `kind` on the element carrying the frame-scoped `ref`. */
 export async function actByRef(
   page: Page,
-  ref: number,
+  ref: string | number,
   kind: RefActionKind,
   value = "",
   option = "",
 ): Promise<ActionResult> {
-  const selector = `[${REF_ATTRIBUTE}="${ref}"]`;
-  const locator = page.locator(selector).first();
+  const locator = refLocator(page, ref);
   try {
-    if ((await locator.count()) === 0) {
+    if (!locator || (await locator.count()) === 0) {
       return { type: kind, ok: false, ref, error: "ref_not_found" };
     }
     if (kind === "pick") return { ...(await pickAutocomplete(page, locator, value, option)), ref };

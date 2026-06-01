@@ -26,7 +26,7 @@ async function runAct(page: Page, a: Record<string, unknown>, human: boolean): P
   const kind = a.kind as RefActionKind;
   const value = a.value ? String(a.value) : "";
   const option = a.option ? String(a.option) : "";
-  if (typeof a.ref === "number") return actByRef(page, a.ref, kind, value, option);
+  if (typeof a.ref === "number" || typeof a.ref === "string") return actByRef(page, a.ref, kind, value, option);
   if (typeof a.target !== "string") return null;
   if (kind === "pick") return pickAutocomplete(page, page.locator(a.target).first(), value, option);
   return kind === "fill"
@@ -41,7 +41,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Snapshot",
       description:
-        "Return the indexed interactive elements of the live page. Each element gets a stable `ref` to use with browser_act for deterministic targeting.",
+        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting.",
       inputSchema: { sessionId: z.string() },
     },
     async (args) => {
@@ -62,7 +62,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
       inputSchema: {
         sessionId: z.string(),
         kind: KIND,
-        ref: z.number().int().optional(),
+        ref: z.union([z.number().int(), z.string()]).optional(),
         target: z.string().optional(),
         value: z.string().optional(),
         option: z.string().optional(),

@@ -150,7 +150,10 @@ Key agentic patterns:
 
 - **`browser_snapshot` → `browser_act`** — snapshot tags each interactive element with a
   stable `ref`; act on a `ref` deterministically (or by text fallback). `browser_act`
-  returns a **diff** of what changed (added/removed/text/url).
+  returns a **diff** of what changed (added/removed/text/url). The walk **pierces open
+  Shadow DOM and traverses iframes** (same- and cross-origin): elements inside a sub-frame
+  get a frame-scoped ref like `"3:4"`, so web-components, consent frames and embedded
+  checkouts are visible and actionable.
 - **`browser_wait_for`** — wait on a condition (`text` / `selector` / `gone` / `urlContains`),
   not a fixed delay.
 - **`browser_run`** — execute an ordered plan (navigate/act/wait/extract) in one call,

@@ -5,7 +5,7 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { REF_ATTRIBUTE } from "../../extraction/snapshot.js";
+import { refLocator } from "../../actions/ref-locator.js";
 import { type ViewportInput, resolveViewport, viewportLabel } from "../../engine/viewport.js";
 import type { SessionManager } from "../../session/manager.js";
 import { settleForCapture } from "../../state/settle-capture.js";
@@ -28,7 +28,7 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
       inputSchema: {
         sessionId: z.string(),
         fullPage: z.boolean().optional(),
-        ref: z.number().int().optional(),
+        ref: z.union([z.number().int(), z.string()]).optional(),
         viewport: VIEWPORT_SCHEMA.optional(),
         viewports: z.array(VIEWPORT_SCHEMA).optional(),
       },
@@ -36,9 +36,9 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        if (typeof a.ref === "number") {
-          const locator = s.page.locator(`[${REF_ATTRIBUTE}="${a.ref}"]`).first();
-          if ((await locator.count()) === 0) return errorResult("ref_not_found");
+        if (typeof a.ref === "number" || typeof a.ref === "string") {
+          const locator = refLocator(s.page, a.ref);
+          if (!locator || (await locator.count()) === 0) return errorResult("ref_not_found");
           const buf = await locator.screenshot({ timeout: 5_000 });
           return imageResult(buf.toString("base64"), `element ref=${a.ref}`);
         }
