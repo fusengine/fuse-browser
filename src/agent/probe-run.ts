@@ -16,6 +16,7 @@ import type { ProbeOptions } from "../interfaces/types.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
 import { gotoWithRetry } from "../net/navigate.js";
 import { throttleHost } from "../net/throttle.js";
+import { reportProxyBlocked } from "../proxy/pool.js";
 import { domSignature } from "../state/dom-signature.js";
 import { runActions } from "./actions-loop.js";
 import type { ResolvedConfig } from "./config.js";
@@ -60,6 +61,7 @@ export async function runProbe(
     const after = await domSignature(page);
     const text = await mainText(page);
     const { challenges, captcha } = await detectAndSolve(page, text, options, config);
+    if (config.proxySource === "pool" && config.proxyUrl && "cloudflare" in challenges && (challenges.cloudflare || challenges.captcha)) reportProxyBlocked(config.proxyUrl);
     const title = await page.title();
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};

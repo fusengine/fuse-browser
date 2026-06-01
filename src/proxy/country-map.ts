@@ -31,7 +31,7 @@ export function loadProxyCountryMap(
 }
 
 /** Source de sélection du proxy effectif. */
-export type ProxySource = "explicit" | "country_map" | null;
+export type ProxySource = "explicit" | "country_map" | "pool" | null;
 
 /** Sélectionne le proxy effectif : explicite > table pays. */
 export function resolveProxy(

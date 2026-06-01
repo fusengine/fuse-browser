@@ -11,6 +11,7 @@ import type { OpenedContext } from "../interfaces/engine.js";
 import { logger } from "../lib/logger.js";
 import { buildContextOptions } from "./context.js";
 import { isChromiumEngine } from "./loader.js";
+import { WEBRTC_LEAK_ARGS } from "./webrtc.js";
 
 const CHROMIUM_ARGS = ["--no-sandbox", "--disable-blink-features=AutomationControlled"];
 
@@ -18,7 +19,7 @@ const CHROMIUM_ARGS = ["--no-sandbox", "--disable-blink-features=AutomationContr
 function buildLaunchOptions(config: ResolvedConfig): LaunchOptions {
   const opts: LaunchOptions = { headless: config.headless };
   if (isChromiumEngine(config.engine)) {
-    opts.args = CHROMIUM_ARGS;
+    opts.args = config.proxyUrl ? [...CHROMIUM_ARGS, ...WEBRTC_LEAK_ARGS] : [...CHROMIUM_ARGS];
     if (config.channel) opts.channel = config.channel;
   }
   if (config.executablePath) opts.executablePath = config.executablePath;

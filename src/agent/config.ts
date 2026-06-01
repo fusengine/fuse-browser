@@ -10,6 +10,7 @@ import type { AgentOptions } from "../interfaces/types.js";
 import { ensureDir } from "../lib/fs.js";
 import { resolveDefaultOutputDir } from "../lib/output-dir.js";
 import { loadProxyCountryMap, type ProxySource, resolveProxy } from "../proxy/country-map.js";
+import { acquirePoolProxy } from "../proxy/pool.js";
 
 /** Effective configuration used by every probe run. */
 export interface ResolvedConfig {
@@ -40,7 +41,14 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
   ensureDir(outputDir);
   const identity = resolveIdentity(opts);
   const map = loadProxyCountryMap(opts.proxyCountryMap, opts.proxyMapPath);
-  const { proxyUrl, proxySource } = resolveProxy(opts.proxyUrl, identity.countryCode, map);
+  let { proxyUrl, proxySource } = resolveProxy(opts.proxyUrl, identity.countryCode, map);
+  if (!proxyUrl) {
+    const pooled = acquirePoolProxy(opts.proxiesPath);
+    if (pooled) {
+      proxyUrl = pooled;
+      proxySource = "pool";
+    }
+  }
   const userDataDir = opts.userDataDir ?? null;
   if (userDataDir) ensureDir(userDataDir);
   const siteMemoryDir = opts.siteMemoryDir ?? join(outputDir, "site-memory");

@@ -213,6 +213,18 @@ Override per run with `outputDir` (library / MCP arg) or `--output-dir` (CLI). C
   `serp.rank` (organic/ads positions + best) — a built-in rank tracker.
   CLI: `--extract-serp --serp-pages 2 --rank-domain example.com`.
 
+## Proxies & anti-bot (scale)
+
+Provide a proxy **pool** and the server rotates across it, retiring a proxy on block:
+
+- `FUSE_PROXIES` env (comma/newline list) or `proxiesPath` (JSON array file) — used when no
+  explicit `proxyUrl` / country-map proxy applies. Round-robin; a proxy that triggers a
+  captcha/Cloudflare challenge is put on a 5-min cooldown and skipped (**auto-retire**).
+- **WebRTC leak guard**: when a proxy is set (Chromium), launch args force WebRTC through the
+  proxy so the real IP can't leak via ICE/STUN.
+- Residential/mobile proxies are what actually beat industrial anti-bot at volume (paid). The
+  proxy list is a secret — keep it out of the repo (`proxies.json` is git-ignored).
+
 ## Disclaimer
 
 Provided **as-is** under MIT, with no warranty. `fuse-browser` is a neutral, dual-use

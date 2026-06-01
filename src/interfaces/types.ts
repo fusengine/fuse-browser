@@ -64,6 +64,7 @@ export interface AgentOptions {
   proxyUrl?: string;
   proxyCountryMap?: Record<string, string>;
   proxyMapPath?: string;
+  proxiesPath?: string;
   realisticProfile?: boolean;
   replayEnabled?: boolean;
   replayDir?: string;

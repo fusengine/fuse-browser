@@ -31,6 +31,7 @@ export const agentOptionShape = {
   userDataDir: z.string().optional(),
   proxyUrl: z.string().optional(),
   proxyMapPath: z.string().optional(),
+  proxiesPath: z.string().optional(),
   storageStatePath: z.string().optional(),
   realisticProfile: z.boolean().optional(),
   replayEnabled: z.boolean().optional(),

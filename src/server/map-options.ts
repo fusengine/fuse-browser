@@ -25,6 +25,7 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     userDataDir: (a.userDataDir as string | undefined) ?? ENV.userDataDir,
     proxyUrl: a.proxyUrl as string | undefined,
     proxyMapPath: a.proxyMapPath as string | undefined,
+    proxiesPath: a.proxiesPath as string | undefined,
     storageStatePath: (a.storageStatePath as string | undefined) ?? ENV.storageStatePath,
     realisticProfile: a.realisticProfile as boolean | undefined,
     replayEnabled: a.replayEnabled as boolean | undefined,
