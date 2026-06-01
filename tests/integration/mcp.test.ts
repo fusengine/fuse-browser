@@ -21,6 +21,7 @@ async function listToolNames(): Promise<string[]> {
 const EXPECTED = [
   "browser_probe",
   "browser_probe_html",
+  "browser_fetch",
   "browser_open",
   "browser_status",
   "browser_close",

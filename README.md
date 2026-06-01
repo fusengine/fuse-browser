@@ -128,11 +128,12 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 `FUSE_HEADLESS`, `FUSE_COUNTRY`, `FUSE_CURRENCY`, `FUSE_USER_DATA_DIR`,
 `FUSE_STORAGE_STATE`, `FUSE_OUTPUT_DIR`.
 
-### Tools (24)
+### Tools (25)
 
 | Group | Tools |
 | --- | --- |
 | **One-shot** | `browser_probe`, `browser_probe_html` |
+| **Fast-path** | `browser_fetch` — HTTP fetch with browser TLS/HTTP2 impersonation, **no browser launch** (~10× faster) for server-rendered HTML |
 | **Session** | `browser_open`, `browser_connect`, `browser_status`, `browser_close` |
 | **Navigate** | `browser_navigate`, `browser_back`, `browser_forward`, `browser_wait`, `browser_wait_for` |
 | **Act** | `browser_click`, `browser_fill`, `browser_login`, `browser_scroll`, `browser_press`, `browser_select` |
@@ -150,6 +151,12 @@ Key agentic patterns:
   not a fixed delay.
 - **`browser_run`** — execute an ordered plan (navigate/act/wait/extract) in one call,
   stopping at the first failure. Guardrails apply to the whole plan.
+
+- **`browser_fetch`** — when a page is server-rendered (price lists, indexes, docs),
+  skip the browser entirely: `impit` impersonates a real Chrome TLS/JA3 + HTTP2
+  fingerprint, `linkedom` extracts the text, and the same price extractor runs on it.
+  ~10× faster and far lighter. Passes static HTML and low/medium Cloudflare; for JS
+  challenges, Turnstile, DataDome or SPA content, fall back to `browser_probe`.
 
 A `runs` resource exposes the JSON reports and screenshots written under the output dir
 (see *Output & data location*).

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * fuse-browser CLI entry point. Subcommands: `probe`, `serp-batch`.
+ * fuse-browser CLI entry point. Subcommands: `probe`, `fetch`, `serp-batch`, `shots`.
  * @module bin/cli
  */
 import { parseArgs } from "node:util";
+import { runFetchCli } from "./fetch-cli.js";
 import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
 import { runShots } from "./shots-cli.js";
@@ -49,11 +50,13 @@ if (command === "serp-batch") {
   await runSerpBatch(rest, opts);
 } else if (command === "shots" && rest[0]) {
   await runShots(rest[0], opts);
+} else if (command === "fetch" && rest[0]) {
+  await runFetchCli(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
   await runProbeCli(rest[0], opts);
 } else {
   process.stderr.write(
-    "usage: fuse-browser probe <url> [...] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n",
+    "usage: fuse-browser probe <url> [...] | fetch <url> [--extract-prices --proxy <url>] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n",
   );
   process.exit(1);
 }

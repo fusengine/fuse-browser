@@ -65,6 +65,8 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "impit": "^0.14.1",
+    "linkedom": "^0.18.12",
     "patchright": "^1.60.1",
     "playwright": "^1.60.0",
     "zod": "^4.4.3"
