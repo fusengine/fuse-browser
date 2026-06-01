@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 /**
- * fuse-browser CLI entry point (`probe` subcommand).
+ * fuse-browser CLI entry point. Subcommands: `probe`, `serp-batch`.
  * @module bin/cli
  */
 import { parseArgs } from "node:util";
-import { BrowserAgent } from "../agent/browser-agent.js";
-import { compactReport } from "../agent/compact.js";
-import { GuardrailViolation } from "../lib/errors.js";
-import type { EngineName } from "../interfaces/engine-types.js";
-import type { BrowserAction } from "../interfaces/types.js";
+import { runProbeCli } from "./probe-cli.js";
+import { runSerpBatch } from "./serp-batch-cli.js";
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -24,6 +21,9 @@ const { positionals, values } = parseArgs({
     "extract-serp": { type: "boolean" },
     "serp-pages": { type: "string" },
     "rank-domain": { type: "string" },
+    hl: { type: "string" },
+    gl: { type: "string" },
+    "delay-ms": { type: "string" },
     "human-mode": { type: "boolean" },
     approved: { type: "boolean" },
     replay: { type: "boolean" },
@@ -39,56 +39,16 @@ const { positionals, values } = parseArgs({
   },
 });
 
-const [command, url] = positionals;
-if (command !== "probe" || !url) {
-  process.stderr.write("usage: fuse-browser probe <url> [--click TEXT] [--fill TARGET=VALUE] [--country US] [--headed] ...\n");
+const [command, ...rest] = positionals;
+const opts = values as Record<string, unknown>;
+
+if (command === "serp-batch") {
+  await runSerpBatch(rest, opts);
+} else if (command === "probe" && rest[0]) {
+  await runProbeCli(rest[0], opts);
+} else {
+  process.stderr.write(
+    "usage: fuse-browser probe <url> [...] | fuse-browser serp-batch <query...> --rank-domain <d> [--serp-pages N] [--hl fr] [--gl ch]\n",
+  );
   process.exit(1);
-}
-
-const actions: BrowserAction[] = [];
-for (const item of (values.fill ?? []) as string[]) {
-  const eq = item.indexOf("=");
-  if (eq < 0) {
-    process.stderr.write("--fill must be TARGET=VALUE\n");
-    process.exit(1);
-  }
-  actions.push({ type: "fill", target: item.slice(0, eq), value: item.slice(eq + 1) });
-}
-for (const target of (values.click ?? []) as string[]) actions.push({ type: "click", target });
-
-const agent = new BrowserAgent({
-  engine: values.engine as EngineName | undefined,
-  countryCode: values.country,
-  currency: values.currency,
-  headless: !values.headed,
-  humanMode: Boolean(values["human-mode"]),
-  outputDir: values["output-dir"],
-  storageStatePath: values["storage-state"],
-  proxyUrl: values.proxy,
-  proxyMapPath: values["proxy-map"],
-  userDataDir: values["user-data-dir"],
-  replayEnabled: Boolean(values.replay),
-  siteMemoryDir: values["site-memory-dir"],
-});
-
-try {
-  const report = await agent.probe(url, {
-    actions,
-    humanApproved: Boolean(values.approved),
-    autoConsent: Boolean(values["auto-consent"]),
-    extractPrices: Boolean(values["extract-prices"]),
-    detectChallenges: Boolean(values["detect-challenges"]),
-    observeVisual: Boolean(values["observe-visual"]),
-    extractSerp: Boolean(values["extract-serp"]),
-    serpPages: values["serp-pages"] ? Number(values["serp-pages"]) : undefined,
-    rankDomain: values["rank-domain"],
-    waitMs: values["wait-ms"] ? Number(values["wait-ms"]) : 0,
-  });
-  process.stdout.write(`${JSON.stringify(compactReport(report), null, 2)}\n`);
-} catch (err) {
-  if (err instanceof GuardrailViolation) {
-    process.stderr.write(`BLOCKED: ${err.message}\n`);
-    process.exit(2);
-  }
-  throw err;
 }

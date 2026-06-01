@@ -47,6 +47,10 @@ npx fuse-browser probe 'https://www.booking.com/searchresults.html?ss=Tokyo' \
 
 # Use the installed Chrome
 npx fuse-browser probe https://example.com --channel chrome
+
+# SEO rank tracking across many keywords (one session)
+npx fuse-browser serp-batch "agence web vevey" "création site web lausanne" \
+  --rank-domain fusengine.ch --serp-pages 2 --hl fr --gl ch
 ```
 
 Sensitive actions (`pay`, `book`, `checkout`, `confirm`, …) are **blocked** unless
