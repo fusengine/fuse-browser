@@ -23,25 +23,24 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ Guardrails (no pay/book without `humanApproved`), safe-by-default output dir, env defaults (`FUSE_*`)
 - ✅ Publish pipeline: CI tests + npm publish (provenance) + GitHub Release on tag
 
-## ⬜ v0.2 — Anti-bot & scale
+## 🟡 v0.2 — Anti-bot & scale
 
 - ✅ **Rotating residential proxies + SessionPool** — auto-retire on block *(shipped 0.1.13)*
 - ⬜ **Real captcha solve, validated** — end-to-end with a paid provider key (reCAPTCHA v2 / Turnstile) *(low effort once a key exists)*
 - ✅ **HTTP fast-path with TLS/JA3 impersonation** (`impit`) — `browser_fetch`, no browser launch *(shipped 0.1.14)*
 
-## ⬜ v0.3 — Agentic robustness
+## ✅ v0.3 — Agentic robustness
 
 - ❌ **CDP-disconnect during sensitive actions** — *won't fix (misconception)*: Playwright/Patchright **is** the CDP connection (dropping it = losing control), and the real signals (`Runtime.enable`, `navigator.webdriver`, injected scripts) are already neutralized at the source by Patchright. Residual hardening = residential proxies + timing + coherent profile, not CDP.
 - ✅ **Action caching** — durable selectors + per-site strategy memory *(shipped 0.1.17)*
 - ✅ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(shipped 0.1.15)*
 - ✅ **Scroll/virtualized-list hints** — `browser_collect` surfaces off-screen results *(shipped 0.1.16)*
 
-## ⬜ v0.4 — Design & data tooling
+## 🟡 v0.4 — Design & data tooling
 
 - ✅ **Visual diff** (`browser_visual_diff`) — pixel diff vs baseline + changed-region boxes (pixelmatch + fast-png) *(shipped 0.1.19)*
 - ✅ **HAR record/replay** — `harPath`/`harMode` record (flushed on close), `harReplay` serves responses offline *(shipped 0.1.20)*
-- ⬜ **HAR record/replay** — deterministic offline re-extraction, CI fixtures *(low)*
-- ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium)*
+- ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium; no issue yet)*
 - ✅ **CSV export** for SERP/rank batches — `serp-batch --csv` *(shipped 0.1.18)*
 
 ## ⬜ Later / optional
