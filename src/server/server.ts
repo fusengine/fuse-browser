@@ -12,6 +12,7 @@ import { registerExtractTool } from "./tools/extract.js";
 import { registerExtractSchemaTool } from "./tools/extract-schema.js";
 import { registerNavigateTool } from "./tools/navigate.js";
 import { registerProbeTools } from "./tools/probe.js";
+import { registerSerpBatchTool } from "./tools/serp-batch.js";
 import { registerRunTool } from "./tools/run.js";
 import { registerScreenshotTool } from "./tools/screenshot.js";
 import { registerSessionTools } from "./tools/session.js";
@@ -29,6 +30,7 @@ export function createServer(): BuiltServer {
   const server = new McpServer({ name: "fuse-browser", version: VERSION });
   const sessions = new SessionManager();
   registerProbeTools(server);
+  registerSerpBatchTool(server);
   registerSessionTools(server, sessions);
   registerConnectTool(server, sessions);
   registerNavigateTool(server, sessions);

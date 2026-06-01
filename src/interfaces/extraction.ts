@@ -81,3 +81,11 @@ export interface Serp {
   related: string[];
   rank?: DomainRank;
 }
+
+/** One query's outcome in a SERP batch. */
+export interface SerpBatchRow {
+  query: string;
+  rank?: DomainRank;
+  results: SerpResult[];
+  error?: string;
+}
