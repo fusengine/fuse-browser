@@ -10,7 +10,6 @@ import { applyCurrencyPreference } from "../consent/currency.js";
 import { urlWithCurrency } from "../consent/currency-url.js";
 import { selectEngine } from "../engine/registry.js";
 import { mainText } from "../extraction/main-text.js";
-import { extractSerp } from "../extraction/serp.js";
 import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
@@ -22,6 +21,7 @@ import { runActions } from "./actions-loop.js";
 import type { ResolvedConfig } from "./config.js";
 import { detectAndSolve } from "./detect.js";
 import { attachListeners } from "./network.js";
+import { extractSerpStep } from "./serp-step.js";
 import { buildReport } from "./report.js";
 
 /** Run one probe against `url` and return the assembled report. */
@@ -63,7 +63,7 @@ export async function runProbe(
     const title = await page.title();
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};
-    const serp = options.extractSerp ? await extractSerp(page) : undefined;
+    const serp = await extractSerpStep(page, options, config);
     if (config.storageStatePath) {
       ensureDir(dirname(config.storageStatePath));
       await context.storageState({ path: config.storageStatePath });

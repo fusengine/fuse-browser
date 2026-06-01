@@ -65,9 +65,19 @@ export interface SerpResult {
   snippet?: string;
 }
 
+/** Where a domain ranks within a SERP. */
+export interface DomainRank {
+  domain: string;
+  organic: number[];
+  ads: number[];
+  best: number | null;
+  found: boolean;
+}
+
 /** Parsed Google search results page. */
 export interface Serp {
   organic: SerpResult[];
   ads: SerpResult[];
   related: string[];
+  rank?: DomainRank;
 }

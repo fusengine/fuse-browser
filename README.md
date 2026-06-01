@@ -163,6 +163,9 @@ Override per run with `outputDir` (library / MCP arg) or `--output-dir` (CLI). C
   as `captcha: { attempted, solved, kind, provider, reason }`. Failures are reported, never thrown.
 - **Google SERP** (opt-in): set `extractSerp: true` on a probe of a Google results page →
   structured `serp: { organic[], ads[], related[] }` (title, url, displayUrl, snippet) in the report.
+  Add `serpPages: N` to aggregate N pages (`start=0,10,…`) and `rankDomain: "example.com"` to get
+  `serp.rank` (organic/ads positions + best) — a built-in rank tracker.
+  CLI: `--extract-serp --serp-pages 2 --rank-domain example.com`.
 
 ## Disclaimer
 

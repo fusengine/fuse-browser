@@ -87,4 +87,8 @@ export interface ProbeOptions {
   solveCaptcha?: boolean;
   /** Extract structured Google SERP (organic/ads/related) into the report. */
   extractSerp?: boolean;
+  /** Number of SERP pages to aggregate (start=0,10,...). Default 1. */
+  serpPages?: number;
+  /** Domain to rank within the SERP (populates `serp.rank`). */
+  rankDomain?: string;
 }

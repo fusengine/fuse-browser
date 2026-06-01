@@ -69,6 +69,8 @@ const probeFlags = {
   actions: z.array(actionSchema).optional(),
   solveCaptcha: z.boolean().optional(),
   extractSerp: z.boolean().optional(),
+  serpPages: z.number().int().optional(),
+  rankDomain: z.string().optional(),
 };
 
 /** `browser_probe` input shape. */

@@ -22,6 +22,8 @@ const { positionals, values } = parseArgs({
     "detect-challenges": { type: "boolean" },
     "observe-visual": { type: "boolean" },
     "extract-serp": { type: "boolean" },
+    "serp-pages": { type: "string" },
+    "rank-domain": { type: "string" },
     "human-mode": { type: "boolean" },
     approved: { type: "boolean" },
     replay: { type: "boolean" },
@@ -78,6 +80,8 @@ try {
     detectChallenges: Boolean(values["detect-challenges"]),
     observeVisual: Boolean(values["observe-visual"]),
     extractSerp: Boolean(values["extract-serp"]),
+    serpPages: values["serp-pages"] ? Number(values["serp-pages"]) : undefined,
+    rankDomain: values["rank-domain"],
     waitMs: values["wait-ms"] ? Number(values["wait-ms"]) : 0,
   });
   process.stdout.write(`${JSON.stringify(compactReport(report), null, 2)}\n`);
