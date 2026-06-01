@@ -22,6 +22,12 @@ export function writeJson(filePath: string, value: unknown): void {
   writeFileEnsured(filePath, JSON.stringify(value, null, 2));
 }
 
+/** Écrit des octets bruts (PNG, etc.) en garantissant le dossier parent. */
+export function writeFileBytes(filePath: string, data: Uint8Array): void {
+  ensureDir(dirname(filePath));
+  writeFileSync(filePath, data);
+}
+
 /** Lit et parse un JSON ; renvoie `fallback` en cas d'erreur/absence. */
 export function readJsonSafe<T>(filePath: string, fallback: T): T {
   try {

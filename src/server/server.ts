@@ -19,6 +19,7 @@ import { registerRunTool } from "./tools/run.js";
 import { registerScreenshotTool } from "./tools/screenshot.js";
 import { registerSessionTools } from "./tools/session.js";
 import { registerSnapshotTools } from "./tools/snapshot.js";
+import { registerVisualDiffTool } from "./tools/visual-diff.js";
 import { registerWaitTool } from "./tools/wait.js";
 
 /** The built server and its session manager (for shutdown). */
@@ -45,6 +46,7 @@ export function createServer(): BuiltServer {
   registerExtractTool(server, sessions);
   registerExtractSchemaTool(server, sessions);
   registerScreenshotTool(server, sessions);
+  registerVisualDiffTool(server, sessions);
   registerResources(server);
   return { server, sessions };
 }

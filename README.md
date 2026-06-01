@@ -132,7 +132,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 `FUSE_HEADLESS`, `FUSE_COUNTRY`, `FUSE_CURRENCY`, `FUSE_USER_DATA_DIR`,
 `FUSE_STORAGE_STATE`, `FUSE_OUTPUT_DIR`.
 
-### Tools (26)
+### Tools (27)
 
 | Group | Tools |
 | --- | --- |
@@ -144,7 +144,7 @@ Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_
 | **Agentic** | `browser_snapshot` (indexed refs), `browser_act` (by ref + page diff), `browser_run` (multi-step plan), `browser_collect` (exhaust a virtualized/infinite list) |
 | **Extract** | `browser_extract` (text/prices/hotels/challenges), `browser_extract_schema` (typed, by CSS selectors) |
 | **SERP** | `browser_serp_batch` — multi-query Google search in one session, per-query organic results + domain rank |
-| **Vision** | `browser_screenshot` (page, single element by `ref`, or responsive set via `viewport`/`viewports`) |
+| **Vision** | `browser_screenshot` (page, single element by `ref`, or responsive set via `viewport`/`viewports`), `browser_visual_diff` (pixel diff vs baseline + changed-region boxes) |
 
 Key agentic patterns:
 

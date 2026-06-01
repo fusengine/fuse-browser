@@ -44,6 +44,7 @@ const EXPECTED = [
   "browser_extract",
   "browser_extract_schema",
   "browser_screenshot",
+  "browser_visual_diff",
   "browser_serp_batch",
 ];
 

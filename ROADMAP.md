@@ -5,7 +5,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 26 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 27 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
@@ -38,7 +38,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ⬜ v0.4 — Design & data tooling
 
-- ⬜ **Visual diff** (`browser_visual_diff`) — compare two captures / vs baseline, pixel diff + changed zones *(medium)*
+- ✅ **Visual diff** (`browser_visual_diff`) — pixel diff vs baseline + changed-region boxes (pixelmatch + fast-png) *(shipped 0.1.19)*
 - ⬜ **HAR record/replay** — deterministic offline re-extraction, CI fixtures *(low)*
 - ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium)*
 - ✅ **CSV export** for SERP/rank batches — `serp-batch --csv` *(shipped 0.1.18)*
