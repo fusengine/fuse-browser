@@ -57,10 +57,32 @@ Sensitive actions (`pay`, `book`, `checkout`, `confirm`, …) are **blocked** un
 ```json
 {
   "mcpServers": {
-    "fuse-browser": { "command": "npx", "args": ["fuse-browser-mcp"] }
+    "fuse-browser": { "command": "npx", "args": ["-y", "@fusengine/browser-mcp"] }
   }
 }
 ```
+
+### Default browser via env
+
+By default the server uses the bundled stealth Chromium. To pin a different
+default **for every tool call** (without the agent specifying it each time), set
+`FUSE_*` env vars in the MCP config — an explicit per-call argument still wins:
+
+```json
+{
+  "mcpServers": {
+    "fuse-browser": {
+      "command": "npx",
+      "args": ["-y", "@fusengine/browser-mcp"],
+      "env": { "FUSE_CHANNEL": "chrome", "FUSE_CDP_ENDPOINT": "http://localhost:9222" }
+    }
+  }
+}
+```
+
+Supported: `FUSE_ENGINE`, `FUSE_CHANNEL`, `FUSE_CDP_ENDPOINT`, `FUSE_EXECUTABLE_PATH`,
+`FUSE_HEADLESS`, `FUSE_COUNTRY`, `FUSE_CURRENCY`, `FUSE_USER_DATA_DIR`,
+`FUSE_STORAGE_STATE`, `FUSE_OUTPUT_DIR`.
 
 ### Tools (23)
 

@@ -8,6 +8,7 @@ import { existsSync } from "node:fs";
 import type { BrowserType, LaunchOptions } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import type { OpenedContext } from "../interfaces/engine.js";
+import { logger } from "../lib/logger.js";
 import { buildContextOptions } from "./context.js";
 import { isChromiumEngine } from "./loader.js";
 
@@ -25,6 +26,18 @@ function buildLaunchOptions(config: ResolvedConfig): LaunchOptions {
   return opts;
 }
 
+const INSTALL_HINT = "Chromium is not installed. Run: npx patchright install chromium";
+
+/** Rethrow a launch failure with an actionable hint when the browser binary is missing. */
+function enrichLaunchError(err: unknown): never {
+  const message = String((err as Error)?.message ?? err);
+  if (message.includes("Executable doesn't exist")) {
+    logger.error("browser binary missing", { hint: INSTALL_HINT });
+    throw new Error(`${INSTALL_HINT}\n${message}`);
+  }
+  throw err as Error;
+}
+
 /** Launch the given engine (persistent or ephemeral) and return a ready context. */
 export async function launchBrowser(
   browserType: BrowserType,
@@ -34,14 +47,13 @@ export async function launchBrowser(
   const contextOptions = buildContextOptions(config.identity, config.realisticProfile);
 
   if (config.userDataDir) {
-    const context = await browserType.launchPersistentContext(config.userDataDir, {
-      ...launchOptions,
-      ...contextOptions,
-    });
+    const context = await browserType
+      .launchPersistentContext(config.userDataDir, { ...launchOptions, ...contextOptions })
+      .catch(enrichLaunchError);
     return { context, browser: null };
   }
 
-  const browser = await browserType.launch(launchOptions);
+  const browser = await browserType.launch(launchOptions).catch(enrichLaunchError);
   if (config.storageStatePath && existsSync(config.storageStatePath)) {
     contextOptions.storageState = config.storageStatePath;
   }

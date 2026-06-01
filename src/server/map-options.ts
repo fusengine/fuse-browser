@@ -4,29 +4,33 @@
  */
 import type { BrowserChannel } from "../interfaces/engine-types.js";
 import type { AgentOptions, BrowserAction, ProbeOptions } from "../interfaces/types.js";
+import { envAgentDefaults } from "./env-defaults.js";
 
-/** Extract {@link AgentOptions} from raw tool arguments. */
+/** Server-wide browser defaults from `FUSE_*` env (per-call args override these). */
+const ENV = envAgentDefaults();
+
+/** Extract {@link AgentOptions} from raw tool arguments, falling back to env. */
 export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
   return {
-    engine: a.engine as AgentOptions["engine"],
-    channel: a.channel as BrowserChannel | undefined,
-    executablePath: a.executablePath as string | undefined,
-    cdpEndpoint: a.cdpEndpoint as string | undefined,
-    headless: a.headless as boolean | undefined,
+    engine: (a.engine as AgentOptions["engine"]) ?? ENV.engine,
+    channel: (a.channel as BrowserChannel | undefined) ?? ENV.channel,
+    executablePath: (a.executablePath as string | undefined) ?? ENV.executablePath,
+    cdpEndpoint: (a.cdpEndpoint as string | undefined) ?? ENV.cdpEndpoint,
+    headless: (a.headless as boolean | undefined) ?? ENV.headless,
     humanMode: a.humanMode as boolean | undefined,
     locale: a.locale as string | undefined,
     timezoneId: a.timezoneId as string | undefined,
-    countryCode: a.countryCode as string | undefined,
-    currency: a.currency as string | undefined,
-    userDataDir: a.userDataDir as string | undefined,
+    countryCode: (a.countryCode as string | undefined) ?? ENV.countryCode,
+    currency: (a.currency as string | undefined) ?? ENV.currency,
+    userDataDir: (a.userDataDir as string | undefined) ?? ENV.userDataDir,
     proxyUrl: a.proxyUrl as string | undefined,
     proxyMapPath: a.proxyMapPath as string | undefined,
-    storageStatePath: a.storageStatePath as string | undefined,
+    storageStatePath: (a.storageStatePath as string | undefined) ?? ENV.storageStatePath,
     realisticProfile: a.realisticProfile as boolean | undefined,
     replayEnabled: a.replayEnabled as boolean | undefined,
     replayDir: a.replayDir as string | undefined,
     siteMemoryDir: a.siteMemoryDir as string | undefined,
-    outputDir: a.outputDir as string | undefined,
+    outputDir: (a.outputDir as string | undefined) ?? ENV.outputDir,
     retry: a.retry as AgentOptions["retry"],
     captcha: a.captcha as AgentOptions["captcha"],
   };

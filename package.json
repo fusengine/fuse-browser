@@ -1,14 +1,32 @@
 {
-  "name": "fuse-browser",
+  "name": "@fusengine/browser-mcp",
   "version": "0.1.0",
-  "description": "Navigateur agentique Fusengine pour agents IA (MCP + CLI) au-dessus de Patchright/Playwright",
+  "description": "MCP server + CLI giving AI agents a real, stealth browser (Patchright/Playwright) — per-country identity, self-healing actions, snapshots, multi-step plans, structured extraction, CDP attach.",
+  "license": "MIT",
+  "author": "Fusengine",
+  "homepage": "https://github.com/fusengine/fuse-browser#readme",
+  "repository": { "type": "git", "url": "git+https://github.com/fusengine/fuse-browser.git" },
+  "bugs": { "url": "https://github.com/fusengine/fuse-browser/issues" },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "browser-automation",
+    "playwright",
+    "patchright",
+    "stealth",
+    "web-scraping",
+    "cli",
+    "typescript"
+  ],
   "type": "module",
+  "publishConfig": { "access": "public" },
   "engines": {
     "node": ">=20"
   },
   "bin": {
     "fuse-browser": "dist/bin/cli.js",
-    "fuse-browser-mcp": "dist/bin/mcp.js"
+    "browser-mcp": "dist/bin/mcp.js"
   },
   "exports": {
     ".": {
@@ -18,10 +36,14 @@
   },
   "files": [
     "dist",
+    "scripts/postinstall.mjs",
     "proxies.example.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
+    "postinstall": "node scripts/postinstall.mjs",
+    "prepublishOnly": "npm run build",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "bun test tests/unit",
