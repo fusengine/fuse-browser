@@ -8,10 +8,33 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { runPipeline } from "../../extraction/pipeline/run.js";
+import type { PipelineSpec } from "../../interfaces/pipeline.js";
 import { scrollCollect } from "../../state/scroll-collect.js";
 import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
+
+const FIELD_RULE = z.object({
+  required: z.boolean().optional(),
+  type: z.enum(["string", "number", "boolean"]).optional(),
+  regex: z.string().optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  enum: z.array(z.unknown()).optional(),
+});
+
+/** Declarative clean→validate→dedupe→emit spec applied to collected rows. */
+const PIPELINE_SCHEMA = z
+  .object({
+    clean: z.object({ numericFields: z.array(z.string()).optional() }).optional(),
+    validate: z.record(z.string(), FIELD_RULE).optional(),
+    dedupeBy: z.array(z.string()).optional(),
+    keep: z.enum(["first", "last"]).optional(),
+    columns: z.array(z.string()).optional(),
+    emit: z.enum(["json", "csv"]).optional(),
+  })
+  .optional();
 
 /** Register `browser_collect`. */
 export function registerCollectTool(server: McpServer, sessions: SessionManager): void {
@@ -27,6 +50,7 @@ export function registerCollectTool(server: McpServer, sessions: SessionManager)
         container: z.string().optional(),
         maxSteps: z.number().int().optional(),
         extractPrices: z.boolean().optional(),
+        pipeline: PIPELINE_SCHEMA,
       },
     },
     async (args) => {
@@ -38,6 +62,18 @@ export function registerCollectTool(server: McpServer, sessions: SessionManager)
           maxSteps: typeof a.maxSteps === "number" ? a.maxSteps : undefined,
           extractPrices: a.extractPrices === true,
         });
+        if (a.pipeline) {
+          const rows = result.items as unknown as Record<string, unknown>[];
+          const pr = runPipeline(rows, a.pipeline as PipelineSpec);
+          return jsonResult({
+            count: pr.rows.length,
+            steps: result.steps,
+            reachedEnd: result.reachedEnd,
+            invalidCount: pr.invalid.length,
+            items: pr.rows,
+            csv: pr.csv,
+          });
+        }
         return jsonResult({
           count: result.items.length,
           steps: result.steps,

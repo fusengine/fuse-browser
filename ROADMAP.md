@@ -36,11 +36,11 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Shadow-DOM & iframe traversal** in the snapshot — modern date/airport pickers *(shipped 0.1.15)*
 - ✅ **Scroll/virtualized-list hints** — `browser_collect` surfaces off-screen results *(shipped 0.1.16)*
 
-## 🟡 v0.4 — Design & data tooling
+## ✅ v0.4 — Design & data tooling
 
 - ✅ **Visual diff** (`browser_visual_diff`) — pixel diff vs baseline + changed-region boxes (pixelmatch + fast-png) *(shipped 0.1.19)*
 - ✅ **HAR record/replay** — `harPath`/`harMode` record (flushed on close), `harReplay` serves responses offline *(shipped 0.1.20)*
-- ⬜ **Extraction pipeline** — composable clean→validate→dedupe→emit stages *(low/medium; no issue yet)*
+- ✅ **Extraction pipeline** — composable clean→validate→dedupe→emit (`pipeline` arg on `browser_collect`) *(shipped 0.1.21)*
 - ✅ **CSV export** for SERP/rank batches — `serp-batch --csv` *(shipped 0.1.18)*
 
 ## ⬜ Later / optional

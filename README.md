@@ -167,6 +167,9 @@ Key agentic patterns:
   rows by stable key** until the list ends. Returns the full set of rows (text / url /
   optional prices) — data, not refs (virtualization recycles nodes), so to act on a found
   row use `browser_act` by text or `browser_scroll` then `browser_snapshot`.
+  Pass an optional **`pipeline`** to post-process rows in one call:
+  `clean` (normalize strings, parse numbers) → `validate` (per-field rules, rejects
+  to `invalidCount`) → `dedupeBy` → `columns` (subset) → `emit:"csv"`.
 - **`browser_run`** — execute an ordered plan (navigate/act/wait/extract) in one call,
   stopping at the first failure. Guardrails apply to the whole plan.
 
