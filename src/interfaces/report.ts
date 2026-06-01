@@ -2,7 +2,7 @@
  * Types des rapports produits par l'agent.
  * @module interfaces/report
  */
-import type { Challenges, HotelOffers, Price, Visual } from "./extraction.js";
+import type { Challenges, HotelOffers, Price, Serp, Visual } from "./extraction.js";
 import type { CaptchaOutcome } from "./net.js";
 import type { ActionResult, Geolocation } from "./types.js";
 
@@ -65,6 +65,7 @@ export interface ProbeReport {
   hotelOffers: HotelOffers | Record<string, never>;
   challenges: Challenges | Record<string, never>;
   captcha?: CaptchaOutcome;
+  serp?: Serp;
   visual: Visual | Record<string, never>;
   consent: ConsentResult;
   currency: CurrencyResult;

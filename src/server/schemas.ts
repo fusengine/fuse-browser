@@ -68,6 +68,7 @@ const probeFlags = {
   humanApproved: z.boolean().optional(),
   actions: z.array(actionSchema).optional(),
   solveCaptcha: z.boolean().optional(),
+  extractSerp: z.boolean().optional(),
 };
 
 /** `browser_probe` input shape. */

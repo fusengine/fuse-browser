@@ -21,6 +21,7 @@ const { positionals, values } = parseArgs({
     "extract-prices": { type: "boolean" },
     "detect-challenges": { type: "boolean" },
     "observe-visual": { type: "boolean" },
+    "extract-serp": { type: "boolean" },
     "human-mode": { type: "boolean" },
     approved: { type: "boolean" },
     replay: { type: "boolean" },
@@ -76,6 +77,7 @@ try {
     extractPrices: Boolean(values["extract-prices"]),
     detectChallenges: Boolean(values["detect-challenges"]),
     observeVisual: Boolean(values["observe-visual"]),
+    extractSerp: Boolean(values["extract-serp"]),
     waitMs: values["wait-ms"] ? Number(values["wait-ms"]) : 0,
   });
   process.stdout.write(`${JSON.stringify(compactReport(report), null, 2)}\n`);

@@ -85,4 +85,6 @@ export interface ProbeOptions {
   observeVisual?: boolean;
   /** Attempt to solve a detected captcha (requires `captcha` config). */
   solveCaptcha?: boolean;
+  /** Extract structured Google SERP (organic/ads/related) into the report. */
+  extractSerp?: boolean;
 }

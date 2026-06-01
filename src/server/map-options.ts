@@ -47,5 +47,6 @@ export function toProbeOptions(a: Record<string, unknown>): ProbeOptions {
     detectChallenges: a.detectChallenges as boolean | undefined,
     observeVisual: a.observeVisual as boolean | undefined,
     solveCaptcha: a.solveCaptcha as boolean | undefined,
+    extractSerp: a.extractSerp as boolean | undefined,
   };
 }

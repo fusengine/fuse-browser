@@ -55,3 +55,19 @@ export interface Visual {
   viewport?: { width: number; height: number };
   interactiveElements?: InteractiveElement[];
 }
+
+/** A single Google SERP entry (organic result or ad). */
+export interface SerpResult {
+  position: number;
+  title: string;
+  url: string;
+  displayUrl?: string;
+  snippet?: string;
+}
+
+/** Parsed Google search results page. */
+export interface Serp {
+  organic: SerpResult[];
+  ads: SerpResult[];
+  related: string[];
+}

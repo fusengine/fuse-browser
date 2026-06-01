@@ -10,6 +10,7 @@ import { applyCurrencyPreference } from "../consent/currency.js";
 import { urlWithCurrency } from "../consent/currency-url.js";
 import { selectEngine } from "../engine/registry.js";
 import { mainText } from "../extraction/main-text.js";
+import { extractSerp } from "../extraction/serp.js";
 import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
@@ -62,6 +63,7 @@ export async function runProbe(
     const title = await page.title();
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};
+    const serp = options.extractSerp ? await extractSerp(page) : undefined;
     if (config.storageStatePath) {
       ensureDir(dirname(config.storageStatePath));
       await context.storageState({ path: config.storageStatePath });
@@ -84,6 +86,7 @@ export async function runProbe(
       reportPath,
       extractPricesFlag: Boolean(options.extractPrices),
       captcha,
+      serp,
     });
   } finally {
     await context.close();

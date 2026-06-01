@@ -15,6 +15,8 @@ export function compactReport(r: ProbeReport): Record<string, unknown> {
     prices: r.prices,
     hotelOffers: r.hotelOffers,
     challenges: r.challenges,
+    captcha: r.captcha,
+    serp: r.serp,
     visual: r.visual,
     actions: r.actions,
     replay: r.replay,
