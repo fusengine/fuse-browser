@@ -3,6 +3,7 @@
  * @module server/server
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { VERSION } from "../lib/version.js";
 import { SessionManager } from "../session/manager.js";
 import { registerResources } from "./resources.js";
 import { registerActTools } from "./tools/act.js";
@@ -25,7 +26,7 @@ export interface BuiltServer {
 
 /** Create the fuse-browser MCP server with every tool and resource wired. */
 export function createServer(): BuiltServer {
-  const server = new McpServer({ name: "fuse-browser", version: "0.1.0" });
+  const server = new McpServer({ name: "fuse-browser", version: VERSION });
   const sessions = new SessionManager();
   registerProbeTools(server);
   registerSessionTools(server, sessions);
