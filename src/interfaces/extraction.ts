@@ -35,7 +35,7 @@ export interface Challenges {
   otp: boolean;
 }
 
-/** An interactive element observed visually. */
+/** An interactive element observed visually. Optional fields enrich snapshots. */
 export interface InteractiveElement {
   index: number;
   tag: string;
@@ -47,6 +47,14 @@ export interface InteractiveElement {
   href: string | null;
   visible: boolean;
   box: { x: number; y: number; width: number; height: number };
+  value?: string | null;
+  placeholder?: string | null;
+  disabled?: boolean;
+  checked?: boolean;
+  options?: string[];
+  ariaExpanded?: string | null;
+  ariaControls?: string | null;
+  obscured?: boolean;
 }
 
 /** Visual observation (screenshot + interactive elements). */

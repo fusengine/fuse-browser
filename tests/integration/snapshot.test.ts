@@ -14,7 +14,9 @@ import { SessionManager } from "../../src/session/manager.js";
 // would drop the inline <script> and break the click handler.
 const PAGE =
   "<button onclick=\"document.getElementById('out').textContent='clicked'\">Go</button>" +
-  "<input placeholder='Where' /><div id='out'>idle</div>";
+  "<input placeholder='Where' value='Geneva' />" +
+  "<select><option>Eco</option><option>Business</option></select>" +
+  "<button disabled>Search</button><div id='out'>idle</div>";
 const URL = `data:text/html,${encodeURIComponent(PAGE)}`;
 
 test("snapshot tags refs and act-by-ref clicks the right element", { timeout: 120_000 }, async () => {
@@ -27,6 +29,15 @@ test("snapshot tags refs and act-by-ref clicks the right element", { timeout: 12
     assert.ok(elements.length >= 2, "snapshot should list button + input");
     const button = elements.find((e) => e.text === "Go");
     assert.ok(button, "button should be in the snapshot");
+
+    // Agentic enrichment: value/placeholder/options/disabled exposed to the LLM.
+    const input = elements.find((e) => e.tag === "input");
+    assert.equal(input?.value, "Geneva", "input current value");
+    assert.equal(input?.placeholder, "Where", "input placeholder");
+    const select = elements.find((e) => e.tag === "select");
+    assert.deepEqual(select?.options, ["Eco", "Business"], "select options");
+    const disabled = elements.find((e) => e.text === "Search");
+    assert.equal(disabled?.disabled, true, "disabled button flagged");
 
     const click = await actByRef(session.page, button.index, "click");
     assert.equal(click.ok, true);
