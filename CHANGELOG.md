@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.26] - 03-06-2026
+
+### Added
+
+- feat(contacts): opt-in `probe({ extractContacts: true })` populates `report.contacts` (emails, phones in E.164 via libphonenumber-js, contact-form detection) from 3 deduped sources — mailto/tel hrefs, text+HTML regex, and deobfuscation ([at]/[dot], HTML entities, bounded bare spans). Opt-in `contactCrawl` follows same-domain contact/kontakt/impressum links (bounded) when the page has no email. No behavior change without the flags. See docs/recipes/prospection.md.
+
 ## [0.1.25] - 03-06-2026
 
 ### Fixed
