@@ -60,5 +60,6 @@ export function toProbeOptions(a: Record<string, unknown>): ProbeOptions {
     rankDomain: a.rankDomain as string | undefined,
     extractContacts: a.extractContacts as boolean | undefined,
     contactCrawl: a.contactCrawl as ProbeOptions["contactCrawl"],
+    contactFilter: a.contactFilter as ProbeOptions["contactFilter"],
   };
 }

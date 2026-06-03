@@ -4,7 +4,7 @@
  * @module extraction/contacts/collect
  */
 import type { Page } from "playwright";
-import type { Contacts, ContactSignals } from "../../interfaces/contacts.js";
+import type { ContactFilter, Contacts, ContactSignals } from "../../interfaces/contacts.js";
 import { evalScript } from "../../lib/evaluate.js";
 import { extractContacts } from "./extract.js";
 
@@ -24,7 +24,7 @@ const SIGNALS_SCRIPT = `() => {
 }`;
 
 /** Gather contact signals from the live page and extract structured contacts. */
-export async function collectContacts(page: Page, country: string): Promise<Contacts> {
+export async function collectContacts(page: Page, country: string, filter?: ContactFilter): Promise<Contacts> {
   const signals = await evalScript<ContactSignals>(page, SIGNALS_SCRIPT);
-  return extractContacts(signals, country);
+  return extractContacts(signals, country, { filter, url: page.url() });
 }

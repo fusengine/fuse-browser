@@ -1,17 +1,18 @@
 /**
- * Email extraction with light deobfuscation (HTML entities, bracketed [at]/[dot],
- * and tight bare "x at y dot z" spans). Prose " at " alone is NOT decoded.
+ * Email extraction with light deobfuscation, placeholder filtering (opt-out via
+ * `filter: "off"`) and same-domain-first ordering when a page URL is provided.
  * @module extraction/contacts/email
  */
+import type { ContactFilter } from "../../interfaces/contacts.js";
 
 const EMAIL_GLOBAL = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
 const EMAIL_ONE = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-/** Asset-like matches (e.g. `sprite@2x.png`) that look like emails but are not. */
 const JUNK = /\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?)$/i;
-/** Bare "user at domain dot tld" — needs ≥1 " dot " so prose " at " is not decoded. */
 const BARE = /([a-z0-9._%+-]{1,64})\s+at\s+([a-z0-9.-]{1,255}(?:\s+dot\s+[a-z]{2,24})+)/gi;
+/** Template/demo placeholder emails seen on starter sites — dropped in strict mode. */
+const PLACEHOLDER =
+  /(votre[-_]?(?:boutique|site|domaine|entreprise|nom|email|adresse)|your[-_]?(?:domain|site|company|email|name)|domaine?\.tld|domain\.tld|@(?:votre|your)|^(?:nom|prenom|email|mail|name|user)@)/i;
 
-/** decodeURIComponent that never throws on malformed input. */
 const safeDecode = (s: string): string => {
   try {
     return decodeURIComponent(s);
@@ -34,8 +35,30 @@ function deobfuscateBare(input: string): string {
   return input.replace(BARE, (m) => m.replace(/\s+at\s+/gi, "@").replace(/\s+dot\s+/gi, "."));
 }
 
-/** Extract + dedupe emails from mailto hrefs and the (deobfuscated) text/HTML. */
-export function extractEmails(signals: { html: string; text: string; mailto: string[] }): string[] {
+/** Lowercased host of a page URL (strips scheme + www). */
+function siteHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/** Same-domain emails first (keeps all — SMBs legitimately use gmail/bluewin). */
+function orderBySameDomain(list: string[], host: string): string[] {
+  if (!host) return list;
+  const same = (e: string): boolean => {
+    const d = e.split("@")[1] ?? "";
+    return d === host || d.endsWith(`.${host}`) || host.endsWith(`.${d}`);
+  };
+  return [...list.filter(same), ...list.filter((e) => !same(e))];
+}
+
+/** Extract + dedupe emails; placeholder-filtered (strict) and same-domain-ordered. */
+export function extractEmails(
+  signals: { html: string; text: string; mailto: string[] },
+  opts: { filter?: ContactFilter; url?: string } = {},
+): string[] {
   const set = new Set<string>();
   const add = (value: string): void => {
     const addr = value.trim().toLowerCase();
@@ -44,7 +67,10 @@ export function extractEmails(signals: { html: string; text: string; mailto: str
   for (const href of signals.mailto) {
     add(safeDecode(href.replace(/^mailto:/i, "").split("?")[0] ?? ""));
   }
-  const haystack = deobfuscateBare(deobfuscate(`${signals.text}\n${signals.html}`));
+  const raw = `${signals.text}\n${signals.html}`;
+  const haystack = deobfuscateBare(deobfuscate(raw.length > 500_000 ? raw.slice(0, 500_000) : raw));
   for (const match of haystack.matchAll(EMAIL_GLOBAL)) add(match[0]);
-  return [...set];
+  let list = [...set];
+  if ((opts.filter ?? "strict") !== "off") list = list.filter((e) => !PLACEHOLDER.test(e));
+  return opts.url ? orderBySameDomain(list, siteHost(opts.url)) : list;
 }
