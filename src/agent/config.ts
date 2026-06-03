@@ -3,6 +3,7 @@
  * @module agent/config
  */
 import { join } from "node:path";
+import { isRemoteCdp } from "../engine/cdp-url.js";
 import { resolveIdentity, type ResolvedIdentity } from "../identity/resolve.js";
 import type { BrowserChannel, EngineName } from "../interfaces/engine-types.js";
 import type { CaptchaConfig, RetryConfig } from "../interfaces/net.js";
@@ -19,6 +20,9 @@ export interface ResolvedConfig {
   channel: BrowserChannel | null;
   executablePath: string | null;
   cdpEndpoint: string | null;
+  cdpHeaders: Record<string, string> | null;
+  cdpCloseOnDone: boolean;
+  cdpTimeoutMs: number;
   storageStatePath: string | null;
   harPath: string | null;
   harMode: "minimal" | "full";
@@ -62,6 +66,9 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     channel: opts.channel ?? null,
     executablePath: opts.executablePath ?? null,
     cdpEndpoint: opts.cdpEndpoint ?? null,
+    cdpHeaders: opts.cdpHeaders ?? null,
+    cdpCloseOnDone: opts.cdpCloseOnDone ?? isRemoteCdp(opts.cdpEndpoint ?? ""),
+    cdpTimeoutMs: opts.cdpTimeoutMs ?? 20_000,
     storageStatePath: opts.storageStatePath ?? null,
     harPath: opts.harPath ?? null,
     harMode: opts.harMode ?? "minimal",

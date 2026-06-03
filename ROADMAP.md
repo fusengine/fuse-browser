@@ -7,6 +7,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 - ✅ MCP server + CLI + library, 28 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
+- ✅ Remote CDP (Browserless): auth `cdpHeaders`/`?token=`, configurable timeout, fresh identity context + stealth re-injection (`addInitScript` parity with launch), `cdpCloseOnDone` closes remote sessions while never closing a local browser
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
 - ✅ Extraction: main text, multi-currency prices, hotel offers
