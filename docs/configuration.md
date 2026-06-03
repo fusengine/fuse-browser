@@ -20,7 +20,10 @@ Every field is optional. Defaults are applied by `resolveConfig` (`src/agent/con
 | `engine` | `"playwright" \| "patchright" \| "firefox" \| "webkit"` | `"patchright"` | Browser automation engine. `patchright` is the stealth-patched Chromium driver. |
 | `channel` | `"chrome" \| "chrome-beta" \| "chrome-dev" \| "chrome-canary" \| "msedge" \| "msedge-beta" \| "msedge-dev" \| "msedge-canary"` | `null` (bundled browser) | Use a real installed browser channel instead of the bundled one. |
 | `executablePath` | `string` | `null` | Absolute path to a browser binary, overriding `channel` / the bundled browser. |
-| `cdpEndpoint` | `string` | `null` | Connect over the Chrome DevTools Protocol to an already-running browser instead of launching one. |
+| `cdpEndpoint` | `string` | `null` | Connect over the Chrome DevTools Protocol to an already-running browser instead of launching one. Accepts a local debug URL (`http://localhost:9222`) or a remote websocket (`wss://host/...`, e.g. Browserless). |
+| `cdpHeaders` | `Record<string,string>` | `null` | Extra headers for the CDP connect handshake — e.g. `{ Authorization: "Bearer <token>" }` for an authenticated Browserless endpoint. (Token can also be passed inline as `?token=` in `cdpEndpoint`.) |
+| `cdpCloseOnDone` | `boolean` | `true` for `ws/wss`, else `false` | Close the CDP session on teardown. Remote endpoints (Browserless) get a fresh context that is closed when done; a local attach never closes the user's browser (only the link is dropped). |
+| `cdpTimeoutMs` | `number` | `20000` | Timeout (ms) for the CDP connect. |
 | `storageStatePath` | `string` | `null` | Path to a Playwright storage-state JSON (cookies + localStorage) to load/persist a logged-in session. See [./sessions.md](./sessions.md). |
 | `harPath` | `string` | `null` | Record network traffic to this HAR file. See [./sessions.md](./sessions.md). |
 | `harMode` | `"minimal" \| "full"` | `"minimal"` | HAR recording detail. `minimal` records metadata only; `full` records response bodies. |
