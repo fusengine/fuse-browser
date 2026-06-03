@@ -8,7 +8,8 @@ import { prepareBookingCurrency } from "../consent/booking-currency.js";
 import { handleCommonConsent } from "../consent/consent.js";
 import { applyCurrencyPreference } from "../consent/currency.js";
 import { urlWithCurrency } from "../consent/currency-url.js";
-import { selectEngine } from "../engine/registry.js";
+import { selectEngineForConfig } from "../engine/registry.js";
+import { teardownOpened } from "../engine/teardown.js";
 import { mainText } from "../extraction/main-text.js";
 import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
@@ -35,9 +36,10 @@ export async function runProbe(
   const runId = sha1(`${url}-${Date.now()}`).slice(0, 10);
   const screenshotPath = join(config.outputDir, `${runId}.png`);
   const reportPath = join(config.outputDir, `${runId}.json`);
-  const { context, browser } = await selectEngine(config.engine).open(config);
+  const opened = await selectEngineForConfig(config).open(config);
+  const { context } = opened;
   try {
-    const page = await context.newPage();
+    const page = opened.page ?? (await context.newPage());
     const logs = attachListeners(page);
     const targetUrl = urlWithCurrency(url, config.currency);
     if (targetUrl.includes("booking.com") && config.currency) {
@@ -91,7 +93,6 @@ export async function runProbe(
       serp,
     });
   } finally {
-    await context.close();
-    if (browser) await browser.close();
+    await teardownOpened(opened);
   }
 }
