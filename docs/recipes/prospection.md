@@ -15,13 +15,14 @@ Everything is **opt-in**: without `extractContacts`, `probe()` behaves exactly a
 import { BrowserAgent } from "@fusengine/browser-mcp";
 
 const agent = new BrowserAgent({ countryCode: "CH" }); // default country for phone parsing
-const report = await agent.probe("https://garage-planches.ch", {
+const report = await agent.probe("https://example.com", {
   extractContacts: true,
   contactCrawl: { enabled: true, maxPages: 3 }, // follow Contact/Impressum links if no email on the home
 });
 
 console.log(report.contacts);
-// { emails: ["info@garage-planches.ch"], phones: ["+41227000000"], hasContactForm: true }
+// shape (illustrative placeholders — not real data):
+// { emails: ["contact@example.com"], phones: ["+41000000000"], hasContactForm: true }
 ```
 
 ### How it works
@@ -52,7 +53,7 @@ The same options are accepted as `browser_probe` arguments (and the CDP remote o
 
 ```jsonc
 {
-  "url": "https://garage-planches.ch",
+  "url": "https://example.com",
   "extractContacts": true,
   "contactCrawl": { "enabled": true, "maxPages": 3 },
   // optional remote browser:

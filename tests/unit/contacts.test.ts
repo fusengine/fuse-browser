@@ -14,24 +14,24 @@ const sig = (o: Partial<ContactSignals>): ContactSignals => ({
 
 describe("extractContacts — emails (live cases)", () => {
   test("mailto-only home: email present only in the href", () => {
-    const c = extractContacts(sig({ mailto: ["mailto:info@garage-planches.ch?subject=Hi"] }), "CH");
-    expect(c.emails).toContain("info@garage-planches.ch");
+    const c = extractContacts(sig({ mailto: ["mailto:info@example.com?subject=Hi"] }), "CH");
+    expect(c.emails).toContain("info@example.com");
   });
   test("plain text on a separate contact page", () => {
-    const c = extractContacts(sig({ text: "Écrivez à contact@garage-planches.ch svp." }), "CH");
-    expect(c.emails).toContain("contact@garage-planches.ch");
+    const c = extractContacts(sig({ text: "Écrivez à contact@example.com svp." }), "CH");
+    expect(c.emails).toContain("contact@example.com");
   });
   test("obfuscated email (at/dot words + HTML entities)", () => {
-    const c = extractContacts(sig({ text: "jean [at] resocar [dot] ch / bob&#64;resocar&#46;ch" }), "CH");
-    expect(c.emails).toContain("jean@resocar.ch");
-    expect(c.emails).toContain("bob@resocar.ch");
+    const c = extractContacts(sig({ text: "jean [at] example [dot] org / bob&#64;example&#46;org" }), "CH");
+    expect(c.emails).toContain("jean@example.org");
+    expect(c.emails).toContain("bob@example.org");
   });
   test("ignores asset-like false positives", () => {
     const c = extractContacts(sig({ html: '<img src="sprite@2x.png">', text: "logo@2x.webp" }), "CH");
     expect(c.emails).toEqual([]);
   });
   test("bare 'x at y dot z' is decoded only with a real dot-span", () => {
-    expect(extractContacts(sig({ text: "jean at resocar dot ch" }), "CH").emails).toContain("jean@resocar.ch");
+    expect(extractContacts(sig({ text: "jean at example dot org" }), "CH").emails).toContain("jean@example.org");
   });
   test("prose ' at ' is NOT turned into a fake email", () => {
     const c = extractContacts(sig({ text: "Visit us at shop.example.org today" }), "CH");
