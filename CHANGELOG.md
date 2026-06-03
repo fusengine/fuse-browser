@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.25] - 03-06-2026
+
+### Fixed
+
+- fix(probe): `BrowserAgent.probe()` now honors `cdpEndpoint` (attaches over CDP via `selectEngineForConfig`) and tears down via `teardownOpened`, so it never closes a user's attached browser. Previously it always launched a fresh browser and ignored `cdpEndpoint`. No behavior change when `cdpEndpoint` is unset.
+
 ## [0.1.24] - 03-06-2026
 
 ### Added
