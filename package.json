@@ -65,6 +65,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "defuddle": "^0.18.1",
     "fast-png": "^8.0.0",
     "impit": "^0.14.1",
     "linkedom": "^0.18.12",
