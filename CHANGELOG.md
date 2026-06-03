@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.29] - 03-06-2026
+
+### Added
+
+- feat(fetch): `browser_fetch` and the `fetch` CLI accept `extractContacts` — structured contacts (emails, phones E.164, contact form) are extracted from the fetched HTML with no browser launch (~7s → ~0.6s on static/SSR sites). New `contactFilter` ("strict" default | "off") drops template placeholder emails and orders same-domain first; also exposed on `browser_probe`. Bounded haystack guards against ReDoS on hostile HTML.
+
 ## [0.1.28] - 03-06-2026
 
 ### Added
