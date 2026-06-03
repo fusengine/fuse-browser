@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.30] - 03-06-2026
+
+### Added
+
+- feat(probe): opt-in `fastPathFirst` cascade — with `extractContacts`, tries HTTP-only extraction first and skips the browser when the contact card is complete (email AND phone), escalating to a full browser probe + `contactCrawl` only when incomplete. Result carries `fastPath: true`. Default false (no behavior change). ~0.6s vs ~7s on static/SSR sites.
+
 ## [0.1.29] - 03-06-2026
 
 ### Added
