@@ -2,7 +2,7 @@
  * Agent construction and per-probe option types.
  * @module interfaces/options
  */
-import type { ContactCrawl } from "./contacts.js";
+import type { ContactCrawl, ContactFilter } from "./contacts.js";
 import type { BrowserChannel, EngineName } from "./engine-types.js";
 import type { CaptchaConfig, RetryConfig } from "./net.js";
 import type { BrowserAction } from "./types.js";
@@ -69,4 +69,6 @@ export interface ProbeOptions {
   extractContacts?: boolean;
   /** Opt-in: when the page has no email, hunt the Contact page (bounded, same-domain). */
   contactCrawl?: ContactCrawl;
+  /** Filter placeholder emails: "strict" (default) drops template addresses, "off" keeps all. */
+  contactFilter?: ContactFilter;
 }

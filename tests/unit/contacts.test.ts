@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { deobfuscate } from "../../src/extraction/contacts/email.js";
 import { extractContacts } from "../../src/extraction/contacts/extract.js";
+import { contactsFromHtml } from "../../src/extraction/contacts/from-html.js";
 import type { ContactSignals } from "../../src/interfaces/contacts.js";
 
 const sig = (o: Partial<ContactSignals>): ContactSignals => ({
@@ -47,6 +48,33 @@ describe("extractContacts — phones (E.164)", () => {
   test("phone in clear text uses the default country", () => {
     const c = extractContacts(sig({ text: "Appelez le 079 123 45 67 pour un essai." }), "CH");
     expect(c.phones).toContain("+41791234567");
+  });
+});
+
+describe("extractContacts — placeholder filter + ordering", () => {
+  test("strict (default) drops template placeholder emails", () => {
+    const c = extractContacts(sig({ text: "écrire à contact@votreboutique.ch ou vrai@garage.ch" }), "CH");
+    expect(c.emails).not.toContain("contact@votreboutique.ch");
+    expect(c.emails).toContain("vrai@garage.ch");
+  });
+  test("filter:'off' keeps placeholders", () => {
+    const c = extractContacts(sig({ text: "contact@votreboutique.ch" }), "CH", { filter: "off" });
+    expect(c.emails).toContain("contact@votreboutique.ch");
+  });
+  test("same-domain emails are ordered first", () => {
+    const c = extractContacts(sig({ text: "a@gmail.com et b@acme.ch" }), "CH", { url: "https://www.acme.ch/contact" });
+    expect(c.emails[0]).toBe("b@acme.ch");
+  });
+});
+
+describe("contactsFromHtml (fast-path, no browser)", () => {
+  test("extracts mailto/tel/form from raw HTML", () => {
+    const html =
+      '<html><body><a href="mailto:info@acme.ch">m</a><a href="tel:+41219811264">t</a><form><input type="email"></form></body></html>';
+    const c = contactsFromHtml(html, "CH", { url: "https://acme.ch" });
+    expect(c.emails).toContain("info@acme.ch");
+    expect(c.phones).toContain("+41219811264");
+    expect(c.hasContactForm).toBe(true);
   });
 });
 

@@ -6,7 +6,7 @@
  */
 import type { Page } from "playwright";
 import { collectContacts } from "../extraction/contacts/collect.js";
-import type { ContactCrawl, Contacts } from "../interfaces/contacts.js";
+import type { ContactCrawl, ContactFilter, Contacts } from "../interfaces/contacts.js";
 import { evalScript } from "../lib/evaluate.js";
 import { gotoWithRetry } from "../net/navigate.js";
 import type { RobotsGuard } from "../net/robots-guard.js";
@@ -53,13 +53,15 @@ export async function huntContacts(
   config: ResolvedConfig,
   crawl?: ContactCrawl,
   guard?: RobotsGuard,
+  filter?: ContactFilter,
 ): Promise<Contacts> {
-  let contacts = await collectContacts(page, config.identity.countryCode);
+  const country = config.identity.countryCode;
+  let contacts = await collectContacts(page, country, filter);
   if (contacts.emails.length > 0 || !crawl?.enabled) return contacts;
   for (const link of await contactLinks(page, crawl.maxPages ?? 3, guard)) {
     try {
       await gotoWithRetry(page, link, { waitUntil: "domcontentloaded", timeout: 20_000 }, config.retry);
-      contacts = merge(contacts, await collectContacts(page, config.identity.countryCode));
+      contacts = merge(contacts, await collectContacts(page, country, filter));
       if (contacts.emails.length > 0) break;
     } catch {
       /* skip an unreachable candidate */

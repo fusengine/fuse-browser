@@ -90,7 +90,7 @@ export async function runProbe(
       extractPricesFlag: Boolean(options.extractPrices),
       captcha,
       serp,
-      contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl, robots ?? undefined) : undefined,
+      contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl, robots ?? undefined, options.contactFilter) : undefined,
     });
   } finally {
     await teardownOpened(opened);

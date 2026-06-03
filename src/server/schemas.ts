@@ -40,10 +40,7 @@ export const agentOptionShape = {
   harMode: z.enum(["minimal", "full"]).optional(),
   harReplay: z.string().optional(),
   realisticProfile: z.boolean().optional(),
-  respectRobots: z
-    .boolean()
-    .optional()
-    .describe("Honor robots.txt (opt-in; off by default — nothing is blocked unless enabled)."),
+  respectRobots: z.boolean().optional().describe("Honor robots.txt (opt-in; off by default)."),
   replayEnabled: z.boolean().optional(),
   replayDir: z.string().optional(),
   siteMemoryDir: z.string().optional(),
@@ -82,14 +79,15 @@ const probeFlags = {
   extractSerp: z.boolean().optional(),
   serpPages: z.number().int().optional(),
   rankDomain: z.string().optional(),
-  extractContacts: z
-    .boolean()
-    .optional()
-    .describe("Extract emails/phones (personal data — ensure a lawful basis under GDPR/nLPD)."),
+  extractContacts: z.boolean().optional().describe("Extract emails/phones (personal data — lawful basis required: GDPR/nLPD)."),
   contactCrawl: z
     .object({ enabled: z.boolean(), maxPages: z.number().int().optional() })
     .optional()
     .describe("Follow same-domain contact/impressum links when no email is found (bounded)."),
+  contactFilter: z
+    .enum(["strict", "off"])
+    .optional()
+    .describe('Filter placeholder emails: "strict" (default) drops template addresses, "off" keeps all.'),
 };
 
 /** `browser_probe` input shape. */

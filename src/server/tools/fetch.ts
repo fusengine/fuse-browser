@@ -1,11 +1,12 @@
 /**
  * `browser_fetch` tool: HTTP fast-path (browser TLS impersonation, no browser
- * launch) for server-rendered HTML. Returns status, LLM-ready markdown (or raw
- * body text), optional prices.
+ * launch). Returns status, LLM-ready markdown (or raw text), optional prices,
+ * and optional structured contacts extracted from the fetched HTML.
  * @module server/tools/fetch
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { contactsFromHtml } from "../../extraction/contacts/from-html.js";
 import { extractPrices } from "../../extraction/prices.js";
 import { htmlToMarkdown, renderMarkdown } from "../../extraction/serialize/to-markdown.js";
 import { fetchFast } from "../../net/fetch-fast.js";
@@ -18,11 +19,14 @@ export function registerFetchTool(server: McpServer): void {
     {
       title: "HTTP fast fetch",
       description:
-        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. For server-rendered HTML (price/index pages). Returns clean LLM-ready markdown (main content + YAML frontmatter) by default, or raw body text with format:"text". Optional prices. Not for JS/SPA pages — use browser_probe there.',
+        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. Returns clean LLM-ready markdown by default (or raw text with format:"text"), optional prices, and optional contacts (emails/phones/form) with extractContacts. For server-rendered HTML; use browser_probe for JS/SPA pages. extractContacts collects personal data — ensure a lawful basis (GDPR/nLPD).',
       inputSchema: {
         url: z.string(),
         format: z.enum(["markdown", "text"]).optional(),
         extractPrices: z.boolean().optional(),
+        extractContacts: z.boolean().optional(),
+        contactFilter: z.enum(["strict", "off"]).optional(),
+        countryCode: z.string().optional(),
         proxyUrl: z.string().optional(),
         maxChars: z.number().int().optional(),
       },
@@ -36,12 +40,15 @@ export function registerFetchTool(server: McpServer): void {
         format === "text"
           ? r.text.slice(0, max)
           : renderMarkdown(await htmlToMarkdown(r.html, { url: r.url }), max);
+      const country = typeof a.countryCode === "string" ? a.countryCode : "CH";
+      const filter = a.contactFilter === "off" ? "off" : "strict";
       return jsonResult({
         status: r.status,
         url: r.url,
         format,
         text,
         prices: a.extractPrices ? extractPrices(r.text) : undefined,
+        contacts: a.extractContacts ? contactsFromHtml(r.html, country, { url: r.url, filter }) : undefined,
       });
     },
   );

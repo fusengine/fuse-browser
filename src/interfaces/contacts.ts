@@ -25,3 +25,14 @@ export interface ContactCrawl {
   /** Max same-domain pages to visit while hunting (default 3). */
   maxPages?: number;
 }
+
+/** Contact filtering mode: drop template/placeholder emails, or keep everything. */
+export type ContactFilter = "strict" | "off";
+
+/** Options for the contact extractor. */
+export interface ExtractContactsOptions {
+  /** Drop placeholder/template emails. Defaults to "strict". */
+  filter?: ContactFilter;
+  /** Page URL — enables same-domain-first ordering of emails. */
+  url?: string;
+}
