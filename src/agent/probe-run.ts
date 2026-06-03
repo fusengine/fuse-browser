@@ -24,6 +24,7 @@ import type { ResolvedConfig } from "./config.js";
 import { detectAndSolve } from "./detect.js";
 import { attachListeners } from "./network.js";
 import { extractSerpStep } from "./serp-step.js";
+import { huntContacts } from "./contact-hunt.js";
 import { buildReport } from "./report.js";
 
 /** Run one probe against `url` and return the assembled report. */
@@ -91,6 +92,7 @@ export async function runProbe(
       extractPricesFlag: Boolean(options.extractPrices),
       captcha,
       serp,
+      contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl) : undefined,
     });
   } finally {
     await teardownOpened(opened);

@@ -11,6 +11,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
 - ✅ Navigation resilience: retry + full-jitter backoff, `Retry-After`, per-host throttle
 - ✅ Extraction: main text, multi-currency prices, hotel offers
+- ✅ Contact extraction (opt-in `extractContacts`): emails + phones (E.164 via libphonenumber-js) + contact-form detection from 3 deduped sources (mailto/tel hrefs, text/HTML regex, `[at]`/`[dot]`/entity deobfuscation), with an opt-in same-domain mini-crawler (`contactCrawl`) that hunts the Contact/Impressum page — see [docs/recipes/prospection.md](docs/recipes/prospection.md)
 - ✅ Google SERP: structured organic/ads/related, multi-page aggregation, domain **rank tracker**, `browser_serp_batch`
 - ✅ Agentic perception: enriched snapshot (value, placeholder, options, checked, disabled, combobox `aria-*`, occlusion)
 - ✅ Cross-boundary snapshot: open **Shadow DOM** piercing + **iframe** traversal (same/cross-origin), frame-scoped refs (`"<frame>:<local>"`)

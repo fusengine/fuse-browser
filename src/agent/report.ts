@@ -6,6 +6,7 @@ import { extractHotelOffers } from "../extraction/hotel-offers.js";
 import { extractPrices } from "../extraction/prices.js";
 import { buildIdentity } from "../identity/identity.js";
 import type { Challenges, Serp, Visual } from "../interfaces/extraction.js";
+import type { Contacts } from "../interfaces/contacts.js";
 import type { CaptchaOutcome } from "../interfaces/net.js";
 import type { ConsentResult, CurrencyResult, ProbeReport } from "../interfaces/report.js";
 import { writeJson } from "../lib/fs.js";
@@ -34,6 +35,7 @@ export interface ReportInput {
   extractPricesFlag: boolean;
   captcha?: CaptchaOutcome;
   serp?: Serp;
+  contacts?: Contacts;
 }
 
 /** Build the full report, write it to disk, and return it. */
@@ -76,6 +78,7 @@ export function buildReport(input: ReportInput): ProbeReport {
     storageStatePath: config.storageStatePath,
     captcha: input.captcha,
     serp: input.serp,
+    contacts: input.contacts,
   };
   writeJson(input.reportPath, report);
   return report;
