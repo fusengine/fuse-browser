@@ -16,6 +16,9 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     channel: (a.channel as BrowserChannel | undefined) ?? ENV.channel,
     executablePath: (a.executablePath as string | undefined) ?? ENV.executablePath,
     cdpEndpoint: (a.cdpEndpoint as string | undefined) ?? ENV.cdpEndpoint,
+    cdpHeaders: a.cdpHeaders as Record<string, string> | undefined,
+    cdpCloseOnDone: a.cdpCloseOnDone as boolean | undefined,
+    cdpTimeoutMs: a.cdpTimeoutMs as number | undefined,
     headless: (a.headless as boolean | undefined) ?? ENV.headless,
     humanMode: a.humanMode as boolean | undefined,
     locale: a.locale as string | undefined,
@@ -54,5 +57,7 @@ export function toProbeOptions(a: Record<string, unknown>): ProbeOptions {
     extractSerp: a.extractSerp as boolean | undefined,
     serpPages: a.serpPages as number | undefined,
     rankDomain: a.rankDomain as string | undefined,
+    extractContacts: a.extractContacts as boolean | undefined,
+    contactCrawl: a.contactCrawl as ProbeOptions["contactCrawl"],
   };
 }

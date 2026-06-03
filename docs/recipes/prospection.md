@@ -46,6 +46,23 @@ const agent = new BrowserAgent({
 const report = await agent.probe(url, { extractContacts: true, contactCrawl: { enabled: true } });
 ```
 
+## Over MCP (`browser_probe`)
+
+The same options are accepted as `browser_probe` arguments (and the CDP remote options on any probe):
+
+```jsonc
+{
+  "url": "https://garage-planches.ch",
+  "extractContacts": true,
+  "contactCrawl": { "enabled": true, "maxPages": 3 },
+  // optional remote browser:
+  "cdpEndpoint": "wss://chrome.browserless.io/playwright",
+  "cdpHeaders": { "Authorization": "Bearer YOUR_TOKEN" }
+}
+```
+
+`report.contacts` is included in the compact tool result.
+
 ## Batch (bounded loop, not a batch class)
 
 There is no batch primitive: loop `probe()` yourself, bounded by your own concurrency
