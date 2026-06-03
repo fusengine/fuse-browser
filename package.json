@@ -68,6 +68,7 @@
     "defuddle": "^0.18.1",
     "fast-png": "^8.0.0",
     "impit": "^0.14.1",
+    "libphonenumber-js": "^1.13.5",
     "linkedom": "^0.18.12",
     "patchright": "^1.60.1",
     "pixelmatch": "^7.2.0",

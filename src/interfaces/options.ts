@@ -2,6 +2,7 @@
  * Agent construction and per-probe option types.
  * @module interfaces/options
  */
+import type { ContactCrawl } from "./contacts.js";
 import type { BrowserChannel, EngineName } from "./engine-types.js";
 import type { CaptchaConfig, RetryConfig } from "./net.js";
 import type { BrowserAction } from "./types.js";
@@ -62,4 +63,8 @@ export interface ProbeOptions {
   serpPages?: number;
   /** Domain to rank within the SERP (populates `serp.rank`). */
   rankDomain?: string;
+  /** Extract structured contacts (emails, phones, contact form) into the report. */
+  extractContacts?: boolean;
+  /** Opt-in: when the page has no email, hunt the Contact page (bounded, same-domain). */
+  contactCrawl?: ContactCrawl;
 }
