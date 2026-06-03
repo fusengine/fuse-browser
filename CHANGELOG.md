@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.28] - 03-06-2026
+
+### Added
+
+- feat(legal): opt-in `respectRobots` honors the origin's `robots.txt` (RFC 9309 matcher) — disallowed primary URL throws `RobotsDisallowed`, disallowed crawl links are skipped. Default false (blocks nothing). Added `LEGAL.md` (operator responsibility, GDPR/nLPD, opt-in levers) and GDPR hints on the contact MCP fields.
+
 ## [0.1.27] - 03-06-2026
 
 ### Added
