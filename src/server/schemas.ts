@@ -22,6 +22,9 @@ export const agentOptionShape = {
   channel: z.enum(CHANNELS).optional(),
   executablePath: z.string().optional(),
   cdpEndpoint: z.string().optional(),
+  cdpHeaders: z.record(z.string(), z.string()).optional(),
+  cdpCloseOnDone: z.boolean().optional(),
+  cdpTimeoutMs: z.number().int().optional(),
   headless: z.boolean().optional(),
   humanMode: z.boolean().optional(),
   locale: z.string().optional(),
@@ -75,6 +78,8 @@ const probeFlags = {
   extractSerp: z.boolean().optional(),
   serpPages: z.number().int().optional(),
   rankDomain: z.string().optional(),
+  extractContacts: z.boolean().optional(),
+  contactCrawl: z.object({ enabled: z.boolean(), maxPages: z.number().int().optional() }).optional(),
 };
 
 /** `browser_probe` input shape. */
