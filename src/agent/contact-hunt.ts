@@ -9,6 +9,7 @@ import { collectContacts } from "../extraction/contacts/collect.js";
 import type { ContactCrawl, Contacts } from "../interfaces/contacts.js";
 import { evalScript } from "../lib/evaluate.js";
 import { gotoWithRetry } from "../net/navigate.js";
+import type { RobotsGuard } from "../net/robots-guard.js";
 import type { ResolvedConfig } from "./config.js";
 
 const LINK_RE = /(contact|kontakt|impressum|mentions|a-?propos|about)/i;
@@ -24,7 +25,7 @@ function merge(a: Contacts, b: Contacts): Contacts {
 }
 
 /** Same-host Contact-like link URLs from the current page, capped to `max`. */
-async function contactLinks(page: Page, max: number): Promise<string[]> {
+async function contactLinks(page: Page, max: number, guard?: RobotsGuard): Promise<string[]> {
   const host = new URL(page.url()).host;
   const links = await evalScript<Array<{ href: string; text: string }>>(page, LINKS_SCRIPT);
   const out: string[] = [];
@@ -38,6 +39,7 @@ async function contactLinks(page: Page, max: number): Promise<string[]> {
       continue;
     }
     if (u.host !== host || seen.has(u.href)) continue;
+    if (guard && !(await guard.allowed(u.href))) continue;
     seen.add(u.href);
     out.push(u.href);
     if (out.length >= max) break;
@@ -50,10 +52,11 @@ export async function huntContacts(
   page: Page,
   config: ResolvedConfig,
   crawl?: ContactCrawl,
+  guard?: RobotsGuard,
 ): Promise<Contacts> {
   let contacts = await collectContacts(page, config.identity.countryCode);
   if (contacts.emails.length > 0 || !crawl?.enabled) return contacts;
-  for (const link of await contactLinks(page, crawl.maxPages ?? 3)) {
+  for (const link of await contactLinks(page, crawl.maxPages ?? 3, guard)) {
     try {
       await gotoWithRetry(page, link, { waitUntil: "domcontentloaded", timeout: 20_000 }, config.retry);
       contacts = merge(contacts, await collectContacts(page, config.identity.countryCode));

@@ -35,6 +35,7 @@ export interface ResolvedConfig {
   proxyUrl: string | null;
   proxySource: ProxySource;
   realisticProfile: boolean;
+  respectRobots: boolean;
   replayEnabled: boolean;
   replayDir: string;
   siteMemoryDir: string;
@@ -81,6 +82,7 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     proxyUrl,
     proxySource,
     realisticProfile: opts.realisticProfile ?? true,
+    respectRobots: opts.respectRobots ?? false,
     replayEnabled: opts.replayEnabled ?? false,
     replayDir: opts.replayDir ?? join(outputDir, "replay"),
     siteMemoryDir,

@@ -44,6 +44,8 @@ export interface AgentOptions {
   retry?: Partial<RetryConfig>;
   /** Captcha solver config (opt-in; authorized testing only). */
   captcha?: CaptchaConfig;
+  /** Honor robots.txt (opt-in, default false — fuse-browser blocks nothing unless enabled). */
+  respectRobots?: boolean;
 }
 
 /** Per-probe options. */
