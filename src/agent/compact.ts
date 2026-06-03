@@ -18,6 +18,7 @@ export function compactReport(r: ProbeReport): Record<string, unknown> {
     captcha: r.captcha,
     serp: r.serp,
     contacts: r.contacts,
+    fastPath: r.fastPath,
     visual: r.visual,
     actions: r.actions,
     replay: r.replay,

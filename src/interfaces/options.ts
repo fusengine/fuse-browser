@@ -71,4 +71,6 @@ export interface ProbeOptions {
   contactCrawl?: ContactCrawl;
   /** Filter placeholder emails: "strict" (default) drops template addresses, "off" keeps all. */
   contactFilter?: ContactFilter;
+  /** With extractContacts: try the HTTP fast-path first, escalate to the browser only if incomplete. */
+  fastPathFirst?: boolean;
 }

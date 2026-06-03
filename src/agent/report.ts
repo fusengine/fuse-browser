@@ -36,6 +36,7 @@ export interface ReportInput {
   captcha?: CaptchaOutcome;
   serp?: Serp;
   contacts?: Contacts;
+  fastPath?: boolean;
 }
 
 /** Build the full report, write it to disk, and return it. */
@@ -79,6 +80,7 @@ export function buildReport(input: ReportInput): ProbeReport {
     captcha: input.captcha,
     serp: input.serp,
     contacts: input.contacts,
+    fastPath: input.fastPath,
   };
   writeJson(input.reportPath, report);
   return report;

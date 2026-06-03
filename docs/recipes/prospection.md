@@ -37,6 +37,18 @@ console.log(report.contacts);
 3. Phones are normalized to **E.164** with `libphonenumber-js`, using `countryCode` as the
    default region for national-format numbers.
 
+### Cascade: `fastPathFirst` (HTTP first, browser only if needed)
+
+```ts
+const report = await agent.probe(url, { extractContacts: true, fastPathFirst: true });
+// report.fastPath === true  → contacts came from the HTTP fast-path (~0.6s, no browser)
+```
+
+With `fastPathFirst`, the probe tries HTTP extraction first and **only launches the browser
+when the card is incomplete** (no email *and* phone yet). On a static/SSR site you pay ~0.6s
+instead of ~7s; SPAs still escalate to a full browser probe + `contactCrawl`. The returned
+report carries `fastPath: true` and leaves browser-only fields (screenshot, network) empty.
+
 ## Over a remote browser (Browserless)
 
 Combine with CDP attach — the probe drives the remote browser and closes the session when done:

@@ -7,6 +7,7 @@ import type { ProbeReport } from "../interfaces/report.js";
 import type { AgentOptions, BrowserAction, ProbeOptions } from "../interfaces/types.js";
 import { GuardrailViolation } from "../lib/errors.js";
 import { resolveConfig, type ResolvedConfig } from "./config.js";
+import { tryFastContacts } from "./fast-contacts.js";
 import { runProbe } from "./probe-run.js";
 
 /** Lightweight browser agent on top of Patchright/Playwright. */
@@ -30,7 +31,7 @@ export class BrowserAgent {
   async probe(url: string, options: ProbeOptions = {}): Promise<ProbeReport> {
     const pf = preflight(options.actions ?? [], options.humanApproved ?? false);
     if (!pf.allowed) throw new GuardrailViolation(pf.reason, pf.blockedActions);
-    return runProbe(this.config, url, options);
+    return (await tryFastContacts(this.config, url, options)) ?? runProbe(this.config, url, options);
   }
 
   /** Probe an inline HTML fixture via a base64 data URL. */
