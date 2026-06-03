@@ -16,6 +16,7 @@ import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
 import { gotoWithRetry } from "../net/navigate.js";
+import { assertRobotsAllowed } from "../net/robots-guard.js";
 import { throttleHost } from "../net/throttle.js";
 import { reportProxyBlocked } from "../proxy/pool.js";
 import { domSignature } from "../state/dom-signature.js";
@@ -37,6 +38,7 @@ export async function runProbe(
   const runId = sha1(`${url}-${Date.now()}`).slice(0, 10);
   const screenshotPath = join(config.outputDir, `${runId}.png`);
   const reportPath = join(config.outputDir, `${runId}.json`);
+  const robots = await assertRobotsAllowed(config, url);
   const opened = await selectEngineForConfig(config).open(config);
   const { context } = opened;
   try {
@@ -48,11 +50,7 @@ export async function runProbe(
     }
     await throttleHost(targetUrl, config.retry.throttleMs);
     await gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
-    try {
-      await page.waitForLoadState("networkidle", { timeout: 10_000 });
-    } catch {
-      /* networkidle is best-effort */
-    }
+    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     const consent = options.autoConsent
       ? await handleCommonConsent(page, config.humanMode)
       : { handled: false };
@@ -92,7 +90,7 @@ export async function runProbe(
       extractPricesFlag: Boolean(options.extractPrices),
       captcha,
       serp,
-      contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl) : undefined,
+      contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl, robots ?? undefined) : undefined,
     });
   } finally {
     await teardownOpened(opened);

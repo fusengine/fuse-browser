@@ -7,7 +7,9 @@ Everything is **opt-in**: without `extractContacts`, `probe()` behaves exactly a
 > ⚠️ **Legal.** Harvesting personal data (emails, phone numbers) is regulated — GDPR (EU),
 > nLPD/FADP (Switzerland), and the target site's Terms of Service and `robots.txt`. You alone
 > are responsible for a lawful basis and lawful use of any data you collect. `fuse-browser` is
-> a neutral, dual-use tool; use it only where you are permitted to.
+> a neutral, dual-use tool; use it only where you are permitted to. See [../../LEGAL.md](../../LEGAL.md).
+>
+> Set `respectRobots: true` to honor the target's `robots.txt` (opt-in — off by default).
 
 ## Library
 

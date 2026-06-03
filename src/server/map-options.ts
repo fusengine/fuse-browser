@@ -34,6 +34,7 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     harMode: a.harMode as "minimal" | "full" | undefined,
     harReplay: a.harReplay as string | undefined,
     realisticProfile: a.realisticProfile as boolean | undefined,
+    respectRobots: a.respectRobots as boolean | undefined,
     replayEnabled: a.replayEnabled as boolean | undefined,
     replayDir: a.replayDir as string | undefined,
     siteMemoryDir: a.siteMemoryDir as string | undefined,

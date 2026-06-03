@@ -31,4 +31,8 @@ describe("toAgentOptions — CDP remote", () => {
     expect(a.cdpCloseOnDone).toBeUndefined();
     expect(a.cdpTimeoutMs).toBeUndefined();
   });
+  test("maps respectRobots (default undefined)", () => {
+    expect(toAgentOptions({ respectRobots: true }).respectRobots).toBe(true);
+    expect(toAgentOptions({}).respectRobots).toBeUndefined();
+  });
 });
