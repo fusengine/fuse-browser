@@ -68,6 +68,8 @@ export interface ProbeReport {
   captcha?: CaptchaOutcome;
   serp?: Serp;
   contacts?: Contacts;
+  /** True when this report came from the HTTP fast-path (no browser launched). */
+  fastPath?: boolean;
   visual: Visual | Record<string, never>;
   consent: ConsentResult;
   currency: CurrencyResult;
