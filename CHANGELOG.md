@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.27] - 03-06-2026
+
+### Added
+
+- feat(mcp): `browser_probe` / `browser_probe_html` now accept `extractContacts`, `contactCrawl`, and the CDP-remote options `cdpHeaders` / `cdpCloseOnDone` / `cdpTimeoutMs`. `report.contacts` is included in the compact result. All optional — no behavior change when absent. Docs/tests use RFC 2606 example domains (no real PII).
+
 ## [0.1.26] - 03-06-2026
 
 ### Added
