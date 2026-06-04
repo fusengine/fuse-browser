@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.38] - 04-06-2026
+
+### Added
+
+- feat(live): **human live view** — `browser_live_view` / `browser_live_view_stop` (31st/32nd tools). A CDP screencast (`Page.startScreencast`, ack-per-frame, re-issued on navigation) streams JPEG frames over an ephemeral, token-gated `127.0.0.1` Server-Sent-Events server to a self-contained `<canvas>`/`<img>` viewer that auto-opens in the OS browser. Watch any session in real time — **works headless too**. Read-only; auto-closes on page close or stop; zero new dependencies. `broadcast()` is hardened against viewer mid-stream disconnects (no process crash on EPIPE/ECONNRESET).
+
 ## [0.1.37] - 04-06-2026
 
 ### Added
