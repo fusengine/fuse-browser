@@ -8,6 +8,10 @@ import type { ResolvedConfig } from "../agent/config.js";
 import { attachListeners, type NetworkLog } from "../agent/network.js";
 import { selectEngineForConfig } from "../engine/registry.js";
 import { ensureDir } from "../lib/fs.js";
+import { attachHealth } from "./health.js";
+
+/** Liveness of a session's page/browser. */
+export type SessionHealth = "ok" | "crashed" | "lost";
 
 /** Live session state. */
 export interface SessionData {
@@ -18,6 +22,10 @@ export interface SessionData {
   config: ResolvedConfig;
   logs: NetworkLog;
   connected: boolean;
+  /** Page/browser liveness, flipped by crash/disconnect listeners. */
+  health: SessionHealth;
+  /** Last main-frame URL, tracked for recovery re-navigation. */
+  lastUrl: string;
   createdAt: number;
   expiresAt: number;
 }
@@ -37,7 +45,7 @@ export async function openSession(
   }
   const logs = attachListeners(page);
   const now = Date.now();
-  return {
+  const session: SessionData = {
     id,
     context: opened.context,
     browser: opened.browser,
@@ -45,9 +53,13 @@ export async function openSession(
     config,
     logs,
     connected: opened.connected ?? false,
+    health: "ok",
+    lastUrl: page.url(),
     createdAt: now,
     expiresAt: now + ttlMs,
   };
+  attachHealth(session);
+  return session;
 }
 
 /**
