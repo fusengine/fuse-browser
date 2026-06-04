@@ -20,6 +20,17 @@ Pass that `sessionId` to subsequent tools to keep working against the same page.
 
 ---
 
+## Crash recovery
+
+A long-lived session can lose its page mid-run — a renderer crash (OOM), or the page being closed out from under it. fuse-browser tracks each session's liveness (`page.on('crash'|'close')`, `context.on('close')`, `browser.on('disconnected')`) and recovers **automatically**, with no new tool or option:
+
+- **Page crashed, context alive** — the next tool call transparently recreates the page in the **same context**, so cookies, `storageState` and auth are preserved. Listeners and HAR replay are re-wired and the page is re-navigated to its last URL. Your tool call then runs as if nothing happened. If the page dies *during* a call, the session is healed and a recoverable error (`page_crashed: … retry your last action`) is returned so the agent re-issues its last step.
+- **Browser/context gone** — unrecoverable within the session. The session is evicted and the call returns `session_lost: browser disconnected — reopen with browser_open`. Open a fresh session to continue.
+
+The last visited URL is tracked continuously (main-frame navigations), so recovery lands you back on the page you were on. Recovery is silent on the happy path — it only engages once a crash/disconnect is observed.
+
+---
+
 ## Lifecycle tools
 
 | Tool | Purpose |

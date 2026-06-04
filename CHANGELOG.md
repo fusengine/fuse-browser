@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.34] - 04-06-2026
+
+### Added
+
+- feat(resilience): automatic crash recovery for live sessions. When a page crashes (or is closed) while its browser context is still alive, the next tool call transparently recreates the page in the **same context** — keeping cookies, `storageState` and auth — re-attaches listeners, re-applies HAR replay and re-navigates to the last URL. A lost browser/context evicts the session with a clear `session_lost: reopen with browser_open` error instead of an opaque exception. Default behavior unchanged on the happy path; no new tool or option.
+
 ## [0.1.33] - 04-06-2026
 
 ### Added
