@@ -6,7 +6,8 @@ import { join } from "node:path";
 import { isRemoteCdp } from "../engine/cdp-url.js";
 import { resolveIdentity, type ResolvedIdentity } from "../identity/resolve.js";
 import type { BrowserChannel, EngineName } from "../interfaces/engine-types.js";
-import type { CaptchaConfig, RetryConfig } from "../interfaces/net.js";
+import type { CaptchaConfig, CircuitBreakerConfig, RetryConfig } from "../interfaces/net.js";
+import { resolveBreaker } from "../net/breaker-config.js";
 import type { AgentOptions } from "../interfaces/types.js";
 import { ensureDir } from "../lib/fs.js";
 import { resolveDefaultOutputDir } from "../lib/output-dir.js";
@@ -40,6 +41,7 @@ export interface ResolvedConfig {
   replayDir: string;
   siteMemoryDir: string;
   retry: RetryConfig;
+  circuitBreaker: CircuitBreakerConfig | null;
   captcha: CaptchaConfig | null;
 }
 
@@ -92,6 +94,7 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
       capMs: opts.retry?.capMs ?? 10_000,
       throttleMs: opts.retry?.throttleMs ?? 0,
     },
+    circuitBreaker: resolveBreaker(opts.circuitBreaker),
     captcha: opts.captcha ?? null,
   };
 }

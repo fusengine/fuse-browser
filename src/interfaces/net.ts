@@ -15,6 +15,23 @@ export interface RetryConfig {
   throttleMs: number;
 }
 
+/** User-facing circuit-breaker overrides (all optional; see resolveBreaker). */
+export interface CircuitBreakerOptions {
+  /** Consecutive failures on a host before the circuit opens (default 5). */
+  threshold?: number;
+  /** First cooldown in ms once open (default 30000). */
+  cooldownMs?: number;
+  /** Ceiling for the exponential reopen backoff in ms (default 600000). */
+  capMs?: number;
+}
+
+/** Resolved per-host circuit-breaker settings (null = disabled). */
+export interface CircuitBreakerConfig {
+  threshold: number;
+  cooldownMs: number;
+  capMs: number;
+}
+
 /** Supported captcha-solving providers (shared createTask/getTaskResult API). */
 export type CaptchaProvider = "2captcha" | "anticaptcha" | "capmonster";
 

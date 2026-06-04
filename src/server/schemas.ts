@@ -3,6 +3,7 @@
  * @module server/schemas
  */
 import { z } from "zod";
+import { captchaSchema, circuitBreakerSchema, retrySchema } from "./schemas-resilience.js";
 
 /** Installed-browser channels (real Chrome/Edge). */
 const CHANNELS = [
@@ -45,23 +46,9 @@ export const agentOptionShape = {
   replayDir: z.string().optional(),
   siteMemoryDir: z.string().optional(),
   outputDir: z.string().optional(),
-  retry: z
-    .object({
-      maxAttempts: z.number().int().optional(),
-      baseMs: z.number().int().optional(),
-      capMs: z.number().int().optional(),
-      throttleMs: z.number().int().optional(),
-    })
-    .optional(),
-  captcha: z
-    .object({
-      provider: z.enum(["2captcha", "anticaptcha", "capmonster"]),
-      apiKey: z.string(),
-      baseUrl: z.string().optional(),
-      timeoutMs: z.number().int().optional(),
-      pollMs: z.number().int().optional(),
-    })
-    .optional(),
+  retry: retrySchema,
+  captcha: captchaSchema,
+  circuitBreaker: circuitBreakerSchema,
 };
 
 /** A single action (loose: type + arbitrary fields). */
