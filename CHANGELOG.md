@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.31] - 04-06-2026
+
+### Added
+
+- feat(vision): opt-in `browser_snapshot({ annotate: true })` returns a Set-of-Marks JPEG — numbered badges (= each element's `ref`) drawn over the page — plus the refMap, so vision models (Claude/GPT-4o/Gemini) see the page and target by `ref`. Default off (no behavior change). Main-frame, viewport-only.
+
 ## [0.1.30] - 03-06-2026
 
 ### Added
