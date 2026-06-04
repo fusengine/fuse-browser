@@ -1,8 +1,13 @@
 /**
- * End-to-end tests for B1 crash recovery: a renderer crash flips the session
- * health flag, recoverSession heals the page in the same context (restoring the
- * last URL), and withSession transparently recovers before running a tool.
- * Real headless Chromium.
+ * End-to-end tests for B1 crash recovery: a lost page flips the session health
+ * flag, recoverSession heals the page in the same context (restoring the last
+ * URL), and withSession transparently recovers before running a tool. Real
+ * headless Chromium.
+ *
+ * We drive the loss with `page.close()` rather than `chrome://crash`: our health
+ * model treats `crash` and `close` identically ("page gone, context alive →
+ * recoverable"), and a real renderer crash is unreliable on CI Chromium (the
+ * `crash` event may never fire), whereas `close` is deterministic everywhere.
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -24,13 +29,13 @@ async function waitForHealth(s: SessionData, want: string, ms = 10_000): Promise
   assert.equal(s.health, want, `expected health "${want}", got "${s.health}"`);
 }
 
-/** Crash the renderer of the session's current page. */
-async function crash(s: SessionData): Promise<void> {
-  await s.page.goto("chrome://crash", { timeout: 5_000 }).catch(() => {});
+/** Drop the session's current page (close == crash in our health model). */
+async function losePage(s: SessionData): Promise<void> {
+  await s.page.close();
   await waitForHealth(s, "crashed");
 }
 
-test("renderer crash flips health and recoverSession heals the page", { timeout: 120_000 }, async () => {
+test("a lost page flips health and recoverSession heals it", { timeout: 120_000 }, async () => {
   const sessions = new SessionManager();
   const s = await sessions.open(resolveConfig({ headless: true, engine: "patchright" }));
   try {
@@ -38,7 +43,7 @@ test("renderer crash flips health and recoverSession heals the page", { timeout:
     assert.equal(s.health, "ok");
     const firstPage = s.page;
 
-    await crash(s);
+    await losePage(s);
     await recoverSession(s);
 
     assert.equal(s.health, "ok", "session should be healthy after recovery");
@@ -50,12 +55,12 @@ test("renderer crash flips health and recoverSession heals the page", { timeout:
   }
 });
 
-test("withSession transparently recovers a page that crashed while idle", { timeout: 120_000 }, async () => {
+test("withSession transparently recovers a page lost while idle", { timeout: 120_000 }, async () => {
   const sessions = new SessionManager();
   const s = await sessions.open(resolveConfig({ headless: true, engine: "patchright" }));
   try {
     await s.page.goto(PAGE, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await crash(s);
+    await losePage(s);
 
     const res = await withSession(sessions, s.id, async (live) =>
       jsonResult({ title: await live.page.title(), healed: live.health }),
