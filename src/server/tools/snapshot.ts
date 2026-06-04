@@ -12,12 +12,13 @@ import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
 import { pickAutocomplete } from "../../actions/autocomplete.js";
 import { smartClick } from "../../actions/smart-click.js";
 import { smartFill } from "../../actions/smart-fill.js";
+import { annotatedScreenshot } from "../../extraction/annotate.js";
 import { captureSnapshot } from "../../extraction/snapshot.js";
 import { diffSnapshots } from "../../extraction/snapshot-diff.js";
 import type { ActionResult } from "../../interfaces/types.js";
 import type { SessionManager } from "../../session/manager.js";
 import { runWithMemory } from "../../state/action-memory.js";
-import { errorResult, jsonResult } from "../result.js";
+import { errorResult, imageJsonResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
 const KIND = z.enum(["click", "fill", "select", "pick"]);
@@ -49,14 +50,17 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Snapshot",
       description:
-        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting. Pass `selectors:true` to also get a durable CSS `selector` per element (cacheable to act later without re-snapshotting).",
-      inputSchema: { sessionId: z.string(), selectors: z.boolean().optional() },
+        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting. Pass `selectors:true` to also get a durable CSS `selector` per element. Pass `annotate:true` for a Set-of-Marks JPEG screenshot with numbered badges (= each `ref`) — for vision models: they see the page and target by ref.",
+      inputSchema: { sessionId: z.string(), selectors: z.boolean().optional(), annotate: z.boolean().optional() },
     },
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
         const elements = await captureSnapshot(s.page, a.selectors === true);
-        return jsonResult({ url: s.page.url(), count: elements.length, elements });
+        const payload = { url: s.page.url(), count: elements.length, elements };
+        if (a.annotate !== true) return jsonResult(payload);
+        const shot = await annotatedScreenshot(s.page);
+        return imageJsonResult(shot.base64, { ...payload, marks: shot.marks });
       });
     },
   );
