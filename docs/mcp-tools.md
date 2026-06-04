@@ -489,6 +489,19 @@ Capture the live page as PNG(s) for vision. Pass `ref` for one element, `viewpor
 { "sessionId": "s_abc123", "annotate": true, "colorScheme": "dark" }
 ```
 
+### browser_inspect
+
+Computed styles, box model and WCAG text-contrast (AA/AAA) for one element by `ref` — for design review (typography, color, spacing, contrast). Main-frame refs.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `ref` | integer \| string | yes | Element ref from `browser_snapshot`. |
+
+```json
+{ "sessionId": "s_abc123", "ref": 12 }
+```
+
 ### browser_visual_diff
 
 Pixel-compare the live page against a `baseline` PNG (created on the first call, diffed on later calls), or two explicit PNGs (`a` + `b`). Returns `diffPixels`/`diffRatio` and changed-region boxes, and writes a highlighted `<path>.diff.png`. Fails if image sizes differ.
