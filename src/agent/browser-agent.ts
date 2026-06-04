@@ -6,6 +6,7 @@ import { preflight, type PreflightResult } from "../guardrails/preflight.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { AgentOptions, BrowserAction, ProbeOptions } from "../interfaces/types.js";
 import { GuardrailViolation } from "../lib/errors.js";
+import { withQueue } from "../net/queue-guard.js";
 import { resolveConfig, type ResolvedConfig } from "./config.js";
 import { tryFastContacts } from "./fast-contacts.js";
 import { runProbe } from "./probe-run.js";
@@ -31,7 +32,10 @@ export class BrowserAgent {
   async probe(url: string, options: ProbeOptions = {}): Promise<ProbeReport> {
     const pf = preflight(options.actions ?? [], options.humanApproved ?? false);
     if (!pf.allowed) throw new GuardrailViolation(pf.reason, pf.blockedActions);
-    return (await tryFastContacts(this.config, url, options)) ?? runProbe(this.config, url, options);
+    const fast = await tryFastContacts(this.config, url, options);
+    if (fast) return fast;
+    // Only the browser path is gated by the queue/budget (the fast path is HTTP).
+    return withQueue(this.config.probeQueue, () => runProbe(this.config, url, options));
   }
 
   /** Probe an inline HTML fixture via a base64 data URL. */

@@ -45,6 +45,7 @@ Every field is optional. Defaults are applied by `resolveConfig` (`src/agent/con
 | `siteMemoryDir` | `string` | `<outputDir>/site-memory` | Directory for per-site memory (created if missing). |
 | `retry` | `Partial<RetryConfig>` | see [Retry](#retry) | Navigation retry/backoff overrides. |
 | `circuitBreaker` | `CircuitBreakerOptions` | `null` (off) | Opt-in per-host circuit breaker. See [Circuit breaker](#circuit-breaker). |
+| `probeQueue` | `ProbeQueueOptions` | `null` (off) | Opt-in bounded probe queue + per-process budget. See [Probe queue](#probe-queue). |
 | `captcha` | `CaptchaConfig` | `null` | Opt-in captcha solver config (authorized testing only). See [./anti-bot.md](./anti-bot.md). |
 
 ## Identity
@@ -122,6 +123,18 @@ Opt-in (`circuitBreaker`, off unless provided). For mass scraping: after N **con
 | `capMs` | `number` | `600000` | Ceiling for the exponential reopen backoff (ms). |
 
 Only **thrown** navigation failures (connection errors, timeouts) trip the breaker. HTTP `4xx`/`5xx`/`429` responses do **not** — they are returned, not thrown, so a `429` is treated as rate-limiting (handled by retry/`Retry-After`), not a host outage.
+
+## Probe queue
+
+Opt-in (`probeQueue`, off unless provided). For mass scraping, caps how many **browser** probes run at once and, optionally, the total per process — so a fleet of agents can't exhaust RAM by launching unbounded Chromium instances. Only the browser path is gated; the HTTP fast-path (`browser_fetch`, `fastPathFirst`) bypasses the queue.
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `concurrency` | `number` | `2` | Max browser probes running at once. |
+| `maxQueue` | `number` | `8` | Max callers waiting for a slot; beyond this, fail fast. |
+| `maxProbes` | `number` | `0` | Max probes admitted per process lifetime. `0` = unlimited. |
+
+Excess callers wait **FIFO** for a slot. When the waiting list is full, `browser_probe` returns **`Probe queue full …`** (`QueueFullError`, transient — retry shortly). When the per-process budget is spent it returns **`Probe budget exhausted …`** (`BudgetExhaustedError`, terminal — start a new process). State is single-process and in-memory.
 
 ## Output location
 

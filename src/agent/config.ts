@@ -6,8 +6,10 @@ import { join } from "node:path";
 import { isRemoteCdp } from "../engine/cdp-url.js";
 import { resolveIdentity, type ResolvedIdentity } from "../identity/resolve.js";
 import type { BrowserChannel, EngineName } from "../interfaces/engine-types.js";
-import type { CaptchaConfig, CircuitBreakerConfig, RetryConfig } from "../interfaces/net.js";
+import type { CaptchaConfig, CircuitBreakerConfig, ProbeQueueConfig, RetryConfig } from "../interfaces/net.js";
 import { resolveBreaker } from "../net/breaker-config.js";
+import { resolveProbeQueue } from "../net/queue-config.js";
+import { resolveRetry } from "../net/retry-config.js";
 import type { AgentOptions } from "../interfaces/types.js";
 import { ensureDir } from "../lib/fs.js";
 import { resolveDefaultOutputDir } from "../lib/output-dir.js";
@@ -42,6 +44,7 @@ export interface ResolvedConfig {
   siteMemoryDir: string;
   retry: RetryConfig;
   circuitBreaker: CircuitBreakerConfig | null;
+  probeQueue: ProbeQueueConfig | null;
   captcha: CaptchaConfig | null;
 }
 
@@ -88,13 +91,9 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     replayEnabled: opts.replayEnabled ?? false,
     replayDir: opts.replayDir ?? join(outputDir, "replay"),
     siteMemoryDir,
-    retry: {
-      maxAttempts: opts.retry?.maxAttempts ?? 3,
-      baseMs: opts.retry?.baseMs ?? 300,
-      capMs: opts.retry?.capMs ?? 10_000,
-      throttleMs: opts.retry?.throttleMs ?? 0,
-    },
+    retry: resolveRetry(opts.retry),
     circuitBreaker: resolveBreaker(opts.circuitBreaker),
+    probeQueue: resolveProbeQueue(opts.probeQueue),
     captcha: opts.captcha ?? null,
   };
 }

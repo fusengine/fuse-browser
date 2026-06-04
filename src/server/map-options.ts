@@ -41,6 +41,7 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     outputDir: (a.outputDir as string | undefined) ?? ENV.outputDir,
     retry: a.retry as AgentOptions["retry"],
     circuitBreaker: a.circuitBreaker as AgentOptions["circuitBreaker"],
+    probeQueue: a.probeQueue as AgentOptions["probeQueue"],
     captcha: a.captcha as AgentOptions["captcha"],
   };
 }
