@@ -10,7 +10,7 @@ Shadow DOM + iframes), multi-step plans, structured extraction, visual diff, and
 guardrails** for payments and bookings. It drives real Chromium, so it reads **Next.js / SPA**
 pages after hydration — not just static HTML.
 
-> 30 MCP tools · stealth + rotating proxies · virtualized-list scraping · HAR record/replay · pixel visual-diff · human handoff.
+> 32 MCP tools · stealth + rotating proxies · virtualized-list scraping · HAR record/replay · pixel visual-diff · human handoff + live view.
 
 ## Install
 
@@ -55,7 +55,7 @@ agent passes `humanApproved`.
 - **Sees everything** — open Shadow DOM, same/cross-origin iframes, and **virtualized/infinite lists** (`browser_collect`).
 - **Fast-path** — `browser_fetch` impersonates a real Chrome TLS fingerprint for server-rendered HTML, no browser launch — returns clean **markdown** and optional **contacts** (`extractContacts`) at ~HTTP speed.
 - **Data out** — multi-currency prices, typed CSS extraction, **contact extraction** (emails/phones E.164, `fastPathFirst` cascade), a clean→validate→dedupe→emit pipeline, CSV export, Google SERP rank tracking.
-- **Ops** — persistent sessions, **auto crash recovery** (a crashed page is recreated in the same context and restored to its last URL between calls), opt-in **per-host circuit breaker** + **bounded probe queue/budget** for mass scraping, `storageState` auto-save, HAR record/replay, pixel `visual_diff`, human handoff for login/2FA.
+- **Ops** — persistent sessions, **auto crash recovery** (a crashed page is recreated in the same context and restored to its last URL between calls), opt-in **per-host circuit breaker** + **bounded probe queue/budget** + **`browser_metrics`** for mass scraping, **live view** (watch any session — even headless — in your browser), `storageState` auto-save, HAR record/replay, pixel `visual_diff`, human handoff for login/2FA.
 
 ## Documentation
 
@@ -63,7 +63,7 @@ Full reference in **[`docs/`](./docs/README.md)**:
 
 [Installation](./docs/installation.md) ·
 [CLI](./docs/cli.md) ·
-[MCP tools (30)](./docs/mcp-tools.md) ·
+[MCP tools (32)](./docs/mcp-tools.md) ·
 [Configuration](./docs/configuration.md) ·
 [Sessions](./docs/sessions.md) ·
 [Extraction](./docs/extraction.md) ·
