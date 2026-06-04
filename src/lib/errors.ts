@@ -42,3 +42,14 @@ export class SessionLimitError extends Error {
     this.name = "SessionLimitError";
   }
 }
+
+/**
+ * Thrown when a session's browser/context is gone (disconnect, context close)
+ * and the page cannot be recreated within it — the session must be reopened.
+ */
+export class BrowserLostError extends Error {
+  constructor(sessionId: string) {
+    super(`Browser lost for session ${sessionId}: reopen with browser_open`);
+    this.name = "BrowserLostError";
+  }
+}
