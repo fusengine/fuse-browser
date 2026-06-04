@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 30 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
@@ -559,4 +559,36 @@ Returned fields: `uptimeMs`, `probesOk`, `probesFailed`, `avgDurationMs`, `minDu
 
 ```json
 { "reset": false }
+```
+
+---
+
+## Live view
+
+Watch a session's browser in real time from a normal web page — works even for **headless** sessions. A CDP screencast streams JPEG frames over an ephemeral, token-gated `127.0.0.1` server (Server-Sent Events) to a `<canvas>`/`<img>` viewer. **Read-only** (no click-through). The frame stream binds to the page at start; after a crash recovery it does not auto-reattach — call `browser_live_view` again.
+
+### browser_live_view
+
+Start the live view for a session and return the viewer URL (token embedded). Opens it in the OS default browser unless `open:false`.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `quality` | integer | no | JPEG quality 1–100 (default `60`). |
+| `maxWidth` | integer | no | Max frame width in px (default `1280`). |
+| `maxHeight` | integer | no | Max frame height in px (default `720`). |
+| `open` | boolean | no | Open the URL in the default browser (default `true`). |
+
+Returns `{ url, note }`. The server auto-closes when the page closes or on `browser_live_view_stop`.
+
+```json
+{ "sessionId": "s_abc123", "quality": 60, "open": true }
+```
+
+### browser_live_view_stop
+
+Stop a session's live view and shut down its local server. Returns `{ stopped: true|false }` (`false` if none was running).
+
+```json
+{ "sessionId": "s_abc123" }
 ```
