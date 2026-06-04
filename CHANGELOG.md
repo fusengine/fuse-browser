@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.36] - 04-06-2026
+
+### Added
+
+- feat(resilience): opt-in **bounded probe queue + per-process budget** (`probeQueue` option, off by default). Caps concurrent **browser** probes (excess callers wait FIFO for a slot); a full waiting list fails fast with `Probe queue full …` (transient), and an optional `maxProbes` lifetime budget rejects further probes with `Probe budget exhausted …` (terminal). Only the browser path is gated — the HTTP fast-path bypasses the queue. Wired into `browser_probe`/`browser_probe_html`. Single-process, in-memory, zero-dependency. Defaults: 2 concurrent / 8 queued / unlimited budget.
+
 ## [0.1.35] - 04-06-2026
 
 ### Added
