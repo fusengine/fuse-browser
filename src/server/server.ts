@@ -12,6 +12,7 @@ import { registerConnectTool } from "./tools/connect.js";
 import { registerExtractTool } from "./tools/extract.js";
 import { registerExtractSchemaTool } from "./tools/extract-schema.js";
 import { registerHandoffTool } from "./tools/handoff.js";
+import { registerInspectTool } from "./tools/inspect.js";
 import { registerNavigateTool } from "./tools/navigate.js";
 import { registerFetchTool } from "./tools/fetch.js";
 import { registerProbeTools } from "./tools/probe.js";
@@ -47,6 +48,7 @@ export function createServer(): BuiltServer {
   registerExtractTool(server, sessions);
   registerExtractSchemaTool(server, sessions);
   registerScreenshotTool(server, sessions);
+  registerInspectTool(server, sessions);
   registerVisualDiffTool(server, sessions);
   registerHandoffTool(server, sessions);
   registerResources(server);
