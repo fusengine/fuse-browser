@@ -70,7 +70,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Act on element",
       description:
-        "Execute click/fill/select/pick on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. Returns a diff of what changed.",
+        "Execute click/fill/select/pick on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. Returns a diff of what changed. Pass `annotate:true` to also get a Set-of-Marks screenshot of the NEW state (re-marked, anti-drift) for vision models.",
       inputSchema: {
         sessionId: z.string(),
         kind: KIND,
@@ -78,6 +78,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
         target: z.string().optional(),
         value: z.string().optional(),
         option: z.string().optional(),
+        annotate: z.boolean().optional(),
       },
     },
     async (args) => {
@@ -89,7 +90,10 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
         if (!result) return errorResult("browser_act requires either `ref` or `target`");
         const after = await captureSnapshot(s.page);
         const diff = diffSnapshots(before, after, s.page.url() !== urlBefore);
-        return jsonResult({ result, url: s.page.url(), diff });
+        const out = { result, url: s.page.url(), diff };
+        if (a.annotate !== true) return jsonResult(out);
+        const shot = await annotatedScreenshot(s.page);
+        return imageJsonResult(shot.base64, { ...out, marks: shot.marks });
       });
     },
   );

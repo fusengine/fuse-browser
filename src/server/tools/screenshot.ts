@@ -6,11 +6,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { refLocator } from "../../actions/ref-locator.js";
+import { annotatedScreenshot } from "../../extraction/annotate.js";
+import { captureSnapshot } from "../../extraction/snapshot.js";
 import { applyColorScheme } from "../../lib/color-scheme.js";
 import { type ViewportInput, resolveViewport, viewportLabel } from "../../engine/viewport.js";
 import type { SessionManager } from "../../session/manager.js";
 import { settleForCapture } from "../../state/settle-capture.js";
-import { errorResult, imageResult, multiImageResult } from "../result.js";
+import { errorResult, imageJsonResult, imageResult, multiImageResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
 const VIEWPORT_SCHEMA = z.union([
@@ -34,6 +36,7 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
         viewports: z.array(VIEWPORT_SCHEMA).optional(),
         colorScheme: z.enum(["light", "dark"]).optional(),
         themeClass: z.string().optional(),
+        annotate: z.boolean().optional(),
       },
     },
     async (args) => {
@@ -53,6 +56,11 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
           const fullPage = Boolean(a.fullPage);
           const list = (Array.isArray(a.viewports) ? a.viewports : a.viewport ? [a.viewport] : []) as ViewportInput[];
           if (list.length === 0) {
+            if (a.annotate === true) {
+              await captureSnapshot(s.page);
+              const shot = await annotatedScreenshot(s.page);
+              return imageJsonResult(shot.base64, { url: s.page.url(), marks: shot.marks });
+            }
             const buffer = await s.page.screenshot({ fullPage });
             return imageResult(buffer.toString("base64"), `screenshot of ${s.page.url()}`);
           }
