@@ -12,6 +12,21 @@ export function jsonResult(payload: Record<string, unknown>): CallToolResult {
   };
 }
 
+/** Image (base64) plus a structured JSON payload (as text + structuredContent). */
+export function imageJsonResult(
+  base64: string,
+  payload: Record<string, unknown>,
+  mimeType = "image/jpeg",
+): CallToolResult {
+  return {
+    content: [
+      { type: "image", data: base64, mimeType },
+      { type: "text", text: JSON.stringify(payload, null, 2) },
+    ],
+    structuredContent: payload,
+  };
+}
+
 /** Error result (isError flag set). */
 export function errorResult(message: string): CallToolResult {
   return { content: [{ type: "text", text: message }], isError: true };
