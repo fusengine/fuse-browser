@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.33] - 04-06-2026
+
+### Added
+
+- feat(design): `browser_inspect({ sessionId, ref })` returns the computed styles, box model (content/padding/margin/border), typography, and resolved colors for any element by `ref`, plus the **WCAG 2.x contrast ratio** (text vs. effective background walked up the ancestor chain) with AA/AAA pass flags. Pure-Node contrast math; design-audit friendly. 29th MCP tool.
+
 ## [0.1.32] - 04-06-2026
 
 ### Added
