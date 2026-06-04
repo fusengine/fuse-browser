@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.32] - 04-06-2026
+
+### Added
+
+- feat(vision): opt-in `annotate:true` on `browser_act` (re-marked Set-of-Marks frame of the new state, anti-drift) and `browser_screenshot` (SoM viewport frame). Default off (no behavior change).
+
 ## [0.1.31] - 04-06-2026
 
 ### Added
