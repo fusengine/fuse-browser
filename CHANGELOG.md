@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.35] - 04-06-2026
+
+### Added
+
+- feat(resilience): opt-in per-host **circuit breaker** for mass scraping (`circuitBreaker` option, off by default). After N consecutive thrown navigation failures on an origin, the circuit opens and further attempts fail fast for a cooldown (exponential reopen backoff, capped) instead of burning browser time on a dead host; a half-open trial after the cooldown closes on success or reopens. Wired into `browser_probe` (returns `Circuit open …`) and `browser_serp_batch` (per-query error row). HTTP 4xx/5xx/429 are returned responses, not throws, so they do not trip the breaker (429 stays a retry/`Retry-After` concern). Defaults: 5 failures / 30s / 10min cap.
+
 ## [0.1.34] - 04-06-2026
 
 ### Added
