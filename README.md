@@ -10,7 +10,7 @@ Shadow DOM + iframes), multi-step plans, structured extraction, visual diff, and
 guardrails** for payments and bookings. It drives real Chromium, so it reads **Next.js / SPA**
 pages after hydration — not just static HTML.
 
-> 29 MCP tools · stealth + rotating proxies · virtualized-list scraping · HAR record/replay · pixel visual-diff · human handoff.
+> 30 MCP tools · stealth + rotating proxies · virtualized-list scraping · HAR record/replay · pixel visual-diff · human handoff.
 
 ## Install
 
@@ -63,7 +63,7 @@ Full reference in **[`docs/`](./docs/README.md)**:
 
 [Installation](./docs/installation.md) ·
 [CLI](./docs/cli.md) ·
-[MCP tools (29)](./docs/mcp-tools.md) ·
+[MCP tools (30)](./docs/mcp-tools.md) ·
 [Configuration](./docs/configuration.md) ·
 [Sessions](./docs/sessions.md) ·
 [Extraction](./docs/extraction.md) ·
