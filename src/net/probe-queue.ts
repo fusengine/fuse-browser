@@ -50,6 +50,11 @@ export function releaseSlot(): void {
   else running = Math.max(0, running - 1);
 }
 
+/** Live queue snapshot: in-flight slots, lifetime admissions, waiting callers. */
+export function queueStats(): { running: number; admitted: number; waiting: number } {
+  return { running, admitted, waiting: waiters.length };
+}
+
 /** Reset queue and budget state (tests only). */
 export function resetQueue(): void {
   running = 0;

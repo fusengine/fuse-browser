@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 28 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 30 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
@@ -541,4 +541,22 @@ If neither `url` nor `selector` is given, it resumes on the next navigation.
 
 ```json
 { "sessionId": "s_abc123", "reason": "Solve captcha", "selector": "#dashboard", "timeoutMs": 300000 }
+```
+
+---
+
+## Diagnostics
+
+### browser_metrics
+
+Read the process-global scraping metrics: a point-in-time snapshot of probe counts, durations, resilience rejections, the live probe-queue depth, RSS and uptime. No session needed. Pass `reset:true` to zero the counters after reading (e.g. at the start of a new job).
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `reset` | boolean | no | Zero all counters **after** returning the snapshot. |
+
+Returned fields: `uptimeMs`, `probesOk`, `probesFailed`, `avgDurationMs`, `minDurationMs`, `maxDurationMs`, `breakerRejects` (requests blocked by an open [circuit breaker](./configuration.md#circuit-breaker)), `queueRejects` / `budgetRejects` (from the [probe queue](./configuration.md#probe-queue)), `queue` (`{ running, admitted, waiting }`), `rssBytes`. Counters are process-global and persist until reset; the HTTP fast-path is not counted (only browser probes).
+
+```json
+{ "reset": false }
 ```

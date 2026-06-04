@@ -13,6 +13,7 @@ import { registerExtractTool } from "./tools/extract.js";
 import { registerExtractSchemaTool } from "./tools/extract-schema.js";
 import { registerHandoffTool } from "./tools/handoff.js";
 import { registerInspectTool } from "./tools/inspect.js";
+import { registerMetricsTool } from "./tools/metrics.js";
 import { registerNavigateTool } from "./tools/navigate.js";
 import { registerFetchTool } from "./tools/fetch.js";
 import { registerProbeTools } from "./tools/probe.js";
@@ -51,6 +52,7 @@ export function createServer(): BuiltServer {
   registerInspectTool(server, sessions);
   registerVisualDiffTool(server, sessions);
   registerHandoffTool(server, sessions);
+  registerMetricsTool(server);
   registerResources(server);
   return { server, sessions };
 }
