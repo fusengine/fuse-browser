@@ -13,6 +13,17 @@ import { buildFrontmatter } from "./frontmatter.js";
 type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
 
 /**
+ * The single, deliberate boundary between linkedom and Defuddle. linkedom's
+ * document is structurally a DOM `Document` at runtime, but this project's
+ * tsconfig omits the DOM lib, so the nominal types don't unify. Isolating the
+ * cast here (rather than inline) keeps it named, documented, and one-of-a-kind —
+ * eliminating it would mean pulling the whole DOM lib in just for one signature.
+ */
+function toDefuddleInput(document: LinkedomDocument): Parameters<typeof Defuddle>[0] {
+  return document as unknown as Parameters<typeof Defuddle>[0];
+}
+
+/**
  * Best-effort body text for the fallback path. linkedom's `body`/`documentElement`
  * getters THROW (not return null) when the document has no root element — e.g.
  * empty or non-HTML input — so plain `?.` is not enough; we wrap in try/catch.
@@ -31,8 +42,7 @@ export async function htmlToMarkdown(html: string, opts: SerializeOptions = {}):
   let markdown = "";
   let meta: MarkdownMeta = { url: opts.url ?? "" };
   try {
-    const input = document as unknown as Parameters<typeof Defuddle>[0];
-    const r = await Defuddle(input, opts.url, {
+    const r = await Defuddle(toDefuddleInput(document), opts.url, {
       markdown: true,
       useAsync: false,
       removeImages: opts.removeImages ?? false,
