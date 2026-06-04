@@ -3,7 +3,7 @@
  * @module server/schemas
  */
 import { z } from "zod";
-import { captchaSchema, circuitBreakerSchema, retrySchema } from "./schemas-resilience.js";
+import { captchaSchema, circuitBreakerSchema, probeQueueSchema, retrySchema } from "./schemas-resilience.js";
 
 /** Installed-browser channels (real Chrome/Edge). */
 const CHANNELS = [
@@ -49,6 +49,7 @@ export const agentOptionShape = {
   retry: retrySchema,
   captcha: captchaSchema,
   circuitBreaker: circuitBreakerSchema,
+  probeQueue: probeQueueSchema,
 };
 
 /** A single action (loose: type + arbitrary fields). */

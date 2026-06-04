@@ -5,10 +5,20 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BrowserAgent } from "../../agent/browser-agent.js";
 import { compactReport } from "../../agent/compact.js";
-import { CircuitOpenError, GuardrailViolation } from "../../lib/errors.js";
+import { BudgetExhaustedError, CircuitOpenError, GuardrailViolation, QueueFullError } from "../../lib/errors.js";
 import { toAgentOptions, toProbeOptions } from "../map-options.js";
 import { errorResult, jsonResult } from "../result.js";
 import { probeHtmlShape, probeShape } from "../schemas.js";
+
+/** Expected, user-actionable probe failures returned as an error result (not thrown). */
+function isProbeUserError(err: unknown): boolean {
+  return (
+    err instanceof GuardrailViolation ||
+    err instanceof CircuitOpenError ||
+    err instanceof QueueFullError ||
+    err instanceof BudgetExhaustedError
+  );
+}
 
 /** Register `browser_probe` and `browser_probe_html`. */
 export function registerProbeTools(server: McpServer): void {
@@ -27,7 +37,7 @@ export function registerProbeTools(server: McpServer): void {
         const report = await agent.probe(String(raw.url), toProbeOptions(raw));
         return jsonResult(compactReport(report));
       } catch (err) {
-        if (err instanceof GuardrailViolation || err instanceof CircuitOpenError) return errorResult(err.message);
+        if (isProbeUserError(err)) return errorResult((err as Error).message);
         throw err;
       }
     },
@@ -47,7 +57,7 @@ export function registerProbeTools(server: McpServer): void {
         const report = await agent.probeHtml(String(raw.html), toProbeOptions(raw));
         return jsonResult(compactReport(report));
       } catch (err) {
-        if (err instanceof GuardrailViolation) return errorResult(err.message);
+        if (isProbeUserError(err)) return errorResult((err as Error).message);
         throw err;
       }
     },

@@ -32,6 +32,23 @@ export interface CircuitBreakerConfig {
   capMs: number;
 }
 
+/** User-facing probe-queue overrides (all optional; see resolveProbeQueue). */
+export interface ProbeQueueOptions {
+  /** Max concurrent browser probes (default 2). */
+  concurrency?: number;
+  /** Max callers waiting for a slot before fail-fast (default 8). */
+  maxQueue?: number;
+  /** Max probes admitted per process lifetime; 0 = unlimited (default 0). */
+  maxProbes?: number;
+}
+
+/** Resolved probe-queue settings (null = disabled). */
+export interface ProbeQueueConfig {
+  concurrency: number;
+  maxQueue: number;
+  maxProbes: number;
+}
+
 /** Supported captcha-solving providers (shared createTask/getTaskResult API). */
 export type CaptchaProvider = "2captcha" | "anticaptcha" | "capmonster";
 

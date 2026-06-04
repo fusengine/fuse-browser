@@ -70,3 +70,25 @@ export class CircuitOpenError extends Error {
     this.retryInMs = retryInMs;
   }
 }
+
+/**
+ * Thrown when the probe queue's waiting list is full: too many probes are
+ * already in flight or queued. Transient — retry after a short delay.
+ */
+export class QueueFullError extends Error {
+  constructor(maxQueue: number) {
+    super(`Probe queue full (max ${maxQueue} waiting): retry shortly`);
+    this.name = "QueueFullError";
+  }
+}
+
+/**
+ * Thrown when the per-process probe budget is exhausted. Terminal for this
+ * process lifetime — do not retry.
+ */
+export class BudgetExhaustedError extends Error {
+  constructor(maxProbes: number) {
+    super(`Probe budget exhausted (${maxProbes} probes): start a new session`);
+    this.name = "BudgetExhaustedError";
+  }
+}

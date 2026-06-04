@@ -35,3 +35,13 @@ export const circuitBreakerSchema = z
   })
   .optional()
   .describe("Per-host circuit breaker: fail fast after N consecutive failures on a host (opt-in).");
+
+/** Bounded probe queue + per-process budget (opt-in; off unless provided). */
+export const probeQueueSchema = z
+  .object({
+    concurrency: z.number().int().optional(),
+    maxQueue: z.number().int().optional(),
+    maxProbes: z.number().int().optional(),
+  })
+  .optional()
+  .describe("Bounded probe queue: cap concurrent probes, fail fast when full, optional per-process budget (opt-in).");

@@ -55,7 +55,7 @@ agent passes `humanApproved`.
 - **Sees everything** — open Shadow DOM, same/cross-origin iframes, and **virtualized/infinite lists** (`browser_collect`).
 - **Fast-path** — `browser_fetch` impersonates a real Chrome TLS fingerprint for server-rendered HTML, no browser launch — returns clean **markdown** and optional **contacts** (`extractContacts`) at ~HTTP speed.
 - **Data out** — multi-currency prices, typed CSS extraction, **contact extraction** (emails/phones E.164, `fastPathFirst` cascade), a clean→validate→dedupe→emit pipeline, CSV export, Google SERP rank tracking.
-- **Ops** — persistent sessions, **auto crash recovery** (a crashed page is recreated in the same context and restored to its last URL between calls), opt-in **per-host circuit breaker** (fail fast on dead hosts during mass scraping), `storageState` auto-save, HAR record/replay, pixel `visual_diff`, human handoff for login/2FA.
+- **Ops** — persistent sessions, **auto crash recovery** (a crashed page is recreated in the same context and restored to its last URL between calls), opt-in **per-host circuit breaker** + **bounded probe queue/budget** for mass scraping, `storageState` auto-save, HAR record/replay, pixel `visual_diff`, human handoff for login/2FA.
 
 ## Documentation
 
