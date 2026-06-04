@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.37] - 04-06-2026
+
+### Added
+
+- feat(observability): **`browser_metrics`** tool (30th) — process-global scraping snapshot: probes ok/failed, avg/min/max probe duration, circuit-breaker/queue/budget rejects, live probe-queue depth (`running`/`admitted`/`waiting`), RSS and uptime. `reset:true` zeroes the counters after reading (job-scoped). Zero-dependency in-memory counters; only browser probes are counted (the HTTP fast-path is not), and resilience rejections are tracked distinctly from probe failures. Browser recycling was deemed N/A — the probe model is already ephemeral (fresh browser per probe), so there is no cross-probe memory growth to bound.
+
 ## [0.1.36] - 04-06-2026
 
 ### Added
