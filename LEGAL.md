@@ -1,8 +1,10 @@
 # Legal & Responsible Use
 
 `fuse-browser` is a **neutral, dual-use automation tool**, provided **as-is under MIT, without
-warranty**. It does nothing unlawful by itself, and it **blocks nothing by default** — every
-restriction is an explicit, opt-in choice you make.
+warranty**, and built for **responsible automation**. Sensitive actions (payment, booking,
+checkout, destructive operations) are protected by **human-approval guardrails**, and compliance
+controls — `robots.txt` respect, rate limiting, and contact-extraction filters — are available and
+**opt-in**. Configure them according to your lawful basis and the target's rules.
 
 ## Your responsibility
 
