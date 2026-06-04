@@ -53,3 +53,20 @@ export class BrowserLostError extends Error {
     this.name = "BrowserLostError";
   }
 }
+
+/**
+ * Thrown when the per-host circuit breaker is open: the origin failed
+ * repeatedly and is in cooldown, so the request fails fast instead of
+ * burning browser time. Retry after `retryInMs`.
+ */
+export class CircuitOpenError extends Error {
+  readonly origin: string;
+  readonly retryInMs: number;
+
+  constructor(origin: string, retryInMs: number) {
+    super(`Circuit open for ${origin}: retry in ${Math.ceil(retryInMs / 1000)}s`);
+    this.name = "CircuitOpenError";
+    this.origin = origin;
+    this.retryInMs = retryInMs;
+  }
+}

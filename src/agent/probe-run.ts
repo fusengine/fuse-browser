@@ -15,6 +15,7 @@ import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
+import { withBreaker } from "../net/breaker-guard.js";
 import { gotoWithRetry } from "../net/navigate.js";
 import { assertRobotsAllowed } from "../net/robots-guard.js";
 import { throttleHost } from "../net/throttle.js";
@@ -49,7 +50,7 @@ export async function runProbe(
       await prepareBookingCurrency(page, config.currency);
     }
     await throttleHost(targetUrl, config.retry.throttleMs);
-    await gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
+    await withBreaker(targetUrl, config.circuitBreaker, () => gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry));
     await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     const consent = options.autoConsent
       ? await handleCommonConsent(page, config.humanMode)

@@ -11,6 +11,7 @@ import { findDomainRanks } from "../extraction/serp-rank.js";
 import type { SerpBatchRow } from "../interfaces/extraction.js";
 import { sleep } from "../lib/retry.js";
 import { randInt } from "../lib/text.js";
+import { withBreaker } from "../net/breaker-guard.js";
 import { gotoWithRetry } from "../net/navigate.js";
 import type { ResolvedConfig } from "./config.js";
 import { collectSerp } from "./serp-paged.js";
@@ -45,7 +46,7 @@ export async function serpBatch(config: ResolvedConfig, opts: SerpBatchOptions):
       if (i > 0) await sleep(opts.delayMs ?? randInt(2_000, 4_000));
       try {
         const url = googleUrl(query, opts.hl ?? "en", opts.gl ?? "us");
-        await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
+        await withBreaker(url, config.circuitBreaker, () => gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry));
         const serp = await collectSerp(page, opts.pages ?? 1, config.retry);
         rows.push({ query, results: serp.organic, rank: opts.rankDomain ? findDomainRanks(serp, opts.rankDomain) : undefined });
       } catch (error) {

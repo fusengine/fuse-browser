@@ -40,6 +40,7 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     siteMemoryDir: a.siteMemoryDir as string | undefined,
     outputDir: (a.outputDir as string | undefined) ?? ENV.outputDir,
     retry: a.retry as AgentOptions["retry"],
+    circuitBreaker: a.circuitBreaker as AgentOptions["circuitBreaker"],
     captcha: a.captcha as AgentOptions["captcha"],
   };
 }

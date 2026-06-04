@@ -44,6 +44,7 @@ Every field is optional. Defaults are applied by `resolveConfig` (`src/agent/con
 | `replayDir` | `string` | `<outputDir>/replay` | Directory for replay artifacts. |
 | `siteMemoryDir` | `string` | `<outputDir>/site-memory` | Directory for per-site memory (created if missing). |
 | `retry` | `Partial<RetryConfig>` | see [Retry](#retry) | Navigation retry/backoff overrides. |
+| `circuitBreaker` | `CircuitBreakerOptions` | `null` (off) | Opt-in per-host circuit breaker. See [Circuit breaker](#circuit-breaker). |
 | `captcha` | `CaptchaConfig` | `null` | Opt-in captcha solver config (authorized testing only). See [./anti-bot.md](./anti-bot.md). |
 
 ## Identity
@@ -109,6 +110,18 @@ Read by `envAgentDefaults` (`src/server/env-defaults.ts`) and the proxy loader (
 | `throttleMs` | `number` | `0` | Minimum gap between hits on the same host in ms. `0` disables throttling. |
 
 Backoff uses **full-jitter exponential** delay and honors a server `Retry-After` header when present. `throttleMs` enforces a minimum per-host gap between requests.
+
+## Circuit breaker
+
+Opt-in (`circuitBreaker`, off unless provided). For mass scraping: after N **consecutive** failures on an origin (`scheme://host:port`), the circuit **opens** and further attempts to that host **fail fast** for a cooldown — `browser_probe` returns `Circuit open for <origin>: retry in Ns`, `browser_serp_batch` records it as a per-query error row — instead of burning browser time on a dead host. After the cooldown a single **half-open** trial is allowed; success closes the circuit, failure reopens it with an **exponentially growing** cooldown (×2, capped). State is per-host, in-memory, single-process (LRU-bounded to 2000 hosts).
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `threshold` | `number` | `5` | Consecutive failures on a host before the circuit opens. |
+| `cooldownMs` | `number` | `30000` | First cooldown once open (ms). |
+| `capMs` | `number` | `600000` | Ceiling for the exponential reopen backoff (ms). |
+
+Only **thrown** navigation failures (connection errors, timeouts) trip the breaker. HTTP `4xx`/`5xx`/`429` responses do **not** — they are returned, not thrown, so a `429` is treated as rate-limiting (handled by retry/`Retry-After`), not a host outage.
 
 ## Output location
 

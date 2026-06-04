@@ -5,7 +5,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BrowserAgent } from "../../agent/browser-agent.js";
 import { compactReport } from "../../agent/compact.js";
-import { GuardrailViolation } from "../../lib/errors.js";
+import { CircuitOpenError, GuardrailViolation } from "../../lib/errors.js";
 import { toAgentOptions, toProbeOptions } from "../map-options.js";
 import { errorResult, jsonResult } from "../result.js";
 import { probeHtmlShape, probeShape } from "../schemas.js";
@@ -27,7 +27,7 @@ export function registerProbeTools(server: McpServer): void {
         const report = await agent.probe(String(raw.url), toProbeOptions(raw));
         return jsonResult(compactReport(report));
       } catch (err) {
-        if (err instanceof GuardrailViolation) return errorResult(err.message);
+        if (err instanceof GuardrailViolation || err instanceof CircuitOpenError) return errorResult(err.message);
         throw err;
       }
     },
