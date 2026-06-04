@@ -35,6 +35,10 @@ Accepts the full [agentOptionShape](#browser_open) (engine, proxy, locale, captc
 | `extractSerp` | boolean | no | Parse the page as a Google SERP. |
 | `serpPages` | integer | no | Number of SERP pages to collect when `extractSerp`. |
 | `rankDomain` | string | no | Report the SERP rank of this domain. |
+| `extractContacts` | boolean | no | Extract `{ emails, phones, hasContactForm }` into `report.contacts`. |
+| `contactCrawl` | object | no | `{ enabled, maxPages? }` — when no email is found, follow same-domain contact/impressum links (bounded). |
+| `contactFilter` | enum `strict` \| `off` | no | Drop placeholder/template emails (default `strict`). |
+| `fastPathFirst` | boolean | no | With `extractContacts`: try HTTP extraction first, escalate to the browser only if the card is incomplete (email AND phone). Sets `report.fastPath`. |
 | _+ all_ [agentOptionShape](#browser_open) | — | no | Engine, proxy, identity, captcha, etc. |
 
 ```json
@@ -68,12 +72,16 @@ HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x fast
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `url` | string | yes | URL to fetch. |
+| `format` | enum `markdown` \| `text` | no | Output format (default `markdown`: main content + YAML frontmatter). |
 | `extractPrices` | boolean | no | Run the price extractor on the body. |
+| `extractContacts` | boolean | no | Extract `{ emails, phones, hasContactForm }` from the fetched HTML (no browser). |
+| `contactFilter` | enum `strict` \| `off` | no | Drop placeholder/template emails (default `strict`). |
+| `countryCode` | string | no | Default region for phone E.164 parsing (default `CH`). |
 | `proxyUrl` | string | no | Proxy to route the request through. |
 | `maxChars` | integer | no | Truncate returned `text` (default `20000`). |
 
 ```json
-{ "url": "https://example.com/pricing", "extractPrices": true, "maxChars": 5000 }
+{ "url": "https://example.com", "extractContacts": true }
 ```
 
 ---
@@ -89,7 +97,11 @@ Open a persistent browser session and return `{ sessionId, expiresAt, identity }
 | `engine` | enum `playwright` \| `patchright` \| `firefox` \| `webkit` | no | Browser engine. |
 | `channel` | enum `chrome` \| `chrome-beta` \| `chrome-dev` \| `chrome-canary` \| `msedge` \| `msedge-beta` \| `msedge-dev` \| `msedge-canary` | no | Installed browser channel (real Chrome/Edge). |
 | `executablePath` | string | no | Path to a browser binary. |
-| `cdpEndpoint` | string | no | Attach to an existing browser over CDP. |
+| `cdpEndpoint` | string | no | Attach to an existing browser over CDP (local `http://localhost:9222` or remote `wss://…`, e.g. Browserless). |
+| `cdpHeaders` | object | no | Extra headers for the CDP connect handshake (e.g. `{ "Authorization": "Bearer …" }`). |
+| `cdpCloseOnDone` | boolean | no | Close the remote CDP session on teardown (default `true` for `ws/wss`). |
+| `cdpTimeoutMs` | integer | no | CDP connect timeout (default `20000`). |
+| `respectRobots` | boolean | no | Honor the origin's `robots.txt` (opt-in; off by default — nothing is blocked unless enabled). |
 | `headless` | boolean | no | Run headless (set `false` for `browser_handoff`). |
 | `humanMode` | boolean | no | Human-like timing/movement for actions. |
 | `locale` | string | no | Browser locale (e.g. `en-US`). |
@@ -331,9 +343,10 @@ Return the indexed interactive elements of the live page, each with a `ref` to u
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
 | `selectors` | boolean | no | Also return a durable CSS `selector` per element (cacheable to act later without re-snapshotting). |
+| `annotate` | boolean | no | Also return a Set-of-Marks JPEG: numbered badges (= each `ref`) drawn over the page, for vision models (main-frame, viewport-only). |
 
 ```json
-{ "sessionId": "s_abc123", "selectors": true }
+{ "sessionId": "s_abc123", "annotate": true }
 ```
 
 ### browser_act
@@ -350,6 +363,7 @@ Execute click/fill/select/pick on an element by `ref` (from `browser_snapshot`) 
 | `target` | string | no | Text/selector fallback when no `ref`. |
 | `value` | string | no | Value to type/select (for `fill`/`select`/`pick`). |
 | `option` | string | no | Suggestion text to click for `pick` (defaults to `value`). |
+| `annotate` | boolean | no | Also return a Set-of-Marks JPEG of the NEW state (re-marked, anti-drift). |
 
 Provide either `ref` or `target`.
 
@@ -467,9 +481,12 @@ Capture the live page as PNG(s) for vision. Pass `ref` for one element, `viewpor
 | `ref` | integer \| string | no | Screenshot a single element by ref. |
 | `viewport` | enum `mobile` \| `tablet` \| `desktop` _or_ `{width, height}` | no | Capture at one viewport size. |
 | `viewports` | array of the above | no | Capture across several viewport sizes. |
+| `colorScheme` | enum `light` \| `dark` | no | Emulate `prefers-color-scheme` and toggle `themeClass` on `<html>`, then restore. |
+| `themeClass` | string | no | Class toggled on `<html>` for class-based dark themes (default `dark`). |
+| `annotate` | boolean | no | Set-of-Marks JPEG: numbered badges (= each `ref`) over the viewport, for vision models. |
 
 ```json
-{ "sessionId": "s_abc123", "viewports": ["mobile", "desktop"], "fullPage": true }
+{ "sessionId": "s_abc123", "annotate": true, "colorScheme": "dark" }
 ```
 
 ### browser_visual_diff

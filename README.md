@@ -51,9 +51,10 @@ agent passes `humanApproved`.
 
 - **Stealth** — Patchright neutralizes the real automation signals; per-country identity + rotating proxy pool.
 - **Agentic targeting** — accessibility-style snapshot with stable refs, self-healing click/fill, multi-step plans.
+- **Vision (Set-of-Marks)** — `annotate:true` on `browser_snapshot`/`browser_act`/`browser_screenshot` draws numbered badges (= each `ref`) on the page, so vision models *see* it and target by ref.
 - **Sees everything** — open Shadow DOM, same/cross-origin iframes, and **virtualized/infinite lists** (`browser_collect`).
-- **Fast-path** — `browser_fetch` impersonates a real Chrome TLS fingerprint for server-rendered HTML, no browser launch.
-- **Data out** — multi-currency prices, typed CSS extraction, a clean→validate→dedupe→emit pipeline, CSV export, Google SERP rank tracking.
+- **Fast-path** — `browser_fetch` impersonates a real Chrome TLS fingerprint for server-rendered HTML, no browser launch — returns clean **markdown** and optional **contacts** (`extractContacts`) at ~HTTP speed.
+- **Data out** — multi-currency prices, typed CSS extraction, **contact extraction** (emails/phones E.164, `fastPathFirst` cascade), a clean→validate→dedupe→emit pipeline, CSV export, Google SERP rank tracking.
 - **Ops** — persistent sessions, `storageState` auto-save, HAR record/replay, pixel `visual_diff`, human handoff for login/2FA.
 
 ## Documentation
