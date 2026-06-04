@@ -72,11 +72,14 @@ Full reference in **[`docs/`](./docs/README.md)**:
 
 ## Disclaimer
 
-Provided **as-is** under MIT, no warranty. `fuse-browser` is a neutral, dual-use automation
-tool that **blocks nothing by default** — **you alone are responsible** for complying with
-applicable law, target sites' Terms of Service, `robots.txt`, and data-protection rules (GDPR,
-nLPD). It can honor `robots.txt` on request (opt-in `respectRobots: true`). The opt-in captcha
-solver and contact extraction are for **authorized, lawful use only**. See **[LEGAL.md](./LEGAL.md)**.
+Provided **as-is** under MIT, no warranty. `fuse-browser` is a neutral, **dual-use** automation
+tool built for **responsible automation**: sensitive actions (payment, booking, checkout,
+destructive operations) are gated behind **human-approval guardrails**, and compliance controls —
+`robots.txt` respect (`respectRobots`), rate limiting, contact-extraction filters — are built in
+and **opt-in**, to be configured according to your lawful basis and the target's rules.
+**You alone are responsible** for complying with applicable law, target sites' Terms of Service,
+`robots.txt`, and data-protection rules (GDPR, nLPD). The opt-in captcha solver and contact
+extraction are for **authorized, lawful use only**. See **[LEGAL.md](./LEGAL.md)**.
 
 ## License
 
