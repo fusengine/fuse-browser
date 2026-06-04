@@ -84,7 +84,7 @@ Read by `envAgentDefaults` (`src/server/env-defaults.ts`) and the proxy loader (
   "mcpServers": {
     "fuse-browser": {
       "command": "npx",
-      "args": ["-y", "fuse-browser"],
+      "args": ["-y", "@fusengine/browser-mcp"],
       "env": {
         "FUSE_ENGINE": "patchright",
         "FUSE_CHANNEL": "chrome",
