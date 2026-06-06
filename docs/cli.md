@@ -27,7 +27,7 @@ Applicable flags: `--engine`, `--country`, `--currency`, `--headed`, `--auto-con
 
 ## `fetch <url>`
 
-HTTP fast-path fetch using TLS impersonation (no full browser). Returns `status`, `url`, the response body truncated to the first 20,000 characters, and optional extracted prices.
+HTTP fast-path fetch using TLS impersonation (no full browser). Returns `status`, `url`, the response body truncated to the first 20,000 characters, and optional extracted prices. HTML is rendered to markdown by default; non-HTML responses (JSON, `text/plain`) are returned verbatim.
 
 ```bash
 fuse-browser fetch https://example.com --extract-prices --proxy http://user:pass@host:8080

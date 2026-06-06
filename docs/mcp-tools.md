@@ -67,12 +67,12 @@ Accepts the full [agentOptionShape](#browser_open) plus the same probe flags as 
 
 ### browser_fetch
 
-HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; not for JS/SPA pages (use `browser_probe` there).
+HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; not for JS/SPA pages (use `browser_probe` there). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher.
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `url` | string | yes | URL to fetch. |
-| `format` | enum `markdown` \| `text` | no | Output format (default `markdown`: main content + YAML frontmatter). |
+| `format` | enum `markdown` \| `text` | no | Output format (default `markdown`: main content + YAML frontmatter). Forced to raw `text` for non-HTML bodies (JSON, plain text). |
 | `extractPrices` | boolean | no | Run the price extractor on the body. |
 | `extractContacts` | boolean | no | Extract `{ emails, phones, hasContactForm }` from the fetched HTML (no browser). |
 | `contactFilter` | enum `strict` \| `off` | no | Drop placeholder/template emails (default `strict`). |
