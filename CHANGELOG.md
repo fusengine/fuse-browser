@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.39] - 07-06-2026
+
+### Fixed
+
+- fix(fetch): the HTTP fast-path no longer mangles **non-HTML** responses. `fetchFast` now reads the `content-type` and, for anything that is not `text/html` / `application/xhtml+xml` (JSON APIs, `text/plain`, …), returns the body **verbatim** instead of running it through the linkedom HTML parser and Defuddle markdown pipeline. `browser_fetch` / the `fetch` CLI force raw `text` output for these bodies. As a bonus, `browser_fetch` is now usable as a fast **JSON-API** fetcher. An absent `content-type` is still treated as HTML (preserves prior behavior); the HTML happy path is unchanged. MIME matching uses an exact allowlist (not `includes("html")`) so payloads like `application/vnd.github.html+json` are correctly treated as non-HTML.
+
 ## [0.1.38] - 04-06-2026
 
 ### Added

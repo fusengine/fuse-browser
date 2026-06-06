@@ -19,7 +19,7 @@ export function registerFetchTool(server: McpServer): void {
     {
       title: "HTTP fast fetch",
       description:
-        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. Returns clean LLM-ready markdown by default (or raw text with format:"text"), optional prices, and optional contacts (emails/phones/form) with extractContacts. For server-rendered HTML; use browser_probe for JS/SPA pages. extractContacts collects personal data — ensure a lawful basis (GDPR/nLPD).',
+        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. Returns clean LLM-ready markdown by default (or raw text with format:"text"), optional prices, and optional contacts (emails/phones/form) with extractContacts. Non-HTML responses (JSON APIs, plain text) are returned verbatim. For server-rendered HTML; use browser_probe for JS/SPA pages. extractContacts collects personal data — ensure a lawful basis (GDPR/nLPD).',
       inputSchema: {
         url: z.string(),
         format: z.enum(["markdown", "text"]).optional(),
@@ -35,7 +35,9 @@ export function registerFetchTool(server: McpServer): void {
       const a = args as Record<string, unknown>;
       const r = await fetchFast(String(a.url), typeof a.proxyUrl === "string" ? a.proxyUrl : undefined);
       const max = typeof a.maxChars === "number" ? a.maxChars : 20_000;
-      const format = a.format === "text" ? "text" : "markdown";
+      // Non-HTML bodies (JSON, plain text) are returned raw — markdown extraction
+      // only applies to HTML, so the fast-path also serves JSON APIs cleanly.
+      const format = a.format === "text" || !r.isHtml ? "text" : "markdown";
       const text =
         format === "text"
           ? r.text.slice(0, max)

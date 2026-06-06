@@ -15,7 +15,8 @@ const str = (v: unknown): string | undefined => (typeof v === "string" ? v : und
 /** Run the `fetch` subcommand against `url`. */
 export async function runFetchCli(url: string, values: Values): Promise<void> {
   const r = await fetchFast(url, str(values.proxy));
-  const format = values.text === true || values.format === "text" ? "text" : "markdown";
+  // Non-HTML bodies (JSON, plain text) are returned raw — markdown only applies to HTML.
+  const format = values.text === true || values.format === "text" || !r.isHtml ? "text" : "markdown";
   const text =
     format === "text"
       ? r.text.slice(0, 20_000)
