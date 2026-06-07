@@ -16,6 +16,7 @@ import { registerInspectTool } from "./tools/inspect.js";
 import { registerLiveViewTool } from "./tools/live-view.js";
 import { registerMetricsTool } from "./tools/metrics.js";
 import { registerNavigateTool } from "./tools/navigate.js";
+import { registerCrawlTool } from "./tools/crawl.js";
 import { registerFetchTool } from "./tools/fetch.js";
 import { registerFetchBatchTool } from "./tools/fetch-batch.js";
 import { registerProbeTools } from "./tools/probe.js";
@@ -40,6 +41,7 @@ export function createServer(): BuiltServer {
   registerProbeTools(server);
   registerFetchTool(server);
   registerFetchBatchTool(server);
+  registerCrawlTool(server);
   registerSerpBatchTool(server);
   registerSessionTools(server, sessions);
   registerConnectTool(server, sessions);

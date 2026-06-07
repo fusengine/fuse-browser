@@ -4,6 +4,7 @@
  * @module bin/cli
  */
 import { handleMetaFlags, parseArgsOrExit } from "./cli-meta.js";
+import { runCrawlCli } from "./crawl-cli.js";
 import { runFetchBatchCli } from "./fetch-batch-cli.js";
 import { runFetchCli } from "./fetch-cli.js";
 import { runProbeCli } from "./probe-cli.js";
@@ -48,6 +49,10 @@ const { positionals, values } = parseArgsOrExit({
     text: { type: "boolean" },
     format: { type: "string" },
     concurrency: { type: "string" },
+    "max-pages": { type: "string" },
+    "max-depth": { type: "string" },
+    "all-origins": { type: "boolean" },
+    "no-robots": { type: "boolean" },
     "proxy-map": { type: "string" },
     "user-data-dir": { type: "string" },
     "site-memory-dir": { type: "string" },
@@ -65,6 +70,8 @@ if (command === "serp-batch") {
   await runShots(rest[0], opts);
 } else if (command === "fetch-batch" && rest.length > 0) {
   await runFetchBatchCli(rest, opts);
+} else if (command === "crawl" && rest[0]) {
+  await runCrawlCli(rest[0], opts);
 } else if (command === "fetch" && rest[0]) {
   await runFetchCli(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
