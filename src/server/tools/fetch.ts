@@ -6,6 +6,7 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { resolveFetchBody } from "../../agent/fetch-resolve.js";
 import { contactsFromHtml } from "../../extraction/contacts/from-html.js";
 import { extractPrices } from "../../extraction/prices.js";
 import { htmlToMarkdown, renderMarkdown } from "../../extraction/serialize/to-markdown.js";
@@ -19,7 +20,7 @@ export function registerFetchTool(server: McpServer): void {
     {
       title: "HTTP fast fetch",
       description:
-        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. Returns clean LLM-ready markdown by default (or raw text with format:"text"), optional prices, and optional contacts (emails/phones/form) with extractContacts. Non-HTML responses (JSON APIs, plain text) are returned verbatim. For server-rendered HTML; use browser_probe for JS/SPA pages. extractContacts collects personal data — ensure a lawful basis (GDPR/nLPD).',
+        'Fetch a URL with browser TLS/HTTP2 impersonation — NO browser launch, ~10x faster. Returns clean LLM-ready markdown by default (or raw text with format:"text"), optional prices, and optional contacts (emails/phones/form) with extractContacts. Non-HTML responses (JSON APIs, plain text) are returned verbatim. For server-rendered HTML; set browserFallback:true to auto-render client-side (SPA/CSR) pages in a real browser when the HTTP response is an empty shell (escalated:true marks such results). extractContacts collects personal data — ensure a lawful basis (GDPR/nLPD).',
       inputSchema: {
         url: z.string(),
         format: z.enum(["markdown", "text"]).optional(),
@@ -29,28 +30,33 @@ export function registerFetchTool(server: McpServer): void {
         countryCode: z.string().optional(),
         proxyUrl: z.string().optional(),
         maxChars: z.number().int().optional(),
+        browserFallback: z.boolean().optional(),
       },
     },
     async (args) => {
       const a = args as Record<string, unknown>;
-      const r = await fetchFast(String(a.url), typeof a.proxyUrl === "string" ? a.proxyUrl : undefined);
+      const proxyUrl = typeof a.proxyUrl === "string" ? a.proxyUrl : undefined;
+      const r = await fetchFast(String(a.url), proxyUrl);
+      // Escalate an empty SPA shell to a real browser render when browserFallback is on.
+      const body = await resolveFetchBody(String(a.url), r, { browserFallback: a.browserFallback === true, proxyUrl });
       const max = typeof a.maxChars === "number" ? a.maxChars : 20_000;
       // Non-HTML bodies (JSON, plain text) are returned raw — markdown extraction
       // only applies to HTML, so the fast-path also serves JSON APIs cleanly.
-      const format = a.format === "text" || !r.isHtml ? "text" : "markdown";
+      const format = a.format === "text" || !body.isHtml ? "text" : "markdown";
       const text =
         format === "text"
-          ? r.text.slice(0, max)
-          : renderMarkdown(await htmlToMarkdown(r.html, { url: r.url }), max);
+          ? body.text.slice(0, max)
+          : renderMarkdown(await htmlToMarkdown(body.html, { url: body.url }), max);
       const country = typeof a.countryCode === "string" ? a.countryCode : "CH";
       const filter = a.contactFilter === "off" ? "off" : "strict";
       return jsonResult({
-        status: r.status,
-        url: r.url,
+        status: body.status,
+        url: body.url,
         format,
+        escalated: body.escalated,
         text,
-        prices: a.extractPrices ? extractPrices(r.text) : undefined,
-        contacts: a.extractContacts ? contactsFromHtml(r.html, country, { url: r.url, filter }) : undefined,
+        prices: a.extractPrices ? extractPrices(body.text) : undefined,
+        contacts: a.extractContacts ? contactsFromHtml(body.html, country, { url: body.url, filter }) : undefined,
       });
     },
   );

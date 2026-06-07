@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.40] - 08-06-2026
+
+### Added
+
+- feat(fetch): **`browserFallback`** (MCP) / **`--browser-fallback`** (CLI) on `browser_fetch` — opt-in escalation so a single call can "see everything". When the HTTP fast-path returns an unrendered client-side shell (SPA/CSR), it transparently re-renders the page in a real browser (Patchright, reusing the `browser_probe` pipeline) and returns the rendered markdown. Off by default — the fast-path stays fast and predictable. Results carry `escalated: true` when a browser was used. Detection is conservative (thin **visible** text + SPA mount markers / heavy scripting), so server-rendered pages (Next.js SSG/SSR, Nuxt, Astro, Remix, VitePress…) never pay the browser cost.
+- feat(cli): the `fetch` subcommand now accepts `--text` and `--format <markdown|text>` (previously read by the handler but not registered, so unusable).
+
+### Changed
+
+- perf(fetch): the fast-path no longer parses HTML it doesn't need. `FastResponse.text` is now **lazy + memoized** — the linkedom text pass runs only when a consumer reads it, so the common markdown path (and the robots.txt path) skips a full parse.
+- perf(serialize): `htmlToMarkdown` caps its input at `DEFAULT_MAX_INPUT_CHARS` (2 MB) before parsing — bounds parse cost on pathological pages.
+- perf(fetch): the body download is **streamed with a 10 MB hard cap** (`readCappedText`), cancelling early instead of buffering unbounded payloads; the cap truncates on a clean UTF-8 boundary (no trailing `U+FFFD`).
+- feat(fetch): requests send `Accept: text/markdown, text/html, …` — servers that serve native markdown (e.g. nuxt.com) are returned verbatim, skipping HTML→markdown entirely.
+
+### Fixed
+
+- fix(fetch): `htmlToText` no longer throws (and no longer returns empty) on **fragment / rootless** pages with no `<html>`/`<body>` — it falls back to a tag strip of the raw HTML, so visible text is always recovered.
+- fix(fetch): thin-shell detection ignores inline `<script>` source (which `textContent` wrongly counts as text), so a bare SPA shell is correctly identified.
+
 ## [0.1.39] - 07-06-2026
 
 ### Fixed

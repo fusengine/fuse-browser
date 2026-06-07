@@ -6,6 +6,14 @@
  */
 import { Impit } from "impit";
 import { parseHTML } from "linkedom";
+import { readCappedText } from "./read-body.js";
+import { visibleText } from "./thin-shell.js";
+
+/** Hard cap on the downloaded body — guards against decompression bombs / runaway streams. */
+const MAX_DOWNLOAD_BYTES = 10_485_760; // 10 MB
+
+/** Content negotiation: prefer markdown (served verbatim), then HTML. */
+const ACCEPT = "text/markdown, text/html, application/xhtml+xml, */*";
 
 let shared: Impit | null = null;
 function client(proxyUrl?: string): Impit {
@@ -14,10 +22,20 @@ function client(proxyUrl?: string): Impit {
   return shared;
 }
 
-/** Extract readable body text from an HTML string (no browser, no layout). */
+/**
+ * Extract readable body text from an HTML string (no browser, no layout).
+ * linkedom's `body`/`documentElement` getters can THROW on rootless input, so
+ * the access is guarded — a malformed body yields "" rather than crashing.
+ */
 export function htmlToText(html: string): string {
-  const { document } = parseHTML(html);
-  return (document.body?.textContent ?? document.documentElement?.textContent ?? "").trim();
+  try {
+    const { document } = parseHTML(html);
+    const text = (document.body?.textContent ?? document.documentElement?.textContent ?? "").trim();
+    if (text) return text;
+  } catch {
+    /* fall through to the raw strip below */
+  }
+  return visibleText(html); // fragment / empty-body pages: recover text from raw HTML
 }
 
 /** MIME types linkedom/Defuddle can parse as markup. */
@@ -55,16 +73,21 @@ export interface FastResponse {
  * JSON APIs. Callers must consult `isHtml` before any HTML→markdown conversion.
  */
 export async function fetchFast(url: string, proxyUrl?: string): Promise<FastResponse> {
-  const res = await client(proxyUrl).fetch(url);
-  const body = await res.text();
+  const res = await client(proxyUrl).fetch(url, { headers: { Accept: ACCEPT } });
+  const body = await readCappedText(res, MAX_DOWNLOAD_BYTES);
   const contentType = (res.headers.get("content-type") ?? "").toLowerCase();
   const isHtml = isHtmlContentType(contentType);
+  // `text` is lazy + memoized: HTML→text parsing only runs if a consumer reads
+  // it (e.g. extractPrices), so the common markdown path skips a linkedom parse.
+  let textCache: string | undefined;
   return {
     status: res.status,
     url: res.url || url,
     html: body,
-    text: isHtml ? htmlToText(body) : body,
     contentType,
     isHtml,
+    get text(): string {
+      return (textCache ??= isHtml ? htmlToText(body) : body);
+    },
   };
 }

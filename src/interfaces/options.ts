@@ -77,4 +77,6 @@ export interface ProbeOptions {
   contactFilter?: ContactFilter;
   /** With extractContacts: try the HTTP fast-path first, escalate to the browser only if incomplete. */
   fastPathFirst?: boolean;
+  /** Capture the fully rendered `page.content()` into `ProbeReport.html` (for fetch escalation). */
+  returnHtml?: boolean;
 }

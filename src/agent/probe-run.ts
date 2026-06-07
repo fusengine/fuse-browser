@@ -46,9 +46,7 @@ export async function runProbe(
     const page = opened.page ?? (await context.newPage());
     const logs = attachListeners(page);
     const targetUrl = urlWithCurrency(url, config.currency);
-    if (targetUrl.includes("booking.com") && config.currency) {
-      await prepareBookingCurrency(page, config.currency);
-    }
+    if (targetUrl.includes("booking.com") && config.currency) await prepareBookingCurrency(page, config.currency);
     await throttleHost(targetUrl, config.retry.throttleMs);
     await withBreaker(targetUrl, config.circuitBreaker, () => gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry));
     await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
@@ -72,7 +70,7 @@ export async function runProbe(
       ensureDir(dirname(config.storageStatePath));
       await context.storageState({ path: config.storageStatePath });
     }
-    return buildReport({
+    const report = buildReport({
       config,
       targetUrl,
       title,
@@ -93,6 +91,8 @@ export async function runProbe(
       serp,
       contacts: options.extractContacts ? await huntContacts(page, config, options.contactCrawl, robots ?? undefined, options.contactFilter) : undefined,
     });
+    if (options.returnHtml) report.html = await page.content();
+    return report;
   } finally {
     await teardownOpened(opened);
   }

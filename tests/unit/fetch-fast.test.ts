@@ -17,6 +17,16 @@ describe("htmlToText", () => {
   test("empty/bodyless HTML yields empty string", () => {
     expect(htmlToText("<html></html>")).toBe("");
   });
+
+  test("rootless/malformed input recovers text via raw strip (no throw, no empty)", () => {
+    // linkedom can throw / yield an empty body on rootless input; the fallback
+    // strips tags from the raw HTML so we still surface the visible text.
+    expect(htmlToText("not html, just plain text")).toBe("not html, just plain text");
+  });
+
+  test("fragment page with no <html>/<body> still yields its text", () => {
+    expect(htmlToText("<h1>Title</h1><pre>BODY CONTENT</pre>")).toContain("BODY CONTENT");
+  });
 });
 
 describe("isHtmlContentType", () => {

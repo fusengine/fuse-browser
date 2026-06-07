@@ -70,6 +70,8 @@ export interface ProbeReport {
   contacts?: Contacts;
   /** True when this report came from the HTTP fast-path (no browser launched). */
   fastPath?: boolean;
+  /** Fully rendered HTML (`page.content()`), present only when `returnHtml` was set. */
+  html?: string;
   visual: Visual | Record<string, never>;
   consent: ConsentResult;
   currency: CurrencyResult;
