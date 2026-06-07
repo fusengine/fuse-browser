@@ -5,7 +5,27 @@
  */
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { logger } from "../lib/logger.js";
+import { VERSION } from "../lib/version.js";
 import { createServer } from "../server/server.js";
+
+const USAGE = "usage: browser-mcp [--help] [--version]\n";
+const args = process.argv.slice(2);
+
+if (args.includes("--help") || args.includes("-h")) {
+  process.stdout.write(USAGE);
+  process.exit(0);
+}
+
+if (args.includes("--version") || args.includes("-v")) {
+  process.stdout.write(`${VERSION}\n`);
+  process.exit(0);
+}
+
+const unknownFlag = args.find((arg) => arg.startsWith("-"));
+if (unknownFlag) {
+  process.stderr.write(`error: Unknown option '${unknownFlag}'\n`);
+  process.exit(1);
+}
 
 async function main(): Promise<void> {
   const { server, sessions } = createServer();
