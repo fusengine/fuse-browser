@@ -3,14 +3,21 @@
  * fuse-browser CLI entry point. Subcommands: `probe`, `fetch`, `fetch-batch`, `serp-batch`, `shots`.
  * @module bin/cli
  */
-import { parseArgs } from "node:util";
+import { handleMetaFlags, parseArgsOrExit } from "./cli-meta.js";
 import { runFetchBatchCli } from "./fetch-batch-cli.js";
 import { runFetchCli } from "./fetch-cli.js";
 import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
 import { runShots } from "./shots-cli.js";
 
-const { positionals, values } = parseArgs({
+const USAGE =
+  "usage: fuse-browser probe <url> [...] | fetch <url> [--extract-prices --proxy <url>] | fetch-batch <url...> [--concurrency <n>] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n";
+
+const argv = process.argv.slice(2);
+handleMetaFlags(argv, USAGE);
+
+const { positionals, values } = parseArgsOrExit({
+  args: argv,
   allowPositionals: true,
   options: {
     engine: { type: "string" },
@@ -63,8 +70,6 @@ if (command === "serp-batch") {
 } else if (command === "probe" && rest[0]) {
   await runProbeCli(rest[0], opts);
 } else {
-  process.stderr.write(
-    "usage: fuse-browser probe <url> [...] | fetch <url> [--extract-prices --proxy <url>] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n",
-  );
+  process.stderr.write(USAGE);
   process.exit(1);
 }

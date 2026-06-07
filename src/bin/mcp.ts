@@ -6,6 +6,17 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { logger } from "../lib/logger.js";
 import { createServer } from "../server/server.js";
+import { firstFlag, handleMetaFlags } from "./cli-meta.js";
+
+// Resolve metadata flags before the stdio transport binds — any stdout write
+// after `server.connect` would corrupt the MCP protocol stream.
+const argv = process.argv.slice(2);
+handleMetaFlags(argv, "usage: browser-mcp [--help] [--version]\n");
+const badFlag = firstFlag(argv);
+if (badFlag) {
+  process.stderr.write(`error: Unknown option '${badFlag}'\n`);
+  process.exit(1);
+}
 
 async function main(): Promise<void> {
   const { server, sessions } = createServer();
