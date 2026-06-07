@@ -4,7 +4,7 @@ Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP 
 
 Tools fall into two families:
 
-- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
+- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
 - **Session tools** require a `sessionId` obtained from `browser_open` (or `browser_connect`). They drive one persistent, stateful page.
 
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
@@ -84,6 +84,27 @@ HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x fast
 ```json
 { "url": "https://example.com", "extractContacts": true }
 ```
+
+---
+
+### browser_fetch_batch
+
+Fetch **many URLs in parallel** via the HTTP fast-path (TLS impersonation, no browser launch), bounded concurrency. Each URL keeps `browser_fetch` semantics (markdown for HTML, JSON/plain-text verbatim, per-URL `browserFallback`). Results come back in input order; a failed URL becomes `{ url, error }` and never aborts the batch.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `urls` | string[] | yes | URLs to fetch. |
+| `format` | enum `markdown` \| `text` | no | Output format (default `markdown`; forced to `text` for non-HTML). |
+| `maxChars` | integer | no | Truncate each returned `text` (default `20000`). |
+| `browserFallback` | boolean | no | Re-render empty SPA/CSR shells in a real browser (per URL). |
+| `proxyUrl` | string | no | Proxy to route the requests through. |
+| `concurrency` | integer | no | Max parallel fetches (default `8`). |
+
+```json
+{ "urls": ["https://a.example", "https://b.example"], "concurrency": 5 }
+```
+
+Returns `{ count, results: [{ status, url, format, escalated, text } | { url, error }] }`.
 
 ---
 

@@ -36,6 +36,16 @@ fuse-browser fetch https://app.example.com --browser-fallback   # render a clien
 
 Applicable flags: `--proxy`, `--extract-prices`, `--browser-fallback`, `--text`, `--format <markdown|text>`.
 
+## `fetch-batch <url...>`
+
+Fetch multiple URLs in parallel via the HTTP fast-path (bounded concurrency, default 8). Prints `{ count, results }`; each result keeps `fetch` semantics, and a failed URL becomes `{ url, error }` without aborting the batch.
+
+```bash
+fuse-browser fetch-batch https://a.example https://b.example https://c.example --concurrency 5
+```
+
+Applicable flags: `--proxy`, `--browser-fallback`, `--text`, `--format <markdown|text>`, `--concurrency <n>`.
+
 ## `serp-batch <queries...>`
 
 Runs one Google search per query and prints one row per query. Requires at least one query (otherwise exits `1`). Output is JSON by default, or CSV with `--csv`.
@@ -76,8 +86,9 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--auto-consent` | boolean | Automatically handle cookie/consent dialogs (probe). |
 | `--extract-prices` | boolean | Extract prices from the page (probe, fetch). |
 | `--browser-fallback` | boolean | Re-render an empty SPA/CSR shell in a real browser (fetch). |
-| `--text` | boolean | Return raw text instead of markdown (fetch). |
-| `--format` | string | Output format `markdown` or `text` (fetch). |
+| `--text` | boolean | Return raw text instead of markdown (fetch, fetch-batch). |
+| `--format` | string | Output format `markdown` or `text` (fetch, fetch-batch). |
+| `--concurrency` | string | Max parallel fetches; parsed as a number (fetch-batch). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |

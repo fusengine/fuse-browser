@@ -6,10 +6,10 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { renderFetch } from "../../agent/fetch-render.js";
 import { resolveFetchBody } from "../../agent/fetch-resolve.js";
 import { contactsFromHtml } from "../../extraction/contacts/from-html.js";
 import { extractPrices } from "../../extraction/prices.js";
-import { htmlToMarkdown, renderMarkdown } from "../../extraction/serialize/to-markdown.js";
 import { fetchFast } from "../../net/fetch-fast.js";
 import { jsonResult } from "../result.js";
 
@@ -39,22 +39,14 @@ export function registerFetchTool(server: McpServer): void {
       const r = await fetchFast(String(a.url), proxyUrl);
       // Escalate an empty SPA shell to a real browser render when browserFallback is on.
       const body = await resolveFetchBody(String(a.url), r, { browserFallback: a.browserFallback === true, proxyUrl });
-      const max = typeof a.maxChars === "number" ? a.maxChars : 20_000;
-      // Non-HTML bodies (JSON, plain text) are returned raw — markdown extraction
-      // only applies to HTML, so the fast-path also serves JSON APIs cleanly.
-      const format = a.format === "text" || !body.isHtml ? "text" : "markdown";
-      const text =
-        format === "text"
-          ? body.text.slice(0, max)
-          : renderMarkdown(await htmlToMarkdown(body.html, { url: body.url }), max);
+      const rendered = await renderFetch(body, {
+        format: typeof a.format === "string" ? a.format : undefined,
+        maxChars: typeof a.maxChars === "number" ? a.maxChars : undefined,
+      });
       const country = typeof a.countryCode === "string" ? a.countryCode : "CH";
       const filter = a.contactFilter === "off" ? "off" : "strict";
       return jsonResult({
-        status: body.status,
-        url: body.url,
-        format,
-        escalated: body.escalated,
-        text,
+        ...rendered,
         prices: a.extractPrices ? extractPrices(body.text) : undefined,
         contacts: a.extractContacts ? contactsFromHtml(body.html, country, { url: body.url, filter }) : undefined,
       });

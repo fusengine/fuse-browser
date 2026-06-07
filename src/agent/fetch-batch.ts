@@ -1,0 +1,43 @@
+/**
+ * Fetch many URLs in parallel via the HTTP fast-path. Bounded concurrency, each
+ * URL resolved independently (fast-path + optional SPA browser escalation) and
+ * rendered to the shared `RenderedFetch` shape. A failed URL becomes an error
+ * entry instead of aborting the batch.
+ * @module agent/fetch-batch
+ */
+import { mapConcurrent } from "../net/concurrent.js";
+import { fetchFast } from "../net/fetch-fast.js";
+import { renderFetch, type RenderedFetch } from "./fetch-render.js";
+import { resolveFetchBody } from "./fetch-resolve.js";
+
+/** Default parallelism — polite for mixed hosts, multiplexes over HTTP/2. */
+const DEFAULT_CONCURRENCY = 8;
+
+/** Options for a batch fetch (per-URL semantics mirror `browser_fetch`). */
+export interface FetchBatchOptions {
+  format?: string;
+  maxChars?: number;
+  browserFallback?: boolean;
+  proxyUrl?: string;
+  concurrency?: number;
+}
+
+/** One batch result: a rendered fetch, or `{ url, error }` on failure. */
+export type FetchBatchItem = RenderedFetch | { url: string; error: string };
+
+/**
+ * Fetch `urls` concurrently and return one item per input, in order.
+ *
+ * @param urls - URLs to fetch.
+ * @param opts - Shared per-URL options + `concurrency` (default 8).
+ * @returns Results aligned to `urls`; failures are `{ url, error }`.
+ */
+export async function fetchBatch(urls: string[], opts: FetchBatchOptions = {}): Promise<FetchBatchItem[]> {
+  const concurrency = opts.concurrency && opts.concurrency > 0 ? opts.concurrency : DEFAULT_CONCURRENCY;
+  const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
+    const r = await fetchFast(url, opts.proxyUrl);
+    const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
+    return renderFetch(body, { format: opts.format, maxChars: opts.maxChars });
+  });
+  return outcomes.map((o, i) => (o.ok ? o.value : { url: urls[i] ?? "", error: String(o.error) }));
+}
