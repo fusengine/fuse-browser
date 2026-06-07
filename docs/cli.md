@@ -27,13 +27,14 @@ Applicable flags: `--engine`, `--country`, `--currency`, `--headed`, `--auto-con
 
 ## `fetch <url>`
 
-HTTP fast-path fetch using TLS impersonation (no full browser). Returns `status`, `url`, the response body truncated to the first 20,000 characters, and optional extracted prices. HTML is rendered to markdown by default; non-HTML responses (JSON, `text/plain`) are returned verbatim.
+HTTP fast-path fetch using TLS impersonation (no full browser). Returns `status`, `url`, the response body truncated to the first 20,000 characters, and optional extracted prices. HTML is rendered to markdown by default; non-HTML responses (JSON, `text/plain`) are returned verbatim. The body download is capped at 10 MB. Pass `--browser-fallback` to re-render an empty SPA/CSR shell in a real browser (`escalated: true` in the output).
 
 ```bash
 fuse-browser fetch https://example.com --extract-prices --proxy http://user:pass@host:8080
+fuse-browser fetch https://app.example.com --browser-fallback   # render a client-side app
 ```
 
-Applicable flags: `--proxy`, `--extract-prices`. (No other flags are read by this subcommand.)
+Applicable flags: `--proxy`, `--extract-prices`, `--browser-fallback`, `--text`, `--format <markdown|text>`.
 
 ## `serp-batch <queries...>`
 
@@ -74,6 +75,9 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--headed` | boolean | Run with a visible browser; absent means headless. |
 | `--auto-consent` | boolean | Automatically handle cookie/consent dialogs (probe). |
 | `--extract-prices` | boolean | Extract prices from the page (probe, fetch). |
+| `--browser-fallback` | boolean | Re-render an empty SPA/CSR shell in a real browser (fetch). |
+| `--text` | boolean | Return raw text instead of markdown (fetch). |
+| `--format` | string | Output format `markdown` or `text` (fetch). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |

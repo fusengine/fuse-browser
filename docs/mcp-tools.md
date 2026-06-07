@@ -67,7 +67,7 @@ Accepts the full [agentOptionShape](#browser_open) plus the same probe flags as 
 
 ### browser_fetch
 
-HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; not for JS/SPA pages (use `browser_probe` there). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher.
+HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; for JS/SPA pages set `browserFallback: true` (or use `browser_probe`). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher. The body download is capped at 10 MB.
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -79,6 +79,7 @@ HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x fast
 | `countryCode` | string | no | Default region for phone E.164 parsing (default `CH`). |
 | `proxyUrl` | string | no | Proxy to route the request through. |
 | `maxChars` | integer | no | Truncate returned `text` (default `20000`). |
+| `browserFallback` | boolean | no | When the HTTP response is an empty SPA/CSR shell, re-render it in a real browser and return the rendered markdown. Off by default. The response sets `escalated: true` when this happens. |
 
 ```json
 { "url": "https://example.com", "extractContacts": true }

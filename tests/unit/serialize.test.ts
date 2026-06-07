@@ -58,4 +58,13 @@ describe("htmlToMarkdown", () => {
     const doc = await htmlToMarkdown("<html></html>", { url: "https://x.com" });
     expect(doc.markdown).toBe("");
   });
+
+  test("maxInputChars drops content past the cap before parsing", async () => {
+    const head = `<html><body><article><p>HEAD CONTENT before the cap, long enough to matter.</p>`;
+    const html = `${head}<p>TAILMARKER past the cap</p></article></body></html>`;
+    const capped = await htmlToMarkdown(html, { url: "https://x.com", maxInputChars: head.length });
+    expect(capped.markdown).not.toContain("TAILMARKER"); // sliced off before linkedom ran
+    const full = await htmlToMarkdown(html, { url: "https://x.com" });
+    expect(full.markdown).toContain("TAILMARKER"); // no cap → full body parsed (Defuddle escapes "_")
+  });
 });

@@ -34,4 +34,10 @@ export interface SerializeOptions {
   removeImages?: boolean;
   /** Preferred BCP-47 content language hint passed to the extractor. */
   language?: string;
+  /**
+   * Max input length (chars) fed to the HTML parser. Bounds parse cost on huge
+   * pages — the tail beyond this is dropped before linkedom/Defuddle run.
+   * Defaults to {@link DEFAULT_MAX_INPUT_CHARS} when omitted.
+   */
+  maxInputChars?: number;
 }

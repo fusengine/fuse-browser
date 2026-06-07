@@ -36,9 +36,17 @@ function bodyText(document: LinkedomDocument): string {
   }
 }
 
+/**
+ * Default cap on HTML length (chars) fed to the parser. Median pages are ~150 KB,
+ * so 2 MB never touches normal content — it only bounds parse cost on pathological
+ * pages and guards against runaway DOM trees. Override via {@link SerializeOptions.maxInputChars}.
+ */
+export const DEFAULT_MAX_INPUT_CHARS = 2_000_000;
+
 /** Convert raw HTML into a {@link MarkdownDoc} (frontmatter + markdown body). */
 export async function htmlToMarkdown(html: string, opts: SerializeOptions = {}): Promise<MarkdownDoc> {
-  const { document } = parseHTML(html);
+  const limit = opts.maxInputChars ?? DEFAULT_MAX_INPUT_CHARS;
+  const { document } = parseHTML(html.length > limit ? html.slice(0, limit) : html);
   let markdown = "";
   let meta: MarkdownMeta = { url: opts.url ?? "" };
   try {
