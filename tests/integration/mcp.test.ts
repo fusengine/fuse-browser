@@ -23,6 +23,7 @@ const EXPECTED = [
   "browser_probe_html",
   "browser_fetch",
   "browser_fetch_batch",
+  "browser_crawl",
   "browser_open",
   "browser_status",
   "browser_close",

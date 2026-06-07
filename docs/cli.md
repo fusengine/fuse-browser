@@ -46,6 +46,16 @@ fuse-browser fetch-batch https://a.example https://b.example https://c.example -
 
 Applicable flags: `--proxy`, `--browser-fallback`, `--text`, `--format <markdown|text>`, `--concurrency <n>`.
 
+## `crawl <url>`
+
+Bounded same-origin crawl from a seed URL via the HTTP fast-path (BFS, parallel per depth level). Prints `{ count, pages }`, one clean-markdown entry per page (with its `depth`). Same-origin and robots.txt-honored by default.
+
+```bash
+fuse-browser crawl https://docs.example.com --max-pages 30 --max-depth 2
+```
+
+Applicable flags: `--max-pages <n>`, `--max-depth <n>`, `--concurrency <n>`, `--all-origins` (cross-origin), `--no-robots` (opt out of robots.txt), `--browser-fallback`, `--text`, `--format <markdown|text>`, `--proxy`.
+
 ## `serp-batch <queries...>`
 
 Runs one Google search per query and prints one row per query. Requires at least one query (otherwise exits `1`). Output is JSON by default, or CSV with `--csv`.
@@ -91,6 +101,10 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--concurrency` | string | Max parallel fetches; parsed as a number (fetch-batch). |
 | `--help`, `-h` | boolean | Print usage and exit (both `fuse-browser` and `browser-mcp`). |
 | `--version`, `-v` | boolean | Print the package version and exit (both bins). |
+| `--max-pages` | string | Crawl page cap; parsed as a number (crawl). |
+| `--max-depth` | string | Crawl BFS depth; parsed as a number (crawl). |
+| `--all-origins` | boolean | Allow cross-origin links during crawl (crawl). |
+| `--no-robots` | boolean | Opt out of robots.txt during crawl (crawl). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |

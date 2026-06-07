@@ -4,7 +4,7 @@ Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP 
 
 Tools fall into two families:
 
-- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
+- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
 - **Session tools** require a `sessionId` obtained from `browser_open` (or `browser_connect`). They drive one persistent, stateful page.
 
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
@@ -105,6 +105,31 @@ Fetch **many URLs in parallel** via the HTTP fast-path (TLS impersonation, no br
 ```
 
 Returns `{ count, results: [{ status, url, format, escalated, text } | { url, error }] }`.
+
+---
+
+### browser_crawl
+
+Crawl a site from a seed URL via the HTTP fast-path (no browser launch): breadth-first, fetching each depth level in parallel, returning clean markdown per page. Same-origin and robots.txt-honored **by default**; bounded by `maxPages`/`maxDepth`. For JS/SPA pages set `browserFallback:true` (renders empty shells per page).
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `url` | string | yes | Seed URL. |
+| `maxPages` | integer | no | Page cap (default `25`). |
+| `maxDepth` | integer | no | BFS depth from the seed (default `2`). |
+| `sameOrigin` | boolean | no | Stay on the seed's origin (default `true`). |
+| `concurrency` | integer | no | Parallel fetches per level (default `5`). |
+| `format` | enum `markdown` \| `text` | no | Per-page output (default `markdown`). |
+| `maxChars` | integer | no | Truncate each page's `text` (default `20000`). |
+| `browserFallback` | boolean | no | Re-render empty SPA/CSR shells per page. |
+| `respectRobots` | boolean | no | Honor robots.txt (default `true`; set `false` to opt out). |
+| `proxyUrl` | string | no | Proxy to route requests through. |
+
+```json
+{ "url": "https://docs.example.com", "maxPages": 30, "maxDepth": 2 }
+```
+
+Returns `{ count, pages: [{ status, url, format, escalated, text, depth }] }`.
 
 ---
 

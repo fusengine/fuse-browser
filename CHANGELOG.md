@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.43] - 08-06-2026
+
+### Added
+
+- feat(crawl): **`browser_crawl`** (MCP) / **`crawl <url>`** (CLI) — bounded same-origin crawl from a seed URL via the HTTP fast-path. Breadth-first, fetching each depth level in parallel, returning clean markdown per page (with its `depth`). Reuses the fast-path + per-page SPA `browserFallback` + the bounded-concurrency map. Conservative defaults: `maxPages` 25, `maxDepth` 2, `concurrency` 5, `sameOrigin` true, and **`respectRobots` true** (robots.txt honored by default; opt out with `respectRobots:false` / `--no-robots`). URLs are de-duplicated at enqueue time and hash fragments are stripped. New `net/extract-links.ts` (same-origin link extraction). 34th tool.
+
 ## [0.1.42] - 08-06-2026
 
 ### Added
