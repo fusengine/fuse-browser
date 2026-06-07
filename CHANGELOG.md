@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.41] - 08-06-2026
+
+### Added
+
+- feat(fetch): **`browser_fetch_batch`** (MCP) / **`fetch-batch <url...>`** (CLI) — fetch many URLs in parallel via the HTTP fast-path, bounded concurrency (default 8). Each URL keeps full `browser_fetch` semantics (markdown for HTML, JSON/plain-text verbatim, per-URL `browserFallback` SPA escalation). Results are returned in input order; a failed URL becomes `{ url, error }` and never aborts the batch. Lets an agent retrieve N pages in one call instead of N round-trips. CLI flag `--concurrency`.
+
+### Changed
+
+- refactor(fetch): extracted the shared body→`{ format, text, escalated }` rendering into `agent/fetch-render.ts` (`renderFetch`), now the single source used by `browser_fetch`, the `fetch` CLI, and `browser_fetch_batch` (removes the prior duplication). New `net/concurrent.ts` (`mapConcurrent`) is a dependency-free, order-preserving, error-isolating bounded-concurrency map.
+
 ## [0.1.40] - 08-06-2026
 
 ### Added

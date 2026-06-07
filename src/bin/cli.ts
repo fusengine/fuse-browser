@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * fuse-browser CLI entry point. Subcommands: `probe`, `fetch`, `serp-batch`, `shots`.
+ * fuse-browser CLI entry point. Subcommands: `probe`, `fetch`, `fetch-batch`, `serp-batch`, `shots`.
  * @module bin/cli
  */
 import { parseArgs } from "node:util";
+import { runFetchBatchCli } from "./fetch-batch-cli.js";
 import { runFetchCli } from "./fetch-cli.js";
 import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
@@ -39,6 +40,7 @@ const { positionals, values } = parseArgs({
     "browser-fallback": { type: "boolean" },
     text: { type: "boolean" },
     format: { type: "string" },
+    concurrency: { type: "string" },
     "proxy-map": { type: "string" },
     "user-data-dir": { type: "string" },
     "site-memory-dir": { type: "string" },
@@ -54,6 +56,8 @@ if (command === "serp-batch") {
   await runSerpBatch(rest, opts);
 } else if (command === "shots" && rest[0]) {
   await runShots(rest[0], opts);
+} else if (command === "fetch-batch" && rest.length > 0) {
+  await runFetchBatchCli(rest, opts);
 } else if (command === "fetch" && rest[0]) {
   await runFetchCli(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
