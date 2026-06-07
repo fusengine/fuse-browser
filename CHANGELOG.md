@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.42] - 08-06-2026
+
+### Added
+
+- feat(cli): both bins handle `--help`/`-h` and `--version`/`-v` **before** strict arg parsing (and, for `browser-mcp`, before the stdio transport binds — printing to stdout after connect would corrupt the protocol). Unknown top-level flags now produce a concise `error: Unknown option '…'` (exit 1) instead of a raw `ERR_PARSE_ARGS_UNKNOWN_OPTION` stack trace. Logic lives in a shared `bin/cli-meta.ts` helper (`handleMetaFlags`, `parseArgsOrExit`, `firstFlag`).
+
 ## [0.1.41] - 08-06-2026
 
 ### Added

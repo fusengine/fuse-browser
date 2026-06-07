@@ -89,6 +89,8 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--text` | boolean | Return raw text instead of markdown (fetch, fetch-batch). |
 | `--format` | string | Output format `markdown` or `text` (fetch, fetch-batch). |
 | `--concurrency` | string | Max parallel fetches; parsed as a number (fetch-batch). |
+| `--help`, `-h` | boolean | Print usage and exit (both `fuse-browser` and `browser-mcp`). |
+| `--version`, `-v` | boolean | Print the package version and exit (both bins). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |
