@@ -56,6 +56,16 @@ fuse-browser crawl https://docs.example.com --max-pages 30 --max-depth 2
 
 Applicable flags: `--max-pages <n>`, `--max-depth <n>`, `--concurrency <n>`, `--all-origins` (cross-origin), `--no-robots` (opt out of robots.txt), `--browser-fallback`, `--text`, `--format <markdown|text>`, `--proxy`.
 
+## `shots-batch <url...>`
+
+Full-page responsive screenshots for multiple URLs in parallel (real browser per page, low concurrency by default). Prints `{ count, results }` with saved PNG paths per URL.
+
+```bash
+fuse-browser shots-batch https://a.example https://b.example --viewports mobile,desktop --concurrency 2
+```
+
+Applicable flags: `--viewports`, `--settle-ms`, `--concurrency`, `--engine`, `--country`, `--headed`, `--output-dir`, `--proxy`.
+
 ## `serp-batch <queries...>`
 
 Runs one Google search per query and prints one row per query. Requires at least one query (otherwise exits `1`). Output is JSON by default, or CSV with `--csv`.

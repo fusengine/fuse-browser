@@ -1,0 +1,39 @@
+/**
+ * Capture responsive screenshots for many URLs — the visual counterpart of
+ * fetch-batch. Each URL goes through {@link captureShots} (its own browser),
+ * with LOW bounded concurrency since every page is a full Chromium instance.
+ * A failed URL becomes an error entry instead of aborting the batch.
+ * @module agent/shots-batch
+ */
+import type { ViewportInput } from "../engine/viewport.js";
+import { mapConcurrent } from "../net/concurrent.js";
+import type { ResolvedConfig } from "./config.js";
+import { captureShots, type Shot } from "./shots.js";
+
+/** Default parallelism — full browsers are RAM-heavy, so keep it low. */
+const DEFAULT_CONCURRENCY = 2;
+
+/** One batch entry: the saved shots for a URL, or an error. */
+export type ShotsBatchItem = { url: string; shots: Shot[] } | { url: string; error: string };
+
+/**
+ * Screenshot each URL at the given viewports, in parallel (bounded).
+ *
+ * @param config - Resolved browser config (engine, output dir, …).
+ * @param urls - URLs to capture.
+ * @param viewports - Viewports per URL.
+ * @param settleMs - Settle delay before each capture.
+ * @param concurrency - Max browsers in flight (default 2).
+ * @returns One item per input URL, in order.
+ */
+export async function captureShotsBatch(
+  config: ResolvedConfig,
+  urls: string[],
+  viewports: ViewportInput[],
+  settleMs?: number,
+  concurrency?: number,
+): Promise<ShotsBatchItem[]> {
+  const limit = concurrency && concurrency > 0 ? concurrency : DEFAULT_CONCURRENCY;
+  const outcomes = await mapConcurrent(urls, limit, (url) => captureShots(config, url, viewports, settleMs));
+  return outcomes.map((o, i) => (o.ok ? { url: urls[i] ?? "", shots: o.value } : { url: urls[i] ?? "", error: String(o.error) }));
+}

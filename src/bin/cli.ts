@@ -9,6 +9,7 @@ import { runFetchBatchCli } from "./fetch-batch-cli.js";
 import { runFetchCli } from "./fetch-cli.js";
 import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
+import { runShotsBatch } from "./shots-batch-cli.js";
 import { runShots } from "./shots-cli.js";
 
 const USAGE =
@@ -66,6 +67,8 @@ const opts = values as Record<string, unknown>;
 
 if (command === "serp-batch") {
   await runSerpBatch(rest, opts);
+} else if (command === "shots-batch" && rest.length > 0) {
+  await runShotsBatch(rest, opts);
 } else if (command === "shots" && rest[0]) {
   await runShots(rest[0], opts);
 } else if (command === "fetch-batch" && rest.length > 0) {

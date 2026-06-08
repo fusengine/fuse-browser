@@ -48,6 +48,7 @@ const EXPECTED = [
   "browser_screenshot",
   "browser_inspect",
   "browser_visual_diff",
+  "browser_shots_batch",
   "browser_handoff",
   "browser_serp_batch",
   "browser_metrics",

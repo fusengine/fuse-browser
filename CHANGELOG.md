@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.44] - 08-06-2026
+
+### Added
+
+- feat(shots): **`browser_shots_batch`** (MCP) / **`shots-batch <url...>`** (CLI) — full-page responsive screenshots for many URLs in parallel, the visual counterpart of `browser_fetch_batch`. Each URL is rendered in a real browser at each viewport (default `mobile,desktop`) and saved as a PNG; concurrency is **low by default (2)** since every page is a full Chromium instance. Returns saved paths per URL; a failed URL becomes `{ url, error }` without aborting the batch. 35th tool.
+
+### Changed
+
+- refactor(viewport): `parseViewports` (CSV → viewport inputs) moved to `engine/viewport.ts` and shared by the `shots` and `shots-batch` CLIs (removes duplication).
+
 ## [0.1.43] - 08-06-2026
 
 ### Added
