@@ -10,7 +10,7 @@ import { teardownOpened } from "../engine/teardown.js";
 import { type ViewportInput, resolveViewport } from "../engine/viewport.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
 import { gotoWithRetry } from "../net/navigate.js";
-import { settleForCapture } from "../state/settle-capture.js";
+import { detectScrollJack, settleForCapture } from "../state/settle-capture.js";
 import type { ResolvedConfig } from "./config.js";
 
 /** One saved responsive screenshot. */
@@ -19,6 +19,8 @@ export interface Shot {
   width: number;
   height: number;
   path: string;
+  /** True when the page is scroll-jacked (~one viewport tall): the shot is hero-only, not the full site. */
+  scrollJacked?: boolean;
 }
 
 /**
@@ -41,10 +43,11 @@ export async function shotsOnPage(
     const size = resolveViewport(v);
     await page.setViewportSize(size);
     await settleForCapture(page, settleMs);
+    const scrollJacked = await detectScrollJack(page);
     const name = typeof v === "string" ? v : `${size.width}x${size.height}`;
     const path = join(config.outputDir, `${runId}-${name}.png`);
     await page.screenshot({ path, fullPage: true, animations: "disabled" });
-    shots.push({ viewport: name, width: size.width, height: size.height, path });
+    shots.push({ viewport: name, width: size.width, height: size.height, path, scrollJacked });
   }
   return shots;
 }

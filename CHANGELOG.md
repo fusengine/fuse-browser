@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.51] - 08-06-2026
+
+### Fixed
+
+- fix(shots): **robust full-page settle + scroll-jack detection** — full-page screenshots could truncate or leave blank gaps on tall sites (lazy / scroll-reveal content not yet loaded) and silently captured **only the hero** on scroll-jacked sites (where the document is one viewport tall and the scroll is faked in JS/canvas). `settleForCapture` now auto-scrolls against `max(body, documentElement).scrollHeight` with **re-measure** (handles growing/lazy pages and the case where `body` under-reports height), waits for a **second `networkidle` plus `document.fonts.ready` and pending images** after the scroll, then returns to the top. New `detectScrollJack`: when the page is ~one viewport tall (so `fullPage` can only capture the hero), shots are flagged **`scrollJacked: true`** instead of returning a misleading partial as if complete. Verified live: instrument.com captures full-page (`scrollJacked=false`); design.studio is correctly flagged (`scrollJacked=true`). Affects `browser_screenshot`, `browser_shots_batch`, `browser_site_shots`, and visual-diff capture.
+
 ## [0.1.50] - 08-06-2026
 
 ### Changed
