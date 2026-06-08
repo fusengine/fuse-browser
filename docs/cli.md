@@ -66,6 +66,16 @@ fuse-browser shots-batch https://a.example https://b.example --viewports mobile,
 
 Applicable flags: `--viewports`, `--settle-ms`, `--concurrency`, `--engine`, `--country`, `--headed`, `--output-dir`, `--proxy`.
 
+## `collect-batch <url...>`
+
+Exhaust the infinite-scroll/paginated list of multiple URLs in parallel (one real browser per URL). Requires `--item` (the row CSS selector). Prints `{ count, results }` with collected items per URL.
+
+```bash
+fuse-browser collect-batch "https://site/search?q=x" --item ".listing-card" --extract-prices
+```
+
+Applicable flags: `--item` (required), `--container`, `--max-steps`, `--extract-prices`, `--concurrency`, `--throttle-ms`, `--engine`, `--country`, `--headed`, `--proxy`.
+
 ## `serp-batch <queries...>`
 
 Runs one Google search per query and prints one row per query. Requires at least one query (otherwise exits `1`). Output is JSON by default, or CSV with `--csv`.
@@ -115,7 +125,10 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--max-depth` | string | Crawl BFS depth; parsed as a number (crawl). |
 | `--all-origins` | boolean | Allow cross-origin links during crawl (crawl). |
 | `--no-robots` | boolean | Opt out of robots.txt during crawl (crawl). |
-| `--throttle-ms` | string | Min gap between same-host hits; parsed as a number (crawl). |
+| `--throttle-ms` | string | Min gap between same-host hits; parsed as a number (crawl, collect-batch). |
+| `--item` | string | CSS selector for one list row (collect-batch). |
+| `--container` | string | Scroll container selector (collect-batch). |
+| `--max-steps` | string | Max scroll steps per page; parsed as a number (collect-batch). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |
