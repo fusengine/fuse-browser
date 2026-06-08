@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.50] - 08-06-2026
+
+### Changed
+
+- feat(engine): **coherent stealth fingerprint** — the realistic profile no longer injects a static user-agent (`Windows / Chrome 125`), which desynced from the real browser's `sec-ch-ua`, `navigator.userAgentData` and WebGL (a detectable lie that 2026 anti-bots key on). Three coordinated changes: **(1)** a **channel cascade** `chrome → chromium → bundled` (with safe missing-binary fallback) launches a full Chrome/Chromium **new-headless** build instead of the `chromium-headless-shell` — so `sec-ch-ua` reports real **Google Chrome** (no `HeadlessChrome` brand) and **WebGL is real** (the shell exposed none); **(2)** the static UA override is replaced by a **coherent UA** derived from the real browser with only the `HeadlessChrome` token stripped — real platform & version preserved (no spoof), cached per browser; **(3)** the context **viewport rotates** over realistic desktop resolutions instead of a fixed `1365×900` fleet fingerprint. Verified live: `navigator.userAgent` and the `User-Agent` header become `Chrome/148` (no `HeadlessChrome`), `sec-ch-ua` = `Google Chrome 148`, real WebGL, coherent UA ↔ Client Hints. Scope: ephemeral + pooled Chromium paths; persistent (`userDataDir`) and CDP attach are unchanged. Refactor: extracted `newConfiguredContext` into `engine/configured-context`.
+
 ## [0.1.49] - 08-06-2026
 
 ### Fixed
