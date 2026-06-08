@@ -7,6 +7,7 @@ import type { ActionResult } from "../interfaces/types.js";
 import { evalScriptArg } from "../lib/evaluate.js";
 import { escapeRegExp } from "../lib/text.js";
 import { humanPause } from "./human.js";
+import { humanMoveTo } from "./human-mouse.js";
 
 const HEURISTIC_CLICK = `(target) => {
   const needle = target.toLowerCase();
@@ -44,6 +45,7 @@ export async function smartClick(
         if (humanMode) {
           await humanPause(page);
           await locator.scrollIntoViewIfNeeded({ timeout: 2_000 });
+          await humanMoveTo(page, locator);
           await locator.hover({ timeout: 2_000 });
           await humanPause(page);
         }
