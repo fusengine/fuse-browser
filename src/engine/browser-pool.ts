@@ -11,7 +11,8 @@
 import type { Browser, BrowserServer, Page } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import { closeServerHardened } from "./close-server.js";
-import { launchServerAndConnect, newConfiguredContext } from "./launch.js";
+import { newConfiguredContext } from "./configured-context.js";
+import { launchServerAndConnect } from "./launch.js";
 import { loadBrowserType } from "./loader.js";
 import { selectEngineForConfig } from "./registry.js";
 import { teardownOpened } from "./teardown.js";

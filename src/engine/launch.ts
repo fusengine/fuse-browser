@@ -1,14 +1,16 @@
 /**
  * Shared launch logic (persistent or ephemeral context), engine-aware.
- * Chromium-only options (args, channel) are NOT passed to Firefox/WebKit, which
- * reject unknown Chromium flags (e.g. WebKit throws on `--no-sandbox`).
+ * Chromium-only options (args) are NOT passed to Firefox/WebKit, which reject
+ * unknown Chromium flags (e.g. WebKit throws on `--no-sandbox`). The launch
+ * channel is chosen by the stealth cascade ({@link channelCascadeFor}).
  * @module engine/launch
  */
-import { existsSync } from "node:fs";
-import type { Browser, BrowserContext, BrowserServer, BrowserType, LaunchOptions } from "playwright";
+import type { Browser, BrowserServer, BrowserType, LaunchOptions } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import type { OpenedContext } from "../interfaces/engine.js";
 import { logger } from "../lib/logger.js";
+import { channelCascadeFor, launchCascade } from "./channel-cascade.js";
+import { newConfiguredContext } from "./configured-context.js";
 import { buildContextOptions } from "./context.js";
 import { isChromiumEngine } from "./loader.js";
 import { WEBRTC_LEAK_ARGS } from "./webrtc.js";
@@ -20,7 +22,6 @@ function buildLaunchOptions(config: ResolvedConfig): LaunchOptions {
   const opts: LaunchOptions = { headless: config.headless };
   if (isChromiumEngine(config.engine)) {
     opts.args = config.proxyUrl ? [...CHROMIUM_ARGS, ...WEBRTC_LEAK_ARGS] : [...CHROMIUM_ARGS];
-    if (config.channel) opts.channel = config.channel;
   }
   if (config.executablePath) opts.executablePath = config.executablePath;
   if (config.proxyUrl) opts.proxy = { server: config.proxyUrl };
@@ -39,38 +40,27 @@ function enrichLaunchError(err: unknown): never {
   throw err as Error;
 }
 
-/**
- * Create a fresh, fully-configured (identity + stealth-inherited) context on an
- * already-launched `browser`. Patchright stealth is browser-level, so every
- * context inherits it; this only layers the per-context identity/HAR/storage.
- * The reusable unit for a multi-context browser pool.
- */
-export async function newConfiguredContext(browser: Browser, config: ResolvedConfig): Promise<BrowserContext> {
-  const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
-  const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
-  if (config.storageStatePath && existsSync(config.storageStatePath)) {
-    contextOptions.storageState = config.storageStatePath;
-  }
-  return browser.newContext(contextOptions);
-}
-
 /** Launch the given engine (persistent or ephemeral) and return a ready context. */
 export async function launchBrowser(
   browserType: BrowserType,
   config: ResolvedConfig,
 ): Promise<OpenedContext> {
   const launchOptions = buildLaunchOptions(config);
+  const cascade = channelCascadeFor(config);
+  const dir = config.userDataDir;
 
-  if (config.userDataDir) {
+  if (dir) {
     const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
     const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
-    const context = await browserType
-      .launchPersistentContext(config.userDataDir, { ...launchOptions, ...contextOptions })
-      .catch(enrichLaunchError);
+    const context = await launchCascade(cascade, (channel) =>
+      browserType.launchPersistentContext(dir, { ...launchOptions, ...contextOptions, channel }),
+    ).catch(enrichLaunchError);
     return { context, browser: null };
   }
 
-  const browser = await browserType.launch(launchOptions).catch(enrichLaunchError);
+  const browser = await launchCascade(cascade, (channel) =>
+    browserType.launch({ ...launchOptions, channel }),
+  ).catch(enrichLaunchError);
   const context = await newConfiguredContext(browser, config);
   return { context, browser };
 }
@@ -80,15 +70,15 @@ export async function launchBrowser(
  * Unlike {@link launchBrowser}, this returns the {@link BrowserServer} so the
  * caller can force-kill the browser process if a graceful close ever stalls —
  * the warm-pool path needs this to avoid zombie Chromium on a loaded host.
- * Stealth is unaffected: Patchright patches client-side, so a connected browser
- * is byte-identical to a launched one (verified live on bot-detection probes).
  */
 export async function launchServerAndConnect(
   browserType: BrowserType,
   config: ResolvedConfig,
 ): Promise<{ server: BrowserServer; browser: Browser }> {
   const launchOptions = buildLaunchOptions(config);
-  const server = await browserType.launchServer(launchOptions).catch(enrichLaunchError);
+  const server = await launchCascade(channelCascadeFor(config), (channel) =>
+    browserType.launchServer({ ...launchOptions, channel }),
+  ).catch(enrichLaunchError);
   const browser = await browserType.connect(server.wsEndpoint());
   return { server, browser };
 }
