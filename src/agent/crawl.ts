@@ -9,6 +9,8 @@ import { mapConcurrent } from "../net/concurrent.js";
 import { extractLinks } from "../net/extract-links.js";
 import { fetchFast } from "../net/fetch-fast.js";
 import { createRobotsGuard } from "../net/robots-guard.js";
+import { throttleHost } from "../net/throttle.js";
+import { jitterMs } from "../lib/retry.js";
 import { renderFetch, type RenderedFetch } from "./fetch-render.js";
 import { resolveFetchBody } from "./fetch-resolve.js";
 
@@ -23,6 +25,7 @@ export interface CrawlOptions {
   browserFallback?: boolean;
   proxyUrl?: string;
   respectRobots?: boolean;
+  throttleMs?: number;
 }
 
 /** A crawled page: its rendered content plus its BFS depth from the seed. */
@@ -44,6 +47,7 @@ export async function crawl(seed: string, opts: CrawlOptions = {}): Promise<{ co
   const sameOrigin = opts.sameOrigin !== false;
   const concurrency = opts.concurrency && opts.concurrency > 0 ? opts.concurrency : 5;
   const robots = opts.respectRobots === false ? null : createRobotsGuard(opts.proxyUrl);
+  const throttleMs = opts.throttleMs ?? 250; // polite per-host gap (jittered per request); 0 disables
   const visited = new Set<string>([seed]);
   const pages: CrawlPage[] = [];
   let frontier = [seed];
@@ -52,6 +56,7 @@ export async function crawl(seed: string, opts: CrawlOptions = {}): Promise<{ co
     const batch = frontier.slice(0, maxPages - pages.length);
     const fetched = await mapConcurrent(batch, concurrency, async (url) => {
       if (robots && !(await robots.allowed(url))) throw new Error("robots-disallowed");
+      await throttleHost(url, jitterMs(throttleMs));
       const r = await fetchFast(url, opts.proxyUrl);
       const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
       return { rendered: await renderFetch(body, { format: opts.format, maxChars: opts.maxChars }), html: body.html, url: body.url };

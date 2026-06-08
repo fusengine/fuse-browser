@@ -54,6 +54,7 @@ const { positionals, values } = parseArgsOrExit({
     "max-depth": { type: "string" },
     "all-origins": { type: "boolean" },
     "no-robots": { type: "boolean" },
+    "throttle-ms": { type: "string" },
     "proxy-map": { type: "string" },
     "user-data-dir": { type: "string" },
     "site-memory-dir": { type: "string" },

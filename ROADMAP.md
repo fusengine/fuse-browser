@@ -57,6 +57,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **CLI metadata flags** — `--help`/`--version` + clean unknown-flag errors on both bins *(shipped 0.1.42)*
 - ✅ **Site crawl** (`browser_crawl`) — bounded same-origin BFS → markdown per page, robots-honored, reuses the batch/escalation path *(shipped 0.1.43)*
 - ✅ **Batch screenshots** (`browser_shots_batch`) — responsive full-page PNGs for many URLs in parallel (visual counterpart of fetch-batch) *(shipped 0.1.44)*
+- ✅ **Crawl per-host throttle (jittered)** — `throttleMs` (default 250ms, jittered `[base/2,1.5×]` to look human) + reserve-ahead `throttleHost` so big crawls stay polite/unblocked *(shipped 0.1.45)*
 - ⬜ **Cross-request fetch cache** — optional byte-bounded LRU to skip repeat fetches across calls *(planned)*
 - ⬜ **Crawl → screenshots** — `crawl` discovers URLs, `shots-batch` captures them: full-site visual snapshot in one flow *(planned)*
 

@@ -15,6 +15,16 @@ export function backoffDelay(attempt: number, baseMs: number, capMs: number): nu
   return randInt(0, expo);
 }
 
+/**
+ * A jittered delay around `baseMs` — uniform in `[baseMs/2, baseMs*1.5]` (mean
+ * `baseMs`). A fixed gap is a bot fingerprint; this makes pacing look human.
+ * Returns 0 when `baseMs <= 0`.
+ */
+export function jitterMs(baseMs: number): number {
+  if (baseMs <= 0) return 0;
+  return randInt(Math.floor(baseMs / 2), Math.ceil(baseMs * 1.5));
+}
+
 /** Outcome of one attempt passed to the classifier. */
 export interface RetryOutcome<T> {
   value?: T;
