@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.46] - 08-06-2026
+
+### Added
+
+- feat(collect): **`browser_collect_batch`** (MCP) / **`collect-batch <url...>`** (CLI) — the collect side of **crawl + collect**. Exhausts the infinite-scroll / paginated list of many listing URLs in parallel: one real browser per URL, drains each page (scroll + dedup by row key), returns all items. Low concurrency (default 2), jittered per-host throttle, per-URL error isolation. Pair with `browser_crawl` to discover category/search pages, then drain each here → ratisser a whole classifieds/listing site. New one-shot `runCollect(config, url, opts)` (browser counterpart of a single fetch) reused by the batch. 36th tool.
+
 ## [0.1.45] - 08-06-2026
 
 ### Added

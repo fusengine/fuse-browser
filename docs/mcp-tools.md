@@ -4,7 +4,7 @@ Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP 
 
 Tools fall into two families:
 
-- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
+- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
 - **Session tools** require a `sessionId` obtained from `browser_open` (or `browser_connect`). They drive one persistent, stateful page.
 
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
@@ -154,6 +154,29 @@ Full-page **responsive screenshots for many URLs in parallel** — the visual co
 ```
 
 Returns `{ count, results: [{ url, shots: [{ viewport, width, height, path }] } | { url, error }] }`.
+
+---
+
+### browser_collect_batch
+
+The collect side of **crawl + collect**: exhaust the **infinite-scroll / paginated list** of many listing URLs in parallel. One real browser per URL drains the page (scroll + dedup by row key) and returns all items. Low concurrency (default 2), jittered per-host throttle, per-URL error isolation. Use `browser_crawl` to find category/search pages, then drain each here.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `urls` | string[] | yes | Listing/search URLs to exhaust. |
+| `item` | string | yes | CSS selector for one list row. |
+| `container` | string | no | Scroll container selector (auto-detected if omitted). |
+| `maxSteps` | integer | no | Max scroll steps per page (default 60). |
+| `extractPrices` | boolean | no | Run the price extractor on each row. |
+| `concurrency` | integer | no | Max browsers in flight (default 2). |
+| `throttleMs` | integer | no | Jittered per-host gap between URLs (default 250; 0 disables). |
+| `engine` / `countryCode` / `headless` / `proxyUrl` | — | no | Browser options. |
+
+```json
+{ "urls": ["https://site/search?q=x"], "item": ".listing-card", "extractPrices": true }
+```
+
+Returns `{ count, results: [{ url, count, steps, reachedEnd, items } | { url, error }] }`.
 
 ---
 

@@ -4,6 +4,7 @@
  * @module bin/cli
  */
 import { handleMetaFlags, parseArgsOrExit } from "./cli-meta.js";
+import { runCollectBatchCli } from "./collect-batch-cli.js";
 import { runCrawlCli } from "./crawl-cli.js";
 import { runFetchBatchCli } from "./fetch-batch-cli.js";
 import { runFetchCli } from "./fetch-cli.js";
@@ -55,6 +56,9 @@ const { positionals, values } = parseArgsOrExit({
     "all-origins": { type: "boolean" },
     "no-robots": { type: "boolean" },
     "throttle-ms": { type: "string" },
+    item: { type: "string" },
+    container: { type: "string" },
+    "max-steps": { type: "string" },
     "proxy-map": { type: "string" },
     "user-data-dir": { type: "string" },
     "site-memory-dir": { type: "string" },
@@ -76,6 +80,8 @@ if (command === "serp-batch") {
   await runFetchBatchCli(rest, opts);
 } else if (command === "crawl" && rest[0]) {
   await runCrawlCli(rest[0], opts);
+} else if (command === "collect-batch" && rest.length > 0) {
+  await runCollectBatchCli(rest, opts);
 } else if (command === "fetch" && rest[0]) {
   await runFetchCli(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
