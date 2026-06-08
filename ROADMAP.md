@@ -63,6 +63,21 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Crawl + collect** — `browser_collect_batch`: exhaust the infinite list of many listing URLs in parallel (crawl discovers, collect drains) → ratisser a whole listing site *(shipped 0.1.46)*
 - ✅ **Crawl → screenshots** (`browser_site_shots`) — crawl + screenshot each page: full-site **content + visual** snapshot in one flow (crawl markdown surfaced, not discarded) *(shipped 0.1.47)*
 
+## ✅ v0.6 — Reliability & stealth coherence
+
+- ✅ **Warm browser pool** — one warm browser, fresh isolated context per task (shots/collect/site-shots) *(shipped 0.1.48)*
+- ✅ **No zombie Chromium** — pool launches via `launchServer()`+`connect()`, `close()` SIGKILLs the process on a stalled graceful close (`closeServerHardened`) *(shipped 0.1.49)*
+- ✅ **Coherent stealth fingerprint** — channel cascade `chrome→chromium→bundled` (full new-headless, real `sec-ch-ua`/WebGL, no `HeadlessChrome`), coherent UA (real-browser UA minus the `Headless` token, no static spoof), rotated realistic viewport *(shipped 0.1.50)*
+- ✅ **Robust full-page capture** — settle scrolls on `documentElement` with re-measure + post-scroll networkidle/fonts/images; `scrollJacked` flag when the document is one viewport tall (fullPage can only get the hero) *(shipped 0.1.51)*
+- ✅ **Scroll-jacked filmstrip** — when `scrollJacked`, drive the site's own scroll with real wheel events and save N viewport frames (`frame0..N`): real sections on smooth-scroll sites, animation states on pure-WebGL ones (no fake stitch) *(shipped 0.1.52)*
+
+## ⬜ Backlog — gated / optional
+- ⬜ **Human mouse paths (Bézier)** before clicks — behavioral evasion vs ML mouse-movement detection *(planned)*
+- ⬜ **Web Bot Auth** (Ed25519 + RFC 9421 request signing) — the "verified bot" lane; **needs an operator domain + a hosted JWKS** at `/.well-known/http-message-signatures-directory` (a random key defeats the purpose) *(infra decision)*
+- ⬜ **Headful + Xvfb** for 100%-undetected headless on servers — *(ops decision; option+doc vs auto-launch)*
+- ⬜ **impit `HEADER_TABLE_SIZE` (1:65536)** in the HTTP/2 SETTINGS frame — last Akamai-fingerprint delta; **upstream** (apify/impit #385), bump impit when fixed
+- ⬜ **Cross-request fetch cache** — optional byte-bounded LRU to skip repeat fetches across calls
+
 ## ⬜ Later / optional
 
 - ✅ **Human-in-the-loop** takeover — `browser_handoff` pauses for a human (headed) to finish login/2FA/captcha, resumes on a url/selector condition *(shipped 0.1.20)*; streaming **live view** later added (`browser_live_view`, JPEG-over-SSE, works headless) *(shipped 0.1.38)*
