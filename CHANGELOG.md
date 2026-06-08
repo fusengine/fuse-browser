@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.53] - 08-06-2026
+
+### Added
+
+- feat(actions): **human Bézier cursor motion before clicks** (`humanMode`) — behavioral anti-bots (ML on mouse velocity / curvature / timing) flag the instant teleport-to-element that `locator.click` produces. In `humanMode`, `smartClick` now moves the cursor to the target along a **cubic Bézier** path (ease-in-out, random control points, per-step jitter, variable timing) before hovering/clicking — a human reach, not a straight teleport. New `human-mouse` module: pure `cubicBezier` + `easeInOutCubic` (unit-tested) + `humanMoveTo` (steps `page.mouse.move` with sleeps; no-op when the element has no box). Only active when `humanMode=true`; the default click path is unchanged.
+
 ## [0.1.52] - 08-06-2026
 
 ### Added
