@@ -133,6 +133,29 @@ Returns `{ count, pages: [{ status, url, format, escalated, text, depth }] }`.
 
 ---
 
+### browser_shots_batch
+
+Full-page **responsive screenshots for many URLs in parallel** — the visual counterpart of `browser_fetch_batch`. Each URL is rendered in a real browser at each viewport and saved as a PNG. Concurrency is **low by default (2)** — every page is a full Chromium instance. A failed URL becomes `{ url, error }`.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `urls` | string[] | yes | URLs to capture. |
+| `viewports` | string | no | CSV of presets/sizes, e.g. `mobile,desktop,1280x720` (default `mobile,desktop`). |
+| `settleMs` | integer | no | Settle delay before each capture. |
+| `concurrency` | integer | no | Max browsers in flight (default `2`). |
+| `engine` | string | no | Engine to launch. |
+| `countryCode` | string | no | Identity country. |
+| `headless` | boolean | no | Run headless (default true). |
+| `proxyUrl` | string | no | Proxy to route through. |
+
+```json
+{ "urls": ["https://a.example", "https://b.example"], "viewports": "mobile,desktop" }
+```
+
+Returns `{ count, results: [{ url, shots: [{ viewport, width, height, path }] } | { url, error }] }`.
+
+---
+
 ## Session
 
 ### browser_open

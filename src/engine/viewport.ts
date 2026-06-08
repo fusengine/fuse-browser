@@ -25,3 +25,23 @@ export function viewportLabel(input: ViewportInput): string {
   const { width, height } = resolveViewport(input);
   return `${typeof input === "string" ? input : "custom"} ${width}x${height}`;
 }
+
+/**
+ * Parse a `--viewports`-style CSV (`"mobile,desktop,1280x720"`) into viewport
+ * inputs. Unknown tokens fall back to `desktop`. Empty input → `mobile,desktop`.
+ *
+ * @param csv - Comma-separated presets and/or `WIDTHxHEIGHT` sizes.
+ * @returns The parsed viewport list.
+ */
+export function parseViewports(csv: string | undefined): ViewportInput[] {
+  const presets = Object.keys(VIEWPORT_PRESETS);
+  return (csv ?? "mobile,desktop")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((p): ViewportInput => {
+      if (presets.includes(p)) return p as ViewportInput;
+      const [w, h] = p.split("x").map(Number);
+      return Number.isFinite(w) && Number.isFinite(h) ? { width: w as number, height: h as number } : "desktop";
+    });
+}

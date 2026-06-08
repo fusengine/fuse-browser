@@ -5,7 +5,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 34 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 35 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Remote CDP (Browserless): auth `cdpHeaders`/`?token=`, configurable timeout, fresh identity context + stealth re-injection (`addInitScript` parity with launch), `cdpCloseOnDone` closes remote sessions while never closing a local browser
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
@@ -56,7 +56,9 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Batch fetch** (`browser_fetch_batch`) — many URLs in parallel, bounded concurrency, per-URL error isolation *(shipped 0.1.41)*
 - ✅ **CLI metadata flags** — `--help`/`--version` + clean unknown-flag errors on both bins *(shipped 0.1.42)*
 - ✅ **Site crawl** (`browser_crawl`) — bounded same-origin BFS → markdown per page, robots-honored, reuses the batch/escalation path *(shipped 0.1.43)*
+- ✅ **Batch screenshots** (`browser_shots_batch`) — responsive full-page PNGs for many URLs in parallel (visual counterpart of fetch-batch) *(shipped 0.1.44)*
 - ⬜ **Cross-request fetch cache** — optional byte-bounded LRU to skip repeat fetches across calls *(planned)*
+- ⬜ **Crawl → screenshots** — `crawl` discovers URLs, `shots-batch` captures them: full-site visual snapshot in one flow *(planned)*
 
 ## ⬜ Later / optional
 
