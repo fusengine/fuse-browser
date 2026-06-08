@@ -1,13 +1,18 @@
 /**
- * A warm browser pool for batch work: launch ONE browser, hand each task a fresh
- * isolated context (cheap) instead of cold-launching a browser per URL. Patchright
- * stealth is browser-level so every context inherits it. Falls back to a full
- * per-task open for non-poolable configs (persistent `userDataDir`, CDP attach).
+ * A warm browser pool for batch work: launch ONE browser (server-backed), hand
+ * each task a fresh isolated context (cheap) instead of cold-launching a browser
+ * per URL. Patchright stealth is browser-level so every context inherits it.
+ * The browser runs as a launchServer process so {@link BrowserPool.close} can
+ * force-kill it if a graceful close stalls — no zombie Chromium on a loaded
+ * host. Falls back to a full per-task open for non-poolable configs (persistent
+ * `userDataDir`, CDP attach).
  * @module engine/browser-pool
  */
-import type { Browser, Page } from "playwright";
+import type { Browser, BrowserServer, Page } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
-import { newConfiguredContext } from "./launch.js";
+import { closeServerHardened } from "./close-server.js";
+import { launchServerAndConnect, newConfiguredContext } from "./launch.js";
+import { loadBrowserType } from "./loader.js";
 import { selectEngineForConfig } from "./registry.js";
 import { teardownOpened } from "./teardown.js";
 
@@ -18,20 +23,22 @@ export class BrowserPool {
   readonly #poolable: boolean;
   #browser: Browser | null = null;
   #browserP: Promise<Browser> | null = null;
+  /** The launchServer process behind the warm browser, killable on stalled close. */
+  #server: BrowserServer | null = null;
 
   constructor(config: ResolvedConfig) {
     this.#config = config;
     this.#poolable = !config.userDataDir && !config.cdpEndpoint;
   }
 
-  /** Lazily launch (once) the shared browser; concurrent callers share one promise. */
+  /** Lazily launch (once) the shared server-backed browser; callers share one promise. */
   #warmBrowser(): Promise<Browser> {
     this.#browserP ??= (async () => {
-      const opened = await selectEngineForConfig(this.#config).open(this.#config);
-      await opened.context.close().catch(() => {}); // discard the throwaway context
-      if (!opened.browser) throw new Error("BrowserPool requires a launched browser");
-      this.#browser = opened.browser;
-      return opened.browser;
+      const browserType = await loadBrowserType(this.#config.engine);
+      const { server, browser } = await launchServerAndConnect(browserType, this.#config);
+      this.#server = server;
+      this.#browser = browser;
+      return browser;
     })();
     return this.#browserP;
   }
@@ -63,9 +70,15 @@ export class BrowserPool {
     }
   }
 
-  /** Close the shared browser (no-op if never warmed or non-poolable). */
+  /**
+   * Close the shared browser (no-op if never warmed or non-poolable). Closes the
+   * server gracefully, force-killing its process if the close stalls so no zombie
+   * Chromium is left behind.
+   */
   async close(): Promise<void> {
-    if (this.#browser) await this.#browser.close().catch(() => {});
+    if (this.#server) await closeServerHardened(this.#server);
+    else if (this.#browser) await this.#browser.close().catch(() => {});
+    this.#server = null;
     this.#browser = null;
     this.#browserP = null;
   }

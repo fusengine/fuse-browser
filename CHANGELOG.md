@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.49] - 08-06-2026
+
+### Fixed
+
+- fix(engine): **force-kill the pooled browser on a stalled close** — no more zombie Chromium. `BrowserPool` now launches its warm browser via `launchServer()` + `connect()` and holds the `BrowserServer`, so `close()` can SIGKILL the whole process group when a graceful close stalls. On a loaded host a stalled `close()` previously left orphaned Chromium processes that piled up over long uptimes and slowed new launches (the "cercle vicieux" of a long-running box). New `closeServerHardened` races the graceful close against an 8 s timeout, then `server.kill()`s (idempotent, no unhandled rejection). Stealth verified **identical** — Patchright patches client-side, so a connected browser is byte-identical to a launched one (`navigator.webdriver=false`, sannysoft rows unchanged). Scope is limited to the batch pool (`browser_collect_batch` / `browser_shots_batch` / `browser_site_shots`); single-shot, sessions, CDP and persistent paths are unchanged. Proven live: 4-URL batch leaves **0** net Chromium, and the forced-kill branch reaps the process group. +4 unit tests lock the contract.
+
 ## [0.1.48] - 08-06-2026
 
 ### Changed
