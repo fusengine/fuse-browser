@@ -76,6 +76,16 @@ fuse-browser collect-batch "https://site/search?q=x" --item ".listing-card" --ex
 
 Applicable flags: `--item` (required), `--container`, `--max-steps`, `--extract-prices`, `--concurrency`, `--throttle-ms`, `--engine`, `--country`, `--headed`, `--proxy`.
 
+## `site-shots <url>`
+
+Full-site snapshot: crawl the site then screenshot each page. Prints `{ count, pages }` with content (markdown) + saved PNG paths per page. Heavy (a browser per page) — keep `--max-pages` modest.
+
+```bash
+fuse-browser site-shots https://example.com --max-pages 20 --viewports mobile,desktop
+```
+
+Applicable flags: `--max-pages`, `--max-depth`, `--throttle-ms`, `--all-origins`, `--no-robots`, `--viewports`, `--settle-ms`, `--concurrency`, `--engine`, `--country`, `--headed`, `--output-dir`, `--proxy`.
+
 ## `serp-batch <queries...>`
 
 Runs one Google search per query and prints one row per query. Requires at least one query (otherwise exits `1`). Output is JSON by default, or CSV with `--csv`.
