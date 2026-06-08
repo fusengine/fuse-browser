@@ -1,20 +1,23 @@
 /**
- * Stealth channel cascade: prefer real Google Chrome, then the full Chromium
- * build, falling back to the bundled headless-shell. The shell leaks
- * `HeadlessChrome` in sec-ch-ua / navigator.userAgentData and exposes no WebGL;
- * the full builds (new headless) do neither. Each launch retries down the
- * cascade only when the chosen browser binary is not installed.
+ * Stealth channel cascade: prefer the Playwright-managed full Chromium build
+ * (Chrome-for-Testing — new headless, no `HeadlessChrome` in sec-ch-ua /
+ * userAgentData, real WebGL), falling back to the bundled headless-shell. The
+ * SYSTEM Google Chrome (`channel:chrome`) is NOT used by default: it is host-
+ * specific and on some servers launches fine but has no network route
+ * (`ERR_INTERNET_DISCONNECTED`), which the cascade cannot detect (a runtime nav
+ * failure, not a launch failure). Pin `channel:"chrome"` explicitly to opt in.
+ * Each launch retries down the cascade only when the chosen binary is missing.
  * @module engine/channel-cascade
  */
 import type { ResolvedConfig } from "../agent/config.js";
 import type { BrowserChannel } from "../interfaces/engine-types.js";
 import { isChromiumEngine } from "./loader.js";
 
-/** Launch channel, most-authentic first; `undefined` = bundled headless-shell. */
+/** Launch channel; `undefined` = bundled headless-shell. */
 export type LaunchChannel = BrowserChannel | "chromium" | undefined;
 
 /** Ordered cascade for a realistic Chromium profile with no pinned channel. */
-const STEALTH_CASCADE: LaunchChannel[] = ["chrome", "chromium", undefined];
+const STEALTH_CASCADE: LaunchChannel[] = ["chromium", undefined];
 
 /** True when a launch error means the requested browser binary is not installed. */
 function isMissingBinary(err: unknown): boolean {
