@@ -5,12 +5,13 @@
  * `browser_crawl` (discover listing URLs) to ratisser a whole site.
  * @module agent/collect-batch
  */
+import { BrowserPool } from "../engine/browser-pool.js";
 import type { CollectedItem } from "../interfaces/extraction.js";
 import { jitterMs } from "../lib/retry.js";
 import { mapConcurrent } from "../net/concurrent.js";
 import { throttleHost } from "../net/throttle.js";
 import type { CollectOptions } from "../state/scroll-collect.js";
-import { runCollect } from "./collect-run.js";
+import { collectOnPage } from "./collect-run.js";
 import type { ResolvedConfig } from "./config.js";
 
 /** Default parallelism — full browser per URL, so keep it low. */
@@ -42,10 +43,15 @@ export async function collectBatch(
 ): Promise<CollectBatchItem[]> {
   const concurrency = opts.concurrency && opts.concurrency > 0 ? opts.concurrency : DEFAULT_CONCURRENCY;
   const throttleMs = opts.throttleMs ?? 250;
-  const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
-    await throttleHost(url, jitterMs(throttleMs));
-    const r = await runCollect(config, url, opts);
-    return { url, count: r.items.length, steps: r.steps, reachedEnd: r.reachedEnd, items: r.items };
-  });
-  return outcomes.map((o, i) => (o.ok ? o.value : { url: urls[i] ?? "", error: String(o.error) }));
+  const pool = new BrowserPool(config);
+  try {
+    const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
+      await throttleHost(url, jitterMs(throttleMs));
+      const r = await pool.withPage((page) => collectOnPage(page, config, url, opts));
+      return { url, count: r.items.length, steps: r.steps, reachedEnd: r.reachedEnd, items: r.items };
+    });
+    return outcomes.map((o, i) => (o.ok ? o.value : { url: urls[i] ?? "", error: String(o.error) }));
+  } finally {
+    await pool.close();
+  }
 }

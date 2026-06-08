@@ -31,6 +31,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Rotating residential proxies + SessionPool** — auto-retire on block *(shipped 0.1.13)*
 - ⬜ **Real captcha solve, validated** — end-to-end with a paid provider key (reCAPTCHA v2 / Turnstile) *(low effort once a key exists)*
 - ✅ **HTTP fast-path with TLS/JA3 impersonation** (`impit`) — `browser_fetch`, no browser launch *(shipped 0.1.14)*
+- ✅ **Warm browser pool / horizontal concurrency** — `BrowserPool`: one warm browser, fresh isolated context per task; drives shots-batch / collect-batch / site-shots (no cold-launch per URL) *(shipped 0.1.48)*
 
 ## ✅ v0.3 — Agentic robustness
 

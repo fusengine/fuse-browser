@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.48] - 08-06-2026
+
+### Changed
+
+- perf(engine): **warm browser pool** for batch tools. `browser_shots_batch`, `browser_collect_batch` and `browser_site_shots` no longer cold-launch a browser per URL — a new `BrowserPool` launches **one** browser and hands each task a fresh isolated context (Patchright stealth is browser-level, so every context inherits it). On a 20-URL batch that's ~19 browser cold-starts saved. Falls back to a full per-task open for non-poolable configs (persistent `userDataDir`, CDP attach), so behaviour is unchanged there. Refactor: extracted `newConfiguredContext` (engine/launch) and page-level `shotsOnPage` / `collectOnPage` so the pool can drive the work; the single-URL `captureShots` / `runCollect` one-shots are unchanged.
+
 ## [0.1.47] - 08-06-2026
 
 ### Added
