@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.54] - 08-06-2026
+
+### Fixed
+
+- fix(engine): **default to the managed Chromium build, not system Chrome** — the 0.1.50 channel cascade preferred `channel:chrome` (the installed Google Chrome). On some Linux servers that system binary **launches fine but has no network route** → every navigation fails with `ERR_INTERNET_DISCONNECTED`, and the cascade can't recover (it only falls through on a *missing-binary* launch error, not a runtime nav failure — so it served a network-dead browser). Reproduced on a real host: `channel:chrome` fails on every request while the managed **Chrome-for-Testing** (`channel:chromium`) and the bundled shell both return 200. **Default cascade is now `[chromium, undefined]`**: the Playwright-managed full Chromium (new headless, **no `HeadlessChrome` in sec-ch-ua, real WebGL** — same high-signal stealth, the brand just reads `Chromium` instead of `Google Chrome`) then the bundled shell. System `chrome`/`msedge*` are **opt-in** via an explicit `channel`. `channel:"chromium"` is now selectable (type + MCP schema) and the `channel` param documents the tradeoff so agents pick correctly (omit = safe default).
+
 ## [0.1.53] - 08-06-2026
 
 ### Added
