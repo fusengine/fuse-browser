@@ -12,6 +12,7 @@ import { runProbeCli } from "./probe-cli.js";
 import { runSerpBatch } from "./serp-batch-cli.js";
 import { runShotsBatch } from "./shots-batch-cli.js";
 import { runShots } from "./shots-cli.js";
+import { runSiteShotsCli } from "./site-shots-cli.js";
 
 const USAGE =
   "usage: fuse-browser probe <url> [...] | fetch <url> [--extract-prices --proxy <url>] | fetch-batch <url...> [--concurrency <n>] | serp-batch <query...> --rank-domain <d> | shots <url> --viewports mobile,desktop\n";
@@ -72,6 +73,8 @@ const opts = values as Record<string, unknown>;
 
 if (command === "serp-batch") {
   await runSerpBatch(rest, opts);
+} else if (command === "site-shots" && rest[0]) {
+  await runSiteShotsCli(rest[0], opts);
 } else if (command === "shots-batch" && rest.length > 0) {
   await runShotsBatch(rest, opts);
 } else if (command === "shots" && rest[0]) {

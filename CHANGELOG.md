@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.47] - 08-06-2026
+
+### Added
+
+- feat(site): **`browser_site_shots`** (MCP) / **`site-shots <url>`** (CLI) — full-site snapshot in one flow: crawl a site (HTTP fast-path, same-origin, robots-honored) then screenshot each discovered page. Returns **both** the page content (markdown — the crawl's extraction is surfaced, not discarded) **and** responsive full-page PNGs per page. For visual QA/audit of a whole site, design review, or a regression baseline. Heavy (one browser per page) so `maxPages` stays modest (25) and shots run at low concurrency (2). Composes the existing `crawl` + `captureShotsBatch`; 37th tool.
+
 ## [0.1.46] - 08-06-2026
 
 ### Added

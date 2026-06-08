@@ -4,7 +4,7 @@ Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP 
 
 Tools fall into two families:
 
-- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
+- **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
 - **Session tools** require a `sessionId` obtained from `browser_open` (or `browser_connect`). They drive one persistent, stateful page.
 
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
@@ -177,6 +177,29 @@ The collect side of **crawl + collect**: exhaust the **infinite-scroll / paginat
 ```
 
 Returns `{ count, results: [{ url, count, steps, reachedEnd, items } | { url, error }] }`.
+
+---
+
+### browser_site_shots
+
+**Full-site snapshot in one call**: crawl the site (HTTP fast-path, same-origin, robots-honored) then screenshot each discovered page. Returns **both** the content (markdown, from the crawl) **and** responsive full-page PNGs per page. For visual QA/audit, design review, or a regression baseline. Heavy — one browser per page — so `maxPages` stays modest and shots run at low concurrency.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `url` | string | yes | Seed URL. |
+| `maxPages` / `maxDepth` | integer | no | Crawl bounds (default 25 / 2). |
+| `sameOrigin` / `respectRobots` | boolean | no | Default true. |
+| `throttleMs` | integer | no | Jittered per-host crawl gap (default 250). |
+| `viewports` | string | no | CSV (default `mobile,desktop`). |
+| `settleMs` | integer | no | Settle delay before each capture. |
+| `shotsConcurrency` | integer | no | Max browsers in flight (default 2). |
+| `engine` / `countryCode` / `headless` / `proxyUrl` | — | no | Browser options. |
+
+```json
+{ "url": "https://example.com", "maxPages": 20, "viewports": "mobile,desktop" }
+```
+
+Returns `{ count, pages: [{ url, depth, text, shots: [{ viewport, width, height, path }], shotsError? }] }`.
 
 ---
 

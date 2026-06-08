@@ -22,6 +22,7 @@ import { registerFetchTool } from "./tools/fetch.js";
 import { registerFetchBatchTool } from "./tools/fetch-batch.js";
 import { registerProbeTools } from "./tools/probe.js";
 import { registerShotsBatchTool } from "./tools/shots-batch.js";
+import { registerSiteShotsTool } from "./tools/site-shots.js";
 import { registerSerpBatchTool } from "./tools/serp-batch.js";
 import { registerRunTool } from "./tools/run.js";
 import { registerScreenshotTool } from "./tools/screenshot.js";
@@ -46,6 +47,7 @@ export function createServer(): BuiltServer {
   registerCrawlTool(server);
   registerCollectBatchTool(server);
   registerShotsBatchTool(server);
+  registerSiteShotsTool(server);
   registerSerpBatchTool(server);
   registerSessionTools(server, sessions);
   registerConnectTool(server, sessions);
