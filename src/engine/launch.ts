@@ -5,7 +5,7 @@
  * @module engine/launch
  */
 import { existsSync } from "node:fs";
-import type { BrowserType, LaunchOptions } from "playwright";
+import type { Browser, BrowserContext, BrowserType, LaunchOptions } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import type { OpenedContext } from "../interfaces/engine.js";
 import { logger } from "../lib/logger.js";
@@ -39,16 +39,31 @@ function enrichLaunchError(err: unknown): never {
   throw err as Error;
 }
 
+/**
+ * Create a fresh, fully-configured (identity + stealth-inherited) context on an
+ * already-launched `browser`. Patchright stealth is browser-level, so every
+ * context inherits it; this only layers the per-context identity/HAR/storage.
+ * The reusable unit for a multi-context browser pool.
+ */
+export async function newConfiguredContext(browser: Browser, config: ResolvedConfig): Promise<BrowserContext> {
+  const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
+  const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
+  if (config.storageStatePath && existsSync(config.storageStatePath)) {
+    contextOptions.storageState = config.storageStatePath;
+  }
+  return browser.newContext(contextOptions);
+}
+
 /** Launch the given engine (persistent or ephemeral) and return a ready context. */
 export async function launchBrowser(
   browserType: BrowserType,
   config: ResolvedConfig,
 ): Promise<OpenedContext> {
   const launchOptions = buildLaunchOptions(config);
-  const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
-  const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
 
   if (config.userDataDir) {
+    const har = config.harPath ? { path: config.harPath, mode: config.harMode } : null;
+    const contextOptions = buildContextOptions(config.identity, config.realisticProfile, har);
     const context = await browserType
       .launchPersistentContext(config.userDataDir, { ...launchOptions, ...contextOptions })
       .catch(enrichLaunchError);
@@ -56,9 +71,6 @@ export async function launchBrowser(
   }
 
   const browser = await browserType.launch(launchOptions).catch(enrichLaunchError);
-  if (config.storageStatePath && existsSync(config.storageStatePath)) {
-    contextOptions.storageState = config.storageStatePath;
-  }
-  const context = await browser.newContext(contextOptions);
+  const context = await newConfiguredContext(browser, config);
   return { context, browser };
 }

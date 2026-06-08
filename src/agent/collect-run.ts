@@ -4,6 +4,7 @@
  * The browser counterpart of a single fetch, for exhausting a listing page.
  * @module agent/collect-run
  */
+import type { Page } from "playwright";
 import { selectEngineForConfig } from "../engine/registry.js";
 import { teardownOpened } from "../engine/teardown.js";
 import { gotoWithRetry } from "../net/navigate.js";
@@ -11,7 +12,17 @@ import { type CollectOptions, type CollectResult, scrollCollect } from "../state
 import type { ResolvedConfig } from "./config.js";
 
 /**
- * Open `url`, drain its list via {@link scrollCollect}, then tear down.
+ * Navigate `page` to `url` and drain its list via {@link scrollCollect} — the
+ * page-level work with no browser lifecycle (so a pool can drive it).
+ */
+export async function collectOnPage(page: Page, config: ResolvedConfig, url: string, opts: CollectOptions): Promise<CollectResult> {
+  await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
+  await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+  return scrollCollect(page, opts);
+}
+
+/**
+ * Open `url` in its own browser, drain its list, then tear down.
  *
  * @param config - Resolved browser config (engine, retry, identity…).
  * @param url - Listing/search page to exhaust.
@@ -22,9 +33,7 @@ export async function runCollect(config: ResolvedConfig, url: string, opts: Coll
   const opened = await selectEngineForConfig(config).open(config);
   const page = opened.page ?? (await opened.context.newPage());
   try {
-    await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
-    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
-    return await scrollCollect(page, opts);
+    return await collectOnPage(page, config, url, opts);
   } finally {
     await teardownOpened(opened);
   }

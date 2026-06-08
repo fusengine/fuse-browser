@@ -5,10 +5,11 @@
  * A failed URL becomes an error entry instead of aborting the batch.
  * @module agent/shots-batch
  */
+import { BrowserPool } from "../engine/browser-pool.js";
 import type { ViewportInput } from "../engine/viewport.js";
 import { mapConcurrent } from "../net/concurrent.js";
 import type { ResolvedConfig } from "./config.js";
-import { captureShots, type Shot } from "./shots.js";
+import { type Shot, shotsOnPage } from "./shots.js";
 
 /** Default parallelism — full browsers are RAM-heavy, so keep it low. */
 const DEFAULT_CONCURRENCY = 2;
@@ -34,6 +35,13 @@ export async function captureShotsBatch(
   concurrency?: number,
 ): Promise<ShotsBatchItem[]> {
   const limit = concurrency && concurrency > 0 ? concurrency : DEFAULT_CONCURRENCY;
-  const outcomes = await mapConcurrent(urls, limit, (url) => captureShots(config, url, viewports, settleMs));
-  return outcomes.map((o, i) => (o.ok ? { url: urls[i] ?? "", shots: o.value } : { url: urls[i] ?? "", error: String(o.error) }));
+  const pool = new BrowserPool(config);
+  try {
+    const outcomes = await mapConcurrent(urls, limit, (url) =>
+      pool.withPage((page) => shotsOnPage(page, config, url, viewports, settleMs)),
+    );
+    return outcomes.map((o, i) => (o.ok ? { url: urls[i] ?? "", shots: o.value } : { url: urls[i] ?? "", error: String(o.error) }));
+  } finally {
+    await pool.close();
+  }
 }
