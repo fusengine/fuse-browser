@@ -5,8 +5,9 @@
 import { z } from "zod";
 import { captchaSchema, circuitBreakerSchema, probeQueueSchema, retrySchema } from "./schemas-resilience.js";
 
-/** Installed-browser channels (real Chrome/Edge). */
+/** Browser channels: `chromium` = managed build (default); others = system browsers. */
 const CHANNELS = [
+  "chromium",
   "chrome",
   "chrome-beta",
   "chrome-dev",
@@ -20,7 +21,12 @@ const CHANNELS = [
 /** Shared browser identity / profile options. */
 export const agentOptionShape = {
   engine: z.enum(["playwright", "patchright", "firefox", "webkit"]).optional(),
-  channel: z.enum(CHANNELS).optional(),
+  channel: z
+    .enum(CHANNELS)
+    .optional()
+    .describe(
+      "Browser channel. Omit for the safe default (managed `chromium` build — reliable everywhere incl. servers). `chrome`/`msedge*` drive the installed SYSTEM browser (real brand, but host-specific: on some servers it launches yet has no network → ERR_INTERNET_DISCONNECTED). Prefer omitting unless you need the system browser.",
+    ),
   executablePath: z.string().optional(),
   cdpEndpoint: z.string().optional(),
   cdpHeaders: z.record(z.string(), z.string()).optional(),
