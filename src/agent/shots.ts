@@ -12,6 +12,7 @@ import { ensureDir, sha1 } from "../lib/fs.js";
 import { gotoWithRetry } from "../net/navigate.js";
 import { detectScrollJack, settleForCapture } from "../state/settle-capture.js";
 import type { ResolvedConfig } from "./config.js";
+import { captureFilmstrip } from "./filmstrip.js";
 
 /** One saved responsive screenshot. */
 export interface Shot {
@@ -19,8 +20,10 @@ export interface Shot {
   width: number;
   height: number;
   path: string;
-  /** True when the page is scroll-jacked (~one viewport tall): the shot is hero-only, not the full site. */
+  /** True when the page is scroll-jacked (~one viewport tall): a wheel-driven filmstrip, not a single full page. */
   scrollJacked?: boolean;
+  /** Frame index within a scroll-jacked filmstrip (0-based); absent for a single full-page shot. */
+  frame?: number;
 }
 
 /**
@@ -43,11 +46,14 @@ export async function shotsOnPage(
     const size = resolveViewport(v);
     await page.setViewportSize(size);
     await settleForCapture(page, settleMs);
-    const scrollJacked = await detectScrollJack(page);
     const name = typeof v === "string" ? v : `${size.width}x${size.height}`;
+    if (await detectScrollJack(page)) {
+      shots.push(...(await captureFilmstrip(page, config.outputDir, runId, name, size, settleMs)));
+      continue;
+    }
     const path = join(config.outputDir, `${runId}-${name}.png`);
     await page.screenshot({ path, fullPage: true, animations: "disabled" });
-    shots.push({ viewport: name, width: size.width, height: size.height, path, scrollJacked });
+    shots.push({ viewport: name, width: size.width, height: size.height, path, scrollJacked: false });
   }
   return shots;
 }

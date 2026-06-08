@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.52] - 08-06-2026
+
+### Added
+
+- feat(shots): **wheel-driven filmstrip for scroll-jacked sites** — `fullPage` can only capture the hero of a scroll-jacked page (the document is one viewport tall and the scroll is faked in JS/canvas). When `scrollJacked` is detected, `browser_screenshot` / `browser_shots_batch` / `browser_site_shots` now drive the site's **own** scroll with real `wheel` events and save **N viewport frames** (`frame0..N`, default 6) instead of one misleading hero: real sections on smooth-scroll sites (Locomotive/Lenis/GSAP), animation states on pure-WebGL ones — no fragile stitching/montage. `Shot` gains an optional `frame` index. Verified live: design.studio yields 6 frames (`scrollJacked=true`), instrument.com stays a single full-page shot (`scrollJacked=false`).
+
 ## [0.1.51] - 08-06-2026
 
 ### Fixed
