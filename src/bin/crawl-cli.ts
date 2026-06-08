@@ -19,6 +19,7 @@ export async function runCrawlCli(url: string, values: Values): Promise<void> {
     format: values.text === true ? "text" : str(values.format),
     browserFallback: values["browser-fallback"] === true,
     respectRobots: values["no-robots"] === true ? false : undefined,
+    throttleMs: num(values["throttle-ms"]),
     proxyUrl: str(values.proxy),
   });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

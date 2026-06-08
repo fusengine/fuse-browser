@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.45] - 08-06-2026
+
+### Added
+
+- feat(crawl): **per-host throttle with jitter** — `browser_crawl` spaces requests to the same host by `throttleMs` (MCP) / `--throttle-ms` (CLI), default **250 ms** (`0` disables). The delay is **jittered per request** (uniform in `[base/2, base*1.5]`, via new `jitterMs`) — a fixed gap is a bot fingerprint, so the pacing oscillates to look human. Keeps big crawls (50-100 URLs) polite and avoids "unusual traffic"/rate-limit blocks.
+
+### Changed
+
+- fix(throttle): `throttleHost` now **reserves the next slot synchronously** (before awaiting), so N concurrent callers on the same host are correctly spaced by `minGapMs` instead of bursting together (the prior check-then-set-after-sleep let concurrent callers read the same timestamp and fire at once). Sequential callers behave identically. Benefits both the crawl and the browser probe path.
+
 ## [0.1.44] - 08-06-2026
 
 ### Added

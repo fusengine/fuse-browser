@@ -54,7 +54,7 @@ Bounded same-origin crawl from a seed URL via the HTTP fast-path (BFS, parallel 
 fuse-browser crawl https://docs.example.com --max-pages 30 --max-depth 2
 ```
 
-Applicable flags: `--max-pages <n>`, `--max-depth <n>`, `--concurrency <n>`, `--all-origins` (cross-origin), `--no-robots` (opt out of robots.txt), `--browser-fallback`, `--text`, `--format <markdown|text>`, `--proxy`.
+Applicable flags: `--max-pages <n>`, `--max-depth <n>`, `--concurrency <n>`, `--throttle-ms <n>` (per-host gap, default 250, 0 disables), `--all-origins` (cross-origin), `--no-robots` (opt out of robots.txt), `--browser-fallback`, `--text`, `--format <markdown|text>`, `--proxy`.
 
 ## `shots-batch <url...>`
 
@@ -115,6 +115,7 @@ Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approv
 | `--max-depth` | string | Crawl BFS depth; parsed as a number (crawl). |
 | `--all-origins` | boolean | Allow cross-origin links during crawl (crawl). |
 | `--no-robots` | boolean | Opt out of robots.txt during crawl (crawl). |
+| `--throttle-ms` | string | Min gap between same-host hits; parsed as a number (crawl). |
 | `--detect-challenges` | boolean | Detect anti-bot / challenge pages (probe). |
 | `--observe-visual` | boolean | Run the visual observation pass (probe). |
 | `--extract-serp` | boolean | Extract SERP results from the page (probe). |

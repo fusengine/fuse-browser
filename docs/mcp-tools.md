@@ -123,6 +123,7 @@ Crawl a site from a seed URL via the HTTP fast-path (no browser launch): breadth
 | `maxChars` | integer | no | Truncate each page's `text` (default `20000`). |
 | `browserFallback` | boolean | no | Re-render empty SPA/CSR shells per page. |
 | `respectRobots` | boolean | no | Honor robots.txt (default `true`; set `false` to opt out). |
+| `throttleMs` | integer | no | Base gap between hits on the same host (default `250`; `0` disables), **jittered** per request (`[base/2, base*1.5]`) to look human. Keeps big crawls polite / unblocked. |
 | `proxyUrl` | string | no | Proxy to route requests through. |
 
 ```json

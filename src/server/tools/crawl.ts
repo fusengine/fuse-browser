@@ -27,6 +27,7 @@ export function registerCrawlTool(server: McpServer): void {
         maxChars: z.number().int().optional(),
         browserFallback: z.boolean().optional(),
         respectRobots: z.boolean().optional(),
+        throttleMs: z.number().int().optional(),
         proxyUrl: z.string().optional(),
       },
     },
@@ -42,6 +43,7 @@ export function registerCrawlTool(server: McpServer): void {
         maxChars: num(a.maxChars),
         browserFallback: a.browserFallback === true,
         respectRobots: a.respectRobots === false ? false : undefined,
+        throttleMs: num(a.throttleMs),
         proxyUrl: typeof a.proxyUrl === "string" ? a.proxyUrl : undefined,
       });
       return jsonResult({ ...result });
