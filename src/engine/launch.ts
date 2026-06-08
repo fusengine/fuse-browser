@@ -5,7 +5,7 @@
  * @module engine/launch
  */
 import { existsSync } from "node:fs";
-import type { Browser, BrowserContext, BrowserType, LaunchOptions } from "playwright";
+import type { Browser, BrowserContext, BrowserServer, BrowserType, LaunchOptions } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import type { OpenedContext } from "../interfaces/engine.js";
 import { logger } from "../lib/logger.js";
@@ -73,4 +73,22 @@ export async function launchBrowser(
   const browser = await browserType.launch(launchOptions).catch(enrichLaunchError);
   const context = await newConfiguredContext(browser, config);
   return { context, browser };
+}
+
+/**
+ * Launch the engine as a separate server and connect a client browser to it.
+ * Unlike {@link launchBrowser}, this returns the {@link BrowserServer} so the
+ * caller can force-kill the browser process if a graceful close ever stalls —
+ * the warm-pool path needs this to avoid zombie Chromium on a loaded host.
+ * Stealth is unaffected: Patchright patches client-side, so a connected browser
+ * is byte-identical to a launched one (verified live on bot-detection probes).
+ */
+export async function launchServerAndConnect(
+  browserType: BrowserType,
+  config: ResolvedConfig,
+): Promise<{ server: BrowserServer; browser: Browser }> {
+  const launchOptions = buildLaunchOptions(config);
+  const server = await browserType.launchServer(launchOptions).catch(enrichLaunchError);
+  const browser = await browserType.connect(server.wsEndpoint());
+  return { server, browser };
 }
