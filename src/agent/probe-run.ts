@@ -16,7 +16,7 @@ import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
 import { withBreaker } from "../net/breaker-guard.js";
-import { gotoWithRetry } from "../net/navigate.js";
+import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 import { assertRobotsAllowed } from "../net/robots-guard.js";
 import { throttleHost } from "../net/throttle.js";
 import { reportProxyBlocked } from "../proxy/pool.js";
@@ -24,6 +24,7 @@ import { domSignature } from "../state/dom-signature.js";
 import { runActions } from "./actions-loop.js";
 import type { ResolvedConfig } from "./config.js";
 import { detectAndSolve } from "./detect.js";
+import { reExtractIfEmpty, settleLoad } from "./probe-settle.js";
 import { attachListeners } from "./network.js";
 import { extractSerpStep } from "./serp-step.js";
 import { huntContacts } from "./contact-hunt.js";
@@ -48,8 +49,8 @@ export async function runProbe(
     const targetUrl = urlWithCurrency(url, config.currency);
     if (targetUrl.includes("booking.com") && config.currency) await prepareBookingCurrency(page, config.currency);
     await throttleHost(targetUrl, config.retry.throttleMs);
-    await withBreaker(targetUrl, config.circuitBreaker, () => gotoWithRetry(page, targetUrl, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry));
-    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+    await withBreaker(targetUrl, config.circuitBreaker, () => gotoWithRetry(page, targetUrl, DEFAULT_GOTO, config.retry));
+    await settleLoad(page);
     const consent = options.autoConsent
       ? await handleCommonConsent(page, config.humanMode)
       : { handled: false };
@@ -59,10 +60,10 @@ export async function runProbe(
     const outcome = await runActions(page, config, actions, targetUrl, runId);
     if (options.waitMs) await page.waitForTimeout(options.waitMs);
     const after = await domSignature(page);
-    const text = await mainText(page);
+    const first = await mainText(page);
+    const { text, title } = await reExtractIfEmpty(page, first, await page.title());
     const { challenges, captcha } = await detectAndSolve(page, text, options, config);
     if (config.proxySource === "pool" && config.proxyUrl && "cloudflare" in challenges && (challenges.cloudflare || challenges.captcha)) reportProxyBlocked(config.proxyUrl);
-    const title = await page.title();
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};
     const serp = await extractSerpStep(page, options, config);

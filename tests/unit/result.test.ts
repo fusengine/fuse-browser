@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { imageJsonResult, jsonResult } from "../../src/server/result.js";
+import { errorResult, imageJsonResult, jsonResult } from "../../src/server/result.js";
 
 describe("imageJsonResult", () => {
   test("returns an image block + a JSON text block + structuredContent", () => {
@@ -22,5 +22,21 @@ describe("imageJsonResult", () => {
   test("jsonResult stays image-free (no regression)", () => {
     const r = jsonResult({ a: 1 });
     expect(r.content.every((c) => c.type === "text")).toBe(true);
+  });
+});
+
+describe("errorResult", () => {
+  test("without code: text + isError, no structuredContent (back-compat)", () => {
+    const r = errorResult("boom");
+    expect(r.isError).toBe(true);
+    expect(r.content).toEqual([{ type: "text", text: "boom" }]);
+    expect(r.structuredContent).toBeUndefined();
+  });
+
+  test("with code: adds structuredContent { code, message }", () => {
+    const r = errorResult("session gone", "session_not_found");
+    expect(r.isError).toBe(true);
+    expect(r.content).toEqual([{ type: "text", text: "session gone" }]);
+    expect(r.structuredContent).toEqual({ code: "session_not_found", message: "session gone" });
   });
 });

@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 32 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 37 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
@@ -10,6 +10,26 @@ Tools fall into two families:
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
 
 The shared identity/profile options (the `agentOptionShape`) are listed once under [`browser_open`](#browser_open); tools that accept them say so and link back.
+
+## Capability groups (`FUSE_CAPS`)
+
+By default all 37 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
+
+| Group | Tools |
+| --- | --- |
+| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`. |
+| `batch` | `browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`. |
+| `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`. |
+| `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`. |
+| `live` | `browser_handoff`, `browser_live_view`, `browser_live_view_stop`. |
+
+```sh
+FUSE_CAPS=core,extract browser-mcp   # only the core + extract groups
+```
+
+Parsing is forgiving: names are case-insensitive and whitespace-tolerant (`"  CORE , Extract "` works), unknown names are reported on stderr and ignored, and a blank/unset value — or one containing **only** unknown names — falls back to all groups (never an empty server).
+
+**Progress notifications.** The batch tools (`browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`) emit MCP `notifications/progress` (`progress`/`total` per finished item, with the item URL/query as `message`) when the client sends a `progressToken` with the request. Clients that don't request progress see no change.
 
 ---
 
@@ -283,6 +303,53 @@ Launch an installed browser with remote debugging, attach to it, and return a se
 
 ```json
 { "browser": "chrome", "port": 9222 }
+```
+
+### browser_tabs
+
+Manage the tabs of a live session: list them, open a new tab (optional `url`), select one as the active target of every other `browser_*` tool, or close one. Use it when a click spawned a popup (OAuth login, `target=_blank` link): `list` to find it, `select` to drive it, `close` then `select` to come back.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `action` | enum `list` \| `new` \| `select` \| `close` | yes | Tab action to perform. |
+| `index` | number | no* | Tab index (**required** for `select`/`close`; `missing_index` error otherwise). |
+| `url` | string | no | URL to open in the new tab (for `new`). |
+
+Always returns the tab list plus the active index after the action: `{ tabs, active }`. Closing the last tab is refused (`cannot_close_last_tab`) — use `browser_close` to end the session. An out-of-range `index` returns `invalid_tab_index`.
+
+```json
+{ "sessionId": "s_abc123", "action": "select", "index": 1 }
+```
+
+### browser_dialog
+
+Set how native dialogs (`alert`/`confirm`/`prompt`/`beforeunload`) are handled on this session: accept or dismiss, with optional text for prompts. Applies to **upcoming** dialogs; the default policy (before any call) is **dismiss**. Dialog handling is auto-attached when the session opens, so dialogs never block a run.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `action` | enum `accept` \| `dismiss` | yes | Policy applied to upcoming dialogs. |
+| `promptText` | string | no | Text typed into `prompt` dialogs when accepting. |
+
+Returns `{ policy, recent }` — `recent` is the last observed dialogs (max 20, oldest first), each `{ type, message, at, handled }`.
+
+```json
+{ "sessionId": "s_abc123", "action": "accept", "promptText": "yes" }
+```
+
+### browser_downloads
+
+List the files downloaded by this session. Download capture is auto-attached when the session opens: every download is saved under `<outputDir>/downloads/<suggestedFilename>` (suffixing `-1`, `-2` on name collisions) and recorded.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+
+Returns `{ count, downloads }` — each download is `{ url, suggestedFilename, path, at, error? }` (`path` is empty while saving or when `error` is set).
+
+```json
+{ "sessionId": "s_abc123" }
 ```
 
 ---
@@ -676,6 +743,39 @@ Returned fields: `uptimeMs`, `probesOk`, `probesFailed`, `avgDurationMs`, `minDu
 
 ```json
 { "reset": false }
+```
+
+### browser_console
+
+Console messages captured in the session since open (last 80 kept). Use to debug JS errors, CSP violations, or why a page misbehaves.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `level` | enum `error` \| `warning` \| `info` \| `log` \| `debug` | no | Keep only this console message type. |
+| `limit` | number | no | Last N entries returned (default `50`). |
+
+Returns `{ count, entries }`.
+
+```json
+{ "sessionId": "s_abc123", "level": "error", "limit": 20 }
+```
+
+### browser_network
+
+Network requests captured in the session since open (last 80 kept), merged into one row per URL: `method`, `url`, `status`, `resourceType`. Use to debug why a page does not load: failed requests (`status: 404/500`), blocked APIs (`urlContains`). Entries without `status` got no response (pending/failed).
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `status` | number | no | Keep only rows with this exact HTTP status. |
+| `urlContains` | string | no | Keep only rows whose URL contains this substring. |
+| `limit` | number | no | Last N rows returned (default `50`). |
+
+Returns `{ count, requests }`.
+
+```json
+{ "sessionId": "s_abc123", "status": 404 }
 ```
 
 ---

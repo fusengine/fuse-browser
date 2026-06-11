@@ -11,6 +11,7 @@ import { resolveConfig } from "../../agent/config.js";
 import { captureShotsBatch } from "../../agent/shots-batch.js";
 import { parseViewports } from "../../engine/viewport.js";
 import { toAgentOptions } from "../map-options.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 
 /** Register `browser_shots_batch`. */
@@ -32,7 +33,7 @@ export function registerShotsBatchTool(server: McpServer): void {
         proxyUrl: z.string().optional(),
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const config = resolveConfig(toAgentOptions(a));
       const urls = Array.isArray(a.urls) ? a.urls.map(String) : [];
@@ -43,6 +44,7 @@ export function registerShotsBatchTool(server: McpServer): void {
         viewports,
         typeof a.settleMs === "number" ? a.settleMs : undefined,
         typeof a.concurrency === "number" ? a.concurrency : undefined,
+        progressReporter(extra),
       );
       return jsonResult({ count: results.length, results });
     },

@@ -6,8 +6,7 @@ import type { Page } from "playwright";
 import { evalScript, evalScriptArg } from "../lib/evaluate.js";
 import { waitForRealtimeSettle } from "../state/realtime.js";
 
-/** booking.com origin and cookie domain. */
-const BOOKING_ORIGIN = "https://www.booking.com";
+/** booking.com cookie domain. */
 const BOOKING_COOKIE_DOMAIN = ".booking.com";
 /** Header currency picker trigger selector. */
 const CURRENCY_TRIGGER_SELECTOR = '[data-testid="header-currency-picker-trigger"]';
@@ -22,9 +21,6 @@ export const CURRENCY_LABELS: Record<string, string[]> = {
 
 /** Currency codes derived from {@link CURRENCY_LABELS}. */
 export const SUPPORTED_CURRENCIES = Object.keys(CURRENCY_LABELS);
-
-const bookingSetupUrl = (currency: string): string =>
-  `${BOOKING_ORIGIN}/?change_currency=1;selected_currency=${currency};top_currency=1`;
 
 const bookingCookie = (name: string, value: string) => ({
   name,
@@ -46,7 +42,16 @@ const PICK_LABEL = `(labels) => {
   return true;
 }`;
 
-/** Pre-position the currency via cookies + booking setup page. */
+/**
+ * Pre-position the currency by seeding the booking.com cookies BEFORE the real
+ * navigation (cur_curr is the one Booking actually reads). The earlier variant
+ * also did an intermediate `page.goto` to the booking.com homepage to "warm" the
+ * currency session, but that landed on the consent wall and left the page in a
+ * broken state, so the subsequent navigation to the target returned blank. The
+ * cookies + the in-URL `selected_currency` param apply the currency; when they
+ * miss, `selectBookingCurrency` (the header UI picker, run on the real page after
+ * navigation) corrects it — so no intermediate navigation is needed.
+ */
 export async function prepareBookingCurrency(page: Page, currency: string): Promise<void> {
   try {
     await page.context().addCookies([
@@ -54,8 +59,6 @@ export async function prepareBookingCurrency(page: Page, currency: string): Prom
       bookingCookie("selected_currency", currency),
       bookingCookie("changed_currency", "1"),
     ]);
-    await page.goto(bookingSetupUrl(currency), { waitUntil: "domcontentloaded", timeout: 20_000 });
-    await page.waitForTimeout(800);
   } catch {
     /* best-effort */
   }

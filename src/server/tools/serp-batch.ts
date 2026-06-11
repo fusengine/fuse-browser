@@ -7,6 +7,7 @@ import { z } from "zod";
 import { resolveConfig } from "../../agent/config.js";
 import { serpBatch } from "../../agent/serp-batch.js";
 import { toAgentOptions } from "../map-options.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 import { agentOptionShape } from "../schemas.js";
 
@@ -28,7 +29,7 @@ export function registerSerpBatchTool(server: McpServer): void {
         ...agentOptionShape,
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const config = resolveConfig(toAgentOptions(a));
       const rows = await serpBatch(config, {
@@ -38,6 +39,7 @@ export function registerSerpBatchTool(server: McpServer): void {
         hl: a.hl as string | undefined,
         gl: a.gl as string | undefined,
         delayMs: a.delayMs as number | undefined,
+        onProgress: progressReporter(extra),
       });
       return jsonResult({ rows });
     },

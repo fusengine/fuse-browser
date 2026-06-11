@@ -36,6 +36,35 @@ describe("extractPrices", () => {
     const prices = extractPrices("Price R 350");
     expect(prices.some((p) => p.currency === "ZAR" && p.amount === 350)).toBe(true);
   });
+
+  test("stitches a currency split across DOM lines (digitec prefix)", () => {
+    const prices = extractPrices("CHF\n6.90");
+    expect(prices.some((p) => p.currency === "CHF" && p.amount === 6.9)).toBe(true);
+  });
+
+  test("stitches a currency on the line after the amount (suffix)", () => {
+    const prices = extractPrices("6.90\nCHF");
+    expect(prices.some((p) => p.currency === "CHF" && p.amount === 6.9)).toBe(true);
+  });
+
+  test("matches currency as a trailing suffix on the same line", () => {
+    const euro = extractPrices("10 €");
+    expect(euro.some((p) => p.currency === "EUR" && p.amount === 10)).toBe(true);
+    const krona = extractPrices("350 kr");
+    expect(krona.some((p) => p.amount === 350 && ["NOK", "SEK", "DKK"].includes(p.currency))).toBe(true);
+  });
+
+  test("handles non-breaking space between currency and amount", () => {
+    const prices = extractPrices("CHF\u00A06.90");
+    expect(prices.some((p) => p.currency === "CHF" && p.amount === 6.9)).toBe(true);
+  });
+
+  test("keeps strikethrough and live price as two distinct amounts", () => {
+    const prices = extractPrices("CHF 100\nCHF 80");
+    const chf = new Set(prices.filter((p) => p.currency === "CHF").map((p) => p.amount));
+    expect(chf.has(100)).toBe(true);
+    expect(chf.has(80)).toBe(true);
+  });
 });
 
 describe("normaliseAmount", () => {
@@ -44,5 +73,10 @@ describe("normaliseAmount", () => {
     expect(normaliseAmount("12'000")).toBe(12000);
     expect(normaliseAmount("1,234.56")).toBe(1234.56);
     expect(normaliseAmount("129")).toBe(129);
+  });
+
+  test("locale-aware decimal separator (CH and EU formats)", () => {
+    expect(normaliseAmount("1'234.56")).toBe(1234.56);
+    expect(normaliseAmount("1.234,56")).toBe(1234.56);
   });
 });

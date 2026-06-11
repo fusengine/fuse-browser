@@ -15,7 +15,7 @@ const HEALED = "page_crashed: the page was recreated and restored — retry your
 /** Evict a lost session and return the standard error result. */
 async function evictLost(sessions: SessionManager, id: string): Promise<CallToolResult> {
   await sessions.close(id).catch(() => {});
-  return errorResult(LOST);
+  return errorResult(LOST, "session_lost");
 }
 
 /**
@@ -57,13 +57,14 @@ export async function withSession(
   try {
     session = sessions.get(id);
   } catch (err) {
-    if (err instanceof SessionNotFoundError) return errorResult(err.message);
+    if (err instanceof SessionNotFoundError) return errorResult(err.message, "session_not_found");
     throw err;
   }
 
   const blocked = await ensureHealthy(sessions, id, session);
   if (blocked) return blocked;
 
+  sessions.markBusy(id);
   try {
     return await fn(session);
   } catch (err) {
@@ -73,9 +74,11 @@ export async function withSession(
     // discovers the browser is gone, evict rather than mislead into retrying.
     try {
       await recoverSession(session);
-      return errorResult(HEALED);
+      return errorResult(HEALED, "page_crashed");
     } catch {
       return evictLost(sessions, id);
     }
+  } finally {
+    sessions.markIdle(id);
   }
 }

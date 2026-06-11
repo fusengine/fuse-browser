@@ -21,6 +21,10 @@ export interface AgentOptions {
   /** Timeout (ms) for the CDP connect. Default 20000. */
   cdpTimeoutMs?: number;
   storageStatePath?: string;
+  /** Named persistent auth profile → storage state at `~/.fuse-browser/profiles/<name>.json` (ignored when `storageStatePath` is set). */
+  profile?: string;
+  /** Resource types to abort at the network layer (image, media, font, ... — unknown types ignored). */
+  blockResources?: string[];
   /** HAR: record traffic to `harPath` (`harMode` minimal/full), or replay from `harReplay`. */
   harPath?: string;
   harMode?: "minimal" | "full";

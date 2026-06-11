@@ -56,3 +56,5 @@ export async function extractStructured(
 ): Promise<Record<string, ExtractedValue>> {
   return evalScriptArg<Record<string, ExtractedValue>, ExtractionSchema>(page, READ_SCRIPT, schema);
 }
+
+export { extractStructuredPerCard } from "./structured-cards.js";

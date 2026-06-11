@@ -9,7 +9,7 @@ import { selectEngineForConfig } from "../engine/registry.js";
 import { teardownOpened } from "../engine/teardown.js";
 import { type ViewportInput, resolveViewport } from "../engine/viewport.js";
 import { ensureDir, sha1 } from "../lib/fs.js";
-import { gotoWithRetry } from "../net/navigate.js";
+import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 import { detectScrollJack, settleForCapture } from "../state/settle-capture.js";
 import type { ResolvedConfig } from "./config.js";
 import { captureFilmstrip } from "./filmstrip.js";
@@ -41,7 +41,7 @@ export async function shotsOnPage(
   ensureDir(config.outputDir);
   const runId = sha1(`${url}-shots`).slice(0, 10);
   const shots: Shot[] = [];
-  await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
+  await gotoWithRetry(page, url, DEFAULT_GOTO, config.retry);
   for (const v of viewports) {
     const size = resolveViewport(v);
     await page.setViewportSize(size);

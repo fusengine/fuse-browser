@@ -13,8 +13,8 @@ import { resolveRetry } from "../net/retry-config.js";
 import type { AgentOptions } from "../interfaces/types.js";
 import { ensureDir } from "../lib/fs.js";
 import { resolveDefaultOutputDir } from "../lib/output-dir.js";
-import { loadProxyCountryMap, type ProxySource, resolveProxy } from "../proxy/country-map.js";
-import { acquirePoolProxy } from "../proxy/pool.js";
+import type { ProxySource } from "../proxy/country-map.js";
+import { resolveProxyChain, resolveStorageStatePath } from "./config-defaults.js";
 
 /** Effective configuration used by every probe run. */
 export interface ResolvedConfig {
@@ -27,6 +27,7 @@ export interface ResolvedConfig {
   cdpCloseOnDone: boolean;
   cdpTimeoutMs: number;
   storageStatePath: string | null;
+  blockResources: string[] | null;
   harPath: string | null;
   harMode: "minimal" | "full";
   harReplay: string | null;
@@ -53,15 +54,7 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
   const outputDir = opts.outputDir ?? resolveDefaultOutputDir();
   ensureDir(outputDir);
   const identity = resolveIdentity(opts);
-  const map = loadProxyCountryMap(opts.proxyCountryMap, opts.proxyMapPath);
-  let { proxyUrl, proxySource } = resolveProxy(opts.proxyUrl, identity.countryCode, map);
-  if (!proxyUrl) {
-    const pooled = acquirePoolProxy(opts.proxiesPath);
-    if (pooled) {
-      proxyUrl = pooled;
-      proxySource = "pool";
-    }
-  }
+  const { proxyUrl, proxySource } = resolveProxyChain(opts, identity.countryCode);
   const userDataDir = opts.userDataDir ?? null;
   if (userDataDir) ensureDir(userDataDir);
   const siteMemoryDir = opts.siteMemoryDir ?? join(outputDir, "site-memory");
@@ -75,7 +68,8 @@ export function resolveConfig(opts: AgentOptions = {}): ResolvedConfig {
     cdpHeaders: opts.cdpHeaders ?? null,
     cdpCloseOnDone: opts.cdpCloseOnDone ?? isRemoteCdp(opts.cdpEndpoint ?? ""),
     cdpTimeoutMs: opts.cdpTimeoutMs ?? 20_000,
-    storageStatePath: opts.storageStatePath ?? null,
+    storageStatePath: resolveStorageStatePath(opts),
+    blockResources: opts.blockResources?.length ? opts.blockResources : null,
     harPath: opts.harPath ?? null,
     harMode: opts.harMode ?? "minimal",
     harReplay: opts.harReplay ?? null,

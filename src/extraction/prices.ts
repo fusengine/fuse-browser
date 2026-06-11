@@ -1,10 +1,16 @@
 /**
- * Multi-currency visible price extraction from page text.
+ * Multi-currency, layout-agnostic visible price extraction from page text.
+ * Captures a currency whether it sits before or after the amount, and even when
+ * the symbol and amount land on separate DOM lines (e.g. "CHF\n6.90").
  * @module extraction/prices
  */
 import type { Price } from "../interfaces/extraction.js";
+import { contextFor } from "./prices-context.js";
+import { normaliseAmount, normaliseSpaces, stitchLogicalLines } from "./prices-normalize.js";
 
-const AMOUNT = "([0-9][0-9'’.,]*)";
+export { normaliseAmount } from "./prices-normalize.js";
+
+const AMOUNT = "([0-9][0-9'\u2019.,\u00A0\u202F\u2009\u2007 ]*[0-9]|[0-9])";
 
 /** [currency code, regex prefix alternative]. Order matters: generic $ goes last. */
 const CURRENCY_PREFIXES: Array<[string, string]> = [
@@ -34,35 +40,39 @@ const CURRENCY_PREFIXES: Array<[string, string]> = [
   ["USD", "USD|US\\$|\\$"],
 ];
 
+/** Single alternation of every currency token, for the logical-line stitcher. */
+const ALL_TOKENS = CURRENCY_PREFIXES.map(([, prefix]) => prefix).join("|");
+
+/** Prefix ("CHF 6.90") or suffix ("6.90 CHF"); suffix skipped when the currency is followed by an amount so "Row 0 CHF 10" → "CHF 10", not "0 CHF". */
 const PATTERNS: Array<[string, RegExp]> = CURRENCY_PREFIXES.map(([currency, prefix]) => [
   currency,
-  new RegExp(`(?:${prefix})\\s*${AMOUNT}`, "gi"),
+  new RegExp(`(?:${prefix})\\s*${AMOUNT}|${AMOUNT}\\s*(?:${prefix})(?![A-Za-z])(?!\\s*[0-9])`, "gi"),
 ]);
 
 const SKIP_WORDS = ["restaurant", "parking", "breakfast", "déjeuner"];
 
-/** Normalize a raw amount: float when it has decimals, otherwise integer (separators stripped). */
-export function normaliseAmount(raw: string): number {
-  const cleaned = raw.replace(/['’]/g, "");
-  if (/[.,]\d{2}$/.test(cleaned)) return Number(cleaned.replace(/,/g, ""));
-  return Number(cleaned.replace(/,/g, "").replace(/\./g, ""));
+/** True for a numeric range like "20–30" / "20-30" (excluded from prices). */
+function isRange(line: string): boolean {
+  return (line.includes("–") || line.includes("-")) && /\d\s*[-–]\s*\d/.test(line);
 }
 
 /**
- * Extract visible prices, skipping ranges (e.g. "20–30") and irrelevant lines
+ * Extract visible prices, skipping ranges and irrelevant lines
  * (restaurant, parking…). Deduplicates by currency+amount.
+ * @param text - Page (or row) innerText, possibly multi-line and split layout.
+ * @returns Detected prices, each tied to its trimmed logical line and index.
  */
 export function extractPrices(text: string): Price[] {
   const prices: Price[] = [];
   const seen = new Set<string>();
-  const lines = text.split("\n");
-  lines.forEach((line, lineNo) => {
-    if ((line.includes("–") || line.includes("-")) && /\d\s*[-–]\s*\d/.test(line)) return;
-    const lowered = line.toLowerCase();
-    if (SKIP_WORDS.some((w) => lowered.includes(w))) return;
+  const physical = normaliseSpaces(text).split("\n");
+  const logical = stitchLogicalLines(physical, ALL_TOKENS);
+  logical.forEach((line, lineNo) => {
+    if (isRange(line)) return;
+    if (SKIP_WORDS.some((w) => line.toLowerCase().includes(w))) return;
     for (const [currency, pattern] of PATTERNS) {
       for (const match of line.matchAll(pattern)) {
-        const amount = normaliseAmount(match[1] as string);
+        const amount = normaliseAmount((match[1] ?? match[2]) as string);
         const key = `${currency}:${amount}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -70,12 +80,20 @@ export function extractPrices(text: string): Price[] {
       }
     }
   });
+  const priceLineNos = new Set(prices.map((p) => p.lineNo));
+  for (const price of prices) {
+    const context = contextFor(logical, price.lineNo, priceLineNos);
+    if (context) price.context = context;
+  }
   return prices;
 }
 
-/** First price of a line, or null. */
+/**
+ * First price of a single line, or null. Callers (hotel-offers) pre-split text.
+ * @param line - One already-isolated line of text.
+ * @returns The first detected currency/amount, or null when none is found.
+ */
 export function parseSinglePrice(line: string): { currency: string; amount: number } | null {
-  const prices = extractPrices(line);
-  const first = prices[0];
+  const first = extractPrices(line)[0];
   return first ? { currency: first.currency, amount: first.amount } : null;
 }

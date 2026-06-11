@@ -9,6 +9,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { writeFileBytes } from "../../lib/fs.js";
 import { diffPng } from "../../lib/pixel-diff.js";
+import { assertPngPath } from "../../lib/safe-png.js";
 import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
@@ -34,14 +35,27 @@ export function registerVisualDiffTool(server: McpServer, sessions: SessionManag
       const x = args as Record<string, unknown>;
       const threshold = typeof x.threshold === "number" ? x.threshold : 0.1;
       if (typeof x.a === "string" && typeof x.b === "string") {
-        const d = diffPng(readFileSync(x.a), readFileSync(x.b), threshold);
-        writeFileBytes(`${x.b}.diff.png`, d.diffPng);
-        return jsonResult({ ...stats(d), diffImage: `${x.b}.diff.png` });
+        let a: string;
+        let b: string;
+        try {
+          a = assertPngPath(x.a, "a");
+          b = assertPngPath(x.b, "b");
+        } catch (e) {
+          return errorResult(e instanceof Error ? e.message : String(e));
+        }
+        const d = diffPng(readFileSync(a), readFileSync(b), threshold);
+        writeFileBytes(`${b}.diff.png`, d.diffPng);
+        return jsonResult({ ...stats(d), diffImage: `${b}.diff.png` });
       }
       if (typeof x.sessionId !== "string" || typeof x.baseline !== "string") {
         return errorResult("browser_visual_diff needs either `a`+`b` paths, or `sessionId`+`baseline`");
       }
-      const baseline = x.baseline;
+      let baseline: string;
+      try {
+        baseline = assertPngPath(x.baseline, "baseline");
+      } catch (e) {
+        return errorResult(e instanceof Error ? e.message : String(e));
+      }
       return withSession(sessions, x.sessionId, async (s) => {
         const shot = await s.page.screenshot({ fullPage: x.fullPage === true });
         if (!existsSync(baseline)) {

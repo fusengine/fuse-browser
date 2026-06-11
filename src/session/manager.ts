@@ -5,7 +5,9 @@
 import type { ResolvedConfig } from "../agent/config.js";
 import { SessionLimitError, SessionNotFoundError } from "../lib/errors.js";
 import { sha1 } from "../lib/fs.js";
-import { closeSession, openSession, type SessionData } from "./session.js";
+import { closeSession } from "./close.js";
+import { openSession, type SessionData } from "./session.js";
+import { TtlGuard } from "./ttl-guard.js";
 
 /** Options for the session manager. */
 export interface SessionManagerOptions {
@@ -18,7 +20,7 @@ export interface SessionManagerOptions {
 /** Holds live sessions and closes them on TTL expiry or shutdown. */
 export class SessionManager {
   private readonly sessions = new Map<string, SessionData>();
-  private readonly timers = new Map<string, NodeJS.Timeout>();
+  private readonly guard: TtlGuard;
   private readonly ttlMs: number;
   private readonly maxSessions: number;
   private counter = 0;
@@ -26,6 +28,7 @@ export class SessionManager {
   constructor(opts: SessionManagerOptions = {}) {
     this.ttlMs = opts.ttlMs ?? 300_000;
     this.maxSessions = opts.maxSessions ?? 8;
+    this.guard = new TtlGuard(this.ttlMs, (id) => void this.close(id));
   }
 
   /**
@@ -38,7 +41,7 @@ export class SessionManager {
     const id = sha1(`${config.outputDir}-${Date.now()}-${this.counter}`).slice(0, 12);
     const session = await openSession(id, config, this.ttlMs);
     this.sessions.set(id, session);
-    this.schedule(id);
+    this.guard.schedule(id);
     return session;
   }
 
@@ -55,27 +58,27 @@ export class SessionManager {
     const session = this.sessions.get(id);
     if (!session) return;
     session.expiresAt = Date.now() + this.ttlMs;
-    this.schedule(id);
+    this.guard.schedule(id);
   }
 
-  private schedule(id: string): void {
-    const existing = this.timers.get(id);
-    if (existing) clearTimeout(existing);
-    const timer = setTimeout(() => void this.close(id), this.ttlMs);
-    timer.unref?.();
-    this.timers.set(id, timer);
+  /** Mark a session as in use by a tool, deferring TTL expiry. */
+  markBusy(id: string): void {
+    if (!this.sessions.has(id)) return;
+    this.guard.markBusy(id);
   }
 
-  /** Close and remove a session; returns false if it did not exist. */
+  /** Mark a session idle again and refresh its TTL. */
+  markIdle(id: string): void {
+    this.guard.markIdle(id);
+    this.touch(id);
+  }
+
+  /** Close and remove a session (always, even if busy); false if missing. */
   async close(id: string): Promise<boolean> {
     const session = this.sessions.get(id);
     if (!session) return false;
     this.sessions.delete(id);
-    const timer = this.timers.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      this.timers.delete(id);
-    }
+    this.guard.clear(id);
     await closeSession(session);
     return true;
   }

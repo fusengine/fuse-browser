@@ -7,7 +7,7 @@ import type { Page } from "playwright";
 import { extractSerp } from "../extraction/serp.js";
 import type { Serp } from "../interfaces/extraction.js";
 import type { RetryConfig } from "../interfaces/net.js";
-import { gotoWithRetry } from "../net/navigate.js";
+import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 
 /** Build the URL for SERP page offset `start`. */
 function withStart(url: string, start: number): string {
@@ -23,7 +23,7 @@ export async function collectSerp(page: Page, pages: number, retry: RetryConfig)
   const seen = new Set(merged.organic.map((r) => r.url));
   const base = page.url();
   for (let i = 1; i < pages; i += 1) {
-    await gotoWithRetry(page, withStart(base, i * 10), { waitUntil: "domcontentloaded", timeout: 30_000 }, retry);
+    await gotoWithRetry(page, withStart(base, i * 10), DEFAULT_GOTO, retry);
     const next = await extractSerp(page);
     for (const r of next.organic) {
       if (seen.has(r.url)) continue;

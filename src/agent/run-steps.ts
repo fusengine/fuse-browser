@@ -11,7 +11,7 @@ import { detectChallenges } from "../extraction/challenges.js";
 import { extractHotelOffers } from "../extraction/hotel-offers.js";
 import { mainText } from "../extraction/main-text.js";
 import { extractPrices } from "../extraction/prices.js";
-import { gotoWithRetry } from "../net/navigate.js";
+import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 
 /** A single step. `type` selects the operation; other fields are step args. */
 export type RunStep = Record<string, unknown> & { type: string };
@@ -51,7 +51,7 @@ async function runExtract(page: Page, step: RunStep): Promise<StepResult> {
 
 async function runOne(page: Page, step: RunStep, humanMode: boolean): Promise<StepResult> {
   if (step.type === "navigate") {
-    await gotoWithRetry(page, String(step.url), { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await gotoWithRetry(page, String(step.url), DEFAULT_GOTO);
     return { index: 0, type: "navigate", ok: true, data: { url: page.url(), title: await page.title() } };
   }
   if (step.type === "wait_for") return runWait(page, step);

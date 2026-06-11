@@ -11,6 +11,7 @@ import { resolveConfig } from "../../agent/config.js";
 import { siteShots } from "../../agent/site-shots.js";
 import { parseViewports } from "../../engine/viewport.js";
 import { toAgentOptions } from "../map-options.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 
 /** Register `browser_site_shots`. */
@@ -37,11 +38,12 @@ export function registerSiteShotsTool(server: McpServer): void {
         proxyUrl: z.string().optional(),
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const num = (v: unknown): number | undefined => (typeof v === "number" ? v : undefined);
       const config = resolveConfig(toAgentOptions(a));
       const result = await siteShots(config, String(a.url), {
+        onProgress: progressReporter(extra),
         maxPages: num(a.maxPages),
         maxDepth: num(a.maxDepth),
         sameOrigin: a.sameOrigin === false ? false : undefined,

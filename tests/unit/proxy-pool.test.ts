@@ -20,7 +20,7 @@ describe("ProxyPool", () => {
   });
 
   test("returns null when all proxies are cooling", () => {
-    let t = 0;
+    const t = 0;
     const p = new ProxyPool(["a"], 1000, () => t);
     expect(p.acquire()).toBe("a");
     p.reportBlocked("a");

@@ -2,12 +2,22 @@
  * Map raw tool arguments to typed agent/probe options.
  * @module server/map-options
  */
+import { profileStoragePath } from "../identity/profiles.js";
 import type { BrowserChannel } from "../interfaces/engine-types.js";
 import type { AgentOptions, BrowserAction, ProbeOptions } from "../interfaces/types.js";
 import { envAgentDefaults } from "./env-defaults.js";
 
 /** Server-wide browser defaults from `FUSE_*` env (per-call args override these). */
 const ENV = envAgentDefaults();
+
+/** Storage state: explicit path beats named `profile`; env default is the last fallback. */
+function storageStateFrom(a: Record<string, unknown>): string | undefined {
+  const explicit = a.storageStatePath as string | undefined;
+  if (explicit) return explicit;
+  const profile = a.profile as string | undefined;
+  if (profile) return profileStoragePath(profile);
+  return ENV.storageStatePath;
+}
 
 /** Extract {@link AgentOptions} from raw tool arguments, falling back to env. */
 export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
@@ -29,7 +39,9 @@ export function toAgentOptions(a: Record<string, unknown>): AgentOptions {
     proxyUrl: a.proxyUrl as string | undefined,
     proxyMapPath: a.proxyMapPath as string | undefined,
     proxiesPath: a.proxiesPath as string | undefined,
-    storageStatePath: (a.storageStatePath as string | undefined) ?? ENV.storageStatePath,
+    storageStatePath: storageStateFrom(a),
+    profile: a.profile as string | undefined,
+    blockResources: a.blockResources as string[] | undefined,
     harPath: a.harPath as string | undefined,
     harMode: a.harMode as "minimal" | "full" | undefined,
     harReplay: a.harReplay as string | undefined,

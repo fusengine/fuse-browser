@@ -36,3 +36,19 @@ describe("toAgentOptions — CDP remote", () => {
     expect(toAgentOptions({}).respectRobots).toBeUndefined();
   });
 });
+
+describe("toAgentOptions — profile & blockResources", () => {
+  test("profile maps to its storage-state path when storageStatePath is absent", () => {
+    const a = toAgentOptions({ profile: "github" });
+    expect(a.profile).toBe("github");
+    expect(a.storageStatePath).toMatch(/profiles[/\\]github\.json$/);
+  });
+  test("explicit storageStatePath wins over profile", () => {
+    const a = toAgentOptions({ profile: "github", storageStatePath: "/tmp/state.json" });
+    expect(a.storageStatePath).toBe("/tmp/state.json");
+  });
+  test("maps blockResources (default undefined)", () => {
+    expect(toAgentOptions({ blockResources: ["image", "font"] }).blockResources).toEqual(["image", "font"]);
+    expect(toAgentOptions({}).blockResources).toBeUndefined();
+  });
+});

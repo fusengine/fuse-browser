@@ -53,7 +53,7 @@ export function mergePagesWithShots(
 export async function siteShots(config: ResolvedConfig, seed: string, opts: SiteShotsOptions = {}): Promise<{ count: number; pages: SitePage[] }> {
   const { pages } = await crawl(seed, opts);
   const viewports = opts.viewports ?? parseViewports(undefined);
-  const shots = await captureShotsBatch(config, pages.map((p) => p.url), viewports, opts.settleMs, opts.shotsConcurrency);
+  const shots = await captureShotsBatch(config, pages.map((p) => p.url), viewports, opts.settleMs, opts.shotsConcurrency, opts.onProgress);
   const merged = mergePagesWithShots(pages, shots);
   return { count: merged.length, pages: merged };
 }

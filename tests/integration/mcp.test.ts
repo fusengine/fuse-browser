@@ -41,10 +41,12 @@ const EXPECTED = [
   "browser_wait",
   "browser_login",
   "browser_snapshot",
+  "browser_autoscroll",
   "browser_act",
   "browser_collect",
   "browser_extract",
   "browser_extract_schema",
+  "browser_products",
   "browser_screenshot",
   "browser_inspect",
   "browser_visual_diff",
@@ -56,6 +58,11 @@ const EXPECTED = [
   "browser_metrics",
   "browser_live_view",
   "browser_live_view_stop",
+  "browser_tabs",
+  "browser_dialog",
+  "browser_downloads",
+  "browser_console",
+  "browser_network",
 ];
 
 test("MCP exposes the expected tool set with no duplicates", async () => {

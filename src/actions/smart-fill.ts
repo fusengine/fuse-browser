@@ -3,8 +3,10 @@
  * @module actions/smart-fill
  */
 import type { Locator, Page } from "playwright";
+import { captureSnapshot } from "../extraction/snapshot.js";
 import type { ActionResult } from "../interfaces/types.js";
 import { escapeRegExp, randInt } from "../lib/text.js";
+import { healLocator } from "./heal-locator.js";
 import { humanPause } from "./human.js";
 
 async function humanType(page: Page, locator: Locator, value: string): Promise<void> {
@@ -50,6 +52,16 @@ export async function smartFill(
     } catch (err) {
       lastError = String(err).split("\n")[0] ?? "error";
     }
+  }
+  try {
+    const healed = await healLocator(page, target, captureSnapshot);
+    if (healed) {
+      if (humanMode) await humanType(page, healed, value);
+      else await healed.fill(value, { timeout: 2_000 });
+      return { type: "fill", target, ok: true, strategy: "heal" };
+    }
+  } catch (err) {
+    lastError = String(err).split("\n")[0] ?? "error";
   }
   return { type: "fill", target, ok: false, error: lastError };
 }

@@ -10,6 +10,7 @@ import { z } from "zod";
 import { collectBatch } from "../../agent/collect-batch.js";
 import { resolveConfig } from "../../agent/config.js";
 import { toAgentOptions } from "../map-options.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 
 /** Register `browser_collect_batch`. */
@@ -34,7 +35,7 @@ export function registerCollectBatchTool(server: McpServer): void {
         proxyUrl: z.string().optional(),
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const num = (v: unknown): number | undefined => (typeof v === "number" ? v : undefined);
       const config = resolveConfig(toAgentOptions(a));
@@ -46,6 +47,7 @@ export function registerCollectBatchTool(server: McpServer): void {
         extractPrices: a.extractPrices === true,
         concurrency: num(a.concurrency),
         throttleMs: num(a.throttleMs),
+        onProgress: progressReporter(extra),
       });
       return jsonResult({ count: results.length, results });
     },

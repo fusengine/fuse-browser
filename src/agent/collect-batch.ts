@@ -21,6 +21,8 @@ const DEFAULT_CONCURRENCY = 2;
 export interface CollectBatchOptions extends CollectOptions {
   concurrency?: number;
   throttleMs?: number;
+  /** Called after each URL settles (success or failure): `(done, total, url)`. */
+  onProgress?: (done: number, total: number, label?: string) => void;
 }
 
 /** One batch entry: the collected list for a URL, or an error. */
@@ -44,11 +46,16 @@ export async function collectBatch(
   const concurrency = opts.concurrency && opts.concurrency > 0 ? opts.concurrency : DEFAULT_CONCURRENCY;
   const throttleMs = opts.throttleMs ?? 250;
   const pool = new BrowserPool(config);
+  let done = 0;
   try {
     const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
-      await throttleHost(url, jitterMs(throttleMs));
-      const r = await pool.withPage((page) => collectOnPage(page, config, url, opts));
-      return { url, count: r.items.length, steps: r.steps, reachedEnd: r.reachedEnd, items: r.items };
+      try {
+        await throttleHost(url, jitterMs(throttleMs));
+        const r = await pool.withPage((page) => collectOnPage(page, config, url, opts));
+        return { url, count: r.items.length, steps: r.steps, reachedEnd: r.reachedEnd, items: r.items };
+      } finally {
+        opts.onProgress?.(++done, urls.length, url);
+      }
     });
     return outcomes.map((o, i) => (o.ok ? o.value : { url: urls[i] ?? "", error: String(o.error) }));
   } finally {

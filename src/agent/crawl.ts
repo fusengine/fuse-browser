@@ -26,6 +26,8 @@ export interface CrawlOptions {
   proxyUrl?: string;
   respectRobots?: boolean;
   throttleMs?: number;
+  /** Called after each page settles (success or failure): `(done, maxPages, url)`. */
+  onProgress?: (done: number, total: number, label?: string) => void;
 }
 
 /** A crawled page: its rendered content plus its BFS depth from the seed. */
@@ -51,15 +53,20 @@ export async function crawl(seed: string, opts: CrawlOptions = {}): Promise<{ co
   const visited = new Set<string>([seed]);
   const pages: CrawlPage[] = [];
   let frontier = [seed];
+  let done = 0;
 
   for (let depth = 0; depth <= maxDepth && frontier.length > 0 && pages.length < maxPages; depth++) {
     const batch = frontier.slice(0, maxPages - pages.length);
     const fetched = await mapConcurrent(batch, concurrency, async (url) => {
-      if (robots && !(await robots.allowed(url))) throw new Error("robots-disallowed");
-      await throttleHost(url, jitterMs(throttleMs));
-      const r = await fetchFast(url, opts.proxyUrl);
-      const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
-      return { rendered: await renderFetch(body, { format: opts.format, maxChars: opts.maxChars }), html: body.html, url: body.url };
+      try {
+        if (robots && !(await robots.allowed(url))) throw new Error("robots-disallowed");
+        await throttleHost(url, jitterMs(throttleMs));
+        const r = await fetchFast(url, opts.proxyUrl);
+        const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
+        return { rendered: await renderFetch(body, { format: opts.format, maxChars: opts.maxChars }), html: body.html, url: body.url };
+      } finally {
+        opts.onProgress?.(++done, maxPages, url);
+      }
     });
     const next: string[] = [];
     for (const o of fetched) {

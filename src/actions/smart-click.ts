@@ -3,9 +3,11 @@
  * @module actions/smart-click
  */
 import type { Locator, Page } from "playwright";
+import { captureSnapshot } from "../extraction/snapshot.js";
 import type { ActionResult } from "../interfaces/types.js";
 import { evalScriptArg } from "../lib/evaluate.js";
 import { escapeRegExp } from "../lib/text.js";
+import { healLocator } from "./heal-locator.js";
 import { humanPause } from "./human.js";
 import { humanMoveTo } from "./human-mouse.js";
 
@@ -55,6 +57,15 @@ export async function smartClick(
     } catch (err) {
       lastError = String(err).split("\n")[0] ?? "error";
     }
+  }
+  try {
+    const healed = await healLocator(page, target, captureSnapshot);
+    if (healed) {
+      await healed.click({ timeout: 2_000 });
+      return { type: "click", target, ok: true, strategy: "heal" };
+    }
+  } catch (err) {
+    lastError = String(err).split("\n")[0] ?? "error";
   }
   try {
     const clicked = await evalScriptArg<boolean, string>(page, HEURISTIC_CLICK, target);

@@ -5,31 +5,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { VERSION } from "../lib/version.js";
 import { SessionManager } from "../session/manager.js";
+import { CAP_GROUPS, parseCaps } from "./caps.js";
+import { toolGroups } from "./registry.js";
 import { registerResources } from "./resources.js";
-import { registerActTools } from "./tools/act.js";
-import { registerCollectTool } from "./tools/collect.js";
-import { registerConnectTool } from "./tools/connect.js";
-import { registerExtractTool } from "./tools/extract.js";
-import { registerExtractSchemaTool } from "./tools/extract-schema.js";
-import { registerHandoffTool } from "./tools/handoff.js";
-import { registerInspectTool } from "./tools/inspect.js";
-import { registerLiveViewTool } from "./tools/live-view.js";
-import { registerMetricsTool } from "./tools/metrics.js";
-import { registerNavigateTool } from "./tools/navigate.js";
-import { registerCollectBatchTool } from "./tools/collect-batch.js";
-import { registerCrawlTool } from "./tools/crawl.js";
-import { registerFetchTool } from "./tools/fetch.js";
-import { registerFetchBatchTool } from "./tools/fetch-batch.js";
-import { registerProbeTools } from "./tools/probe.js";
-import { registerShotsBatchTool } from "./tools/shots-batch.js";
-import { registerSiteShotsTool } from "./tools/site-shots.js";
-import { registerSerpBatchTool } from "./tools/serp-batch.js";
-import { registerRunTool } from "./tools/run.js";
-import { registerScreenshotTool } from "./tools/screenshot.js";
-import { registerSessionTools } from "./tools/session.js";
-import { registerSnapshotTools } from "./tools/snapshot.js";
-import { registerVisualDiffTool } from "./tools/visual-diff.js";
-import { registerWaitTool } from "./tools/wait.js";
 
 /** The built server and its session manager (for shutdown). */
 export interface BuiltServer {
@@ -37,34 +15,19 @@ export interface BuiltServer {
   sessions: SessionManager;
 }
 
-/** Create the fuse-browser MCP server with every tool and resource wired. */
+/**
+ * Create the fuse-browser MCP server. Tool groups can be filtered with the
+ * `FUSE_CAPS` env var (e.g. `FUSE_CAPS=core,extract`) to expose fewer tools
+ * to the client; resources are always registered.
+ */
 export function createServer(): BuiltServer {
   const server = new McpServer({ name: "fuse-browser", version: VERSION });
   const sessions = new SessionManager();
-  registerProbeTools(server);
-  registerFetchTool(server);
-  registerFetchBatchTool(server);
-  registerCrawlTool(server);
-  registerCollectBatchTool(server);
-  registerShotsBatchTool(server);
-  registerSiteShotsTool(server);
-  registerSerpBatchTool(server);
-  registerSessionTools(server, sessions);
-  registerConnectTool(server, sessions);
-  registerNavigateTool(server, sessions);
-  registerActTools(server, sessions);
-  registerSnapshotTools(server, sessions);
-  registerCollectTool(server, sessions);
-  registerWaitTool(server, sessions);
-  registerRunTool(server, sessions);
-  registerExtractTool(server, sessions);
-  registerExtractSchemaTool(server, sessions);
-  registerScreenshotTool(server, sessions);
-  registerInspectTool(server, sessions);
-  registerVisualDiffTool(server, sessions);
-  registerHandoffTool(server, sessions);
-  registerLiveViewTool(server, sessions);
-  registerMetricsTool(server);
-  registerResources(server);
+  const caps = parseCaps(process.env.FUSE_CAPS);
+  const groups = toolGroups(server, sessions);
+  for (const group of CAP_GROUPS) {
+    if (caps.has(group)) for (const register of groups[group]) register();
+  }
+  registerResources(server, sessions);
   return { server, sessions };
 }

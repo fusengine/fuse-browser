@@ -25,6 +25,8 @@ Every field is optional. Defaults are applied by `resolveConfig` (`src/agent/con
 | `cdpCloseOnDone` | `boolean` | `true` for `ws/wss`, else `false` | Close the CDP session on teardown. Remote endpoints (Browserless) get a fresh context that is closed when done; a local attach never closes the user's browser (only the link is dropped). |
 | `cdpTimeoutMs` | `number` | `20000` | Timeout (ms) for the CDP connect. |
 | `storageStatePath` | `string` | `null` | Path to a Playwright storage-state JSON (cookies + localStorage) to load/persist a logged-in session. See [./sessions.md](./sessions.md). |
+| `profile` | `string` | `null` | Named persistent auth profile — shorthand for `storageStatePath` at `~/.fuse-browser/profiles/<name>.json` (`FUSE_BROWSER_HOME` overrides the home dir; ignored when `storageStatePath` is set). Name: letters/digits then `-`/`_`, max 41 chars. |
+| `blockResources` | `string[]` | `null` (off) | Resource types aborted at the network layer to speed up batch runs: `image`, `media`, `font`, `stylesheet`, `script`, `xhr`, `fetch`, `websocket`, `manifest`, `other`. Unknown types are ignored. |
 | `harPath` | `string` | `null` | Record network traffic to this HAR file. See [./sessions.md](./sessions.md). |
 | `harMode` | `"minimal" \| "full"` | `"minimal"` | HAR recording detail. `minimal` records metadata only; `full` records response bodies. |
 | `harReplay` | `string` | `null` | Replay network traffic from this HAR file instead of hitting the live network. |

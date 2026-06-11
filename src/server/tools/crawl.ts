@@ -7,6 +7,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { crawl } from "../../agent/crawl.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 
 /** Register `browser_crawl`. */
@@ -31,10 +32,11 @@ export function registerCrawlTool(server: McpServer): void {
         proxyUrl: z.string().optional(),
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const num = (v: unknown): number | undefined => (typeof v === "number" ? v : undefined);
       const result = await crawl(String(a.url), {
+        onProgress: progressReporter(extra),
         maxPages: num(a.maxPages),
         maxDepth: num(a.maxDepth),
         sameOrigin: a.sameOrigin === false ? false : undefined,

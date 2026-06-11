@@ -1,6 +1,6 @@
 # CLI
 
-`fuse-browser` is a command-line front-end for the browser agent. It exposes four subcommands that all share a single flag parser (`node:util` `parseArgs`, strict mode), so any flag is accepted globally but only consumed by the subcommands documented below.
+`fuse-browser` is a command-line front-end for the browser agent. It exposes nine one-shot subcommands (`probe`, `fetch`, `fetch-batch`, `crawl`, `collect-batch`, `serp-batch`, `shots`, `shots-batch`, `site-shots`) that all share a single flag parser (`node:util` `parseArgs`, strict mode), so any flag is accepted globally but only consumed by the subcommands documented below. Session-based interaction (open/navigate/click/products/autoscroll/…) is exposed through the MCP server (`browser-mcp`), not the CLI.
 
 ```
 fuse-browser probe <url> [flags]
@@ -106,6 +106,61 @@ fuse-browser shots https://example.com --viewports mobile,tablet,1280x720 --sett
 ```
 
 Applicable flags: `--engine`, `--country`, `--headed`, `--output-dir`, `--viewports`, `--settle-ms`.
+
+---
+
+## Page commands (one-shot)
+
+These commands open a page, run one operation, print JSON on stdout (errors on stderr), and tear the browser down. Exit codes: `0` success, `1` functional/step failure, `2` bad usage or malformed JSON. They all share the page flags `--engine`, `--country`, `--currency`, `--headed`, `--human-mode`, `--proxy`, `--proxy-map`, `--output-dir`, `--storage-state`, `--no-robots`, `--wait-ms`, `--block-resources`.
+
+### `run <url>`
+
+Executes a multi-step plan in one session. Steps come from `--steps '<json>'` (inline array) or `--steps-file <path>` (`-` reads stdin). Each step is `{type, …}`: `navigate`, `click`, `fill`, `scroll`, `press`, `wait`, `select`, `extract`. Prints `{ok, url, steps}`; on a failed step prints `{ok:false, error:{kind:"step_failed", step, message}}` and exits `1`. Malformed/non-array JSON exits `2`.
+
+```bash
+fuse-browser run https://example.com \
+  --steps '[{"type":"wait","ms":500},{"type":"extract","kind":"text"}]'
+```
+
+### `products <url>`
+
+Extracts repeated product cards from the rendered DOM. `--limit <n>` caps the result; `--container <selector>` forces the card container. Prints `{url, count, products}`.
+
+```bash
+fuse-browser products "https://www.digitec.ch/en/search?q=macbook" --limit 20
+```
+
+### `extract <url>`
+
+Pulls page content. `--kind text` (default) returns main text, `prices` returns parsed prices, `markdown` returns LLM-ready markdown + metadata. Prints `{url, kind, …}`.
+
+```bash
+fuse-browser extract https://example.com --kind markdown
+```
+
+### `snapshot <url>`
+
+Captures the indexed interactive-element snapshot (each element gets a stable `ref`). Add `--selectors` for per-element CSS selectors. Prints `{url, count, elements}`.
+
+```bash
+fuse-browser snapshot https://example.com --selectors
+```
+
+### `screenshot <url>`
+
+Captures a PNG. Add `--full-page` for the full scroll height. With `--output <file>` it writes the file and prints `{url, path, bytes}`; otherwise it prints `{url, base64}`.
+
+```bash
+fuse-browser screenshot https://example.com --full-page --output shot.png
+```
+
+### `inspect <url>`
+
+Snapshots the page (tagging elements with `data-fuse-ref`) then reports computed style, box, and WCAG contrast for the element named by `--ref <ref>` (a `ref` from `snapshot`). `--ref` is required (else exits `2`); an unknown ref exits `1`. Prints `{url, ref, style}`.
+
+```bash
+fuse-browser inspect https://example.com --ref 0
+```
 
 ---
 

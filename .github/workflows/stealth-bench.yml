@@ -1,0 +1,38 @@
+name: Stealth Bench
+
+# Separate, non-blocking benchmark: validates anti-bot stealth
+# non-regression against public detection pages. Independent of CI —
+# never gates merges. Manual dispatch + weekly schedule.
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+
+jobs:
+  stealth-bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Network-dependent on third-party sites; do not fail the suite on flakes.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium (Patchright + system deps)
+        run: bunx patchright install --with-deps chromium
+
+      - name: Run stealth benchmark
+        run: node --import tsx tests/live/stealth-bench.ts

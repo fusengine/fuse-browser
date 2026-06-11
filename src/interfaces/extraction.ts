@@ -9,6 +9,12 @@ export interface Price {
   amount: number;
   line: string;
   lineNo: number;
+  /**
+   * Best-effort short context label for the price: the nearest significant
+   * non-price neighbouring line (e.g. "2 nights, 2 adults", "Tickets from",
+   * or a product title). Optional and back-compatible.
+   */
+  context?: string;
 }
 
 /** An aggregated hotel offer (provider + price). */

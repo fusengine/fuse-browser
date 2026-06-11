@@ -63,6 +63,19 @@ browser_close { "sessionId": "<id>" }
 browser_open  { "storageStatePath": "./.auth/site.json" }
 ```
 
+> **Shorthand:** the `profile` option names a persistent auth profile (`profile: "github"` ⇒ `storageStatePath` at `~/.fuse-browser/profiles/github.json`). It is ignored when `storageStatePath` is set explicitly — see [configuration](./configuration.md).
+
+---
+
+## Dialogs & downloads (auto-attached)
+
+Every session is wired for native dialogs and downloads **at open** (and re-wired after [crash recovery](#crash-recovery)) — no setup call needed:
+
+- **Dialogs** — `alert`/`confirm`/`prompt`/`beforeunload` are handled by a per-session policy so they never block a run. The default policy is **dismiss**; change it with `browser_dialog` (`accept`/`dismiss`, optional `promptText` for prompts), which also returns the last observed dialogs (max 20).
+- **Downloads** — every download is saved under `<outputDir>/downloads/<suggestedFilename>` (suffixing `-1`, `-2` on collisions). List them with `browser_downloads` (`{ url, suggestedFilename, path, at, error? }` each).
+
+See [MCP tools](./mcp-tools.md#browser_dialog) for the parameters.
+
 ---
 
 ## HAR record / replay

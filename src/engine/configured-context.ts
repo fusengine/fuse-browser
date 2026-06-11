@@ -7,6 +7,7 @@
 import { existsSync } from "node:fs";
 import type { Browser, BrowserContext } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
+import { applyResourceBlocking } from "../net/block.js";
 import { buildContextOptions } from "./context.js";
 
 /** Cached coherent UA per browser (one real-UA read per browser process). */
@@ -55,5 +56,7 @@ export async function newConfiguredContext(browser: Browser, config: ResolvedCon
     const ua = await coherentUserAgent(browser);
     if (ua) contextOptions.userAgent = ua;
   }
-  return browser.newContext(contextOptions);
+  const context = await browser.newContext(contextOptions);
+  if (config.blockResources?.length) await applyResourceBlocking(context, config.blockResources);
+  return context;
 }

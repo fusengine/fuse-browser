@@ -27,9 +27,14 @@ export function imageJsonResult(
   };
 }
 
-/** Error result (isError flag set). */
-export function errorResult(message: string): CallToolResult {
-  return { content: [{ type: "text", text: message }], isError: true };
+/**
+ * Error result (isError flag set). When a machine-readable `code` is given,
+ * it is exposed as `structuredContent: { code, message }`.
+ */
+export function errorResult(message: string, code?: string): CallToolResult {
+  const result: CallToolResult = { content: [{ type: "text", text: message }], isError: true };
+  if (code) result.structuredContent = { code, message };
+  return result;
 }
 
 /** Image result (PNG base64) with an optional text note. */

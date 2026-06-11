@@ -2,12 +2,12 @@
  * A live browser session: a context + page kept alive between MCP calls.
  * @module session/session
  */
-import { dirname } from "node:path";
 import type { Browser, BrowserContext, Page } from "playwright";
 import type { ResolvedConfig } from "../agent/config.js";
 import { attachListeners, type NetworkLog } from "../agent/network.js";
 import { selectEngineForConfig } from "../engine/registry.js";
-import { ensureDir } from "../lib/fs.js";
+import { attachDialogs } from "./dialogs.js";
+import { attachDownloads } from "./downloads.js";
 import { attachHealth } from "./health.js";
 
 /** Liveness of a session's page/browser. */
@@ -59,41 +59,7 @@ export async function openSession(
     expiresAt: now + ttlMs,
   };
   attachHealth(session);
+  attachDialogs(session);
+  attachDownloads(session);
   return session;
-}
-
-/**
- * Close a session. For launched browsers, close context + browser. For a CDP
- * attach (`connected`), only drop the link — never close the user's browser
- * or its default context.
- */
-export async function closeSession(session: SessionData): Promise<void> {
-  if (session.connected) {
-    try {
-      await session.browser?.close();
-    } catch {
-      /* ignore: detaching from a user browser */
-    }
-    return;
-  }
-  if (session.config.storageStatePath) {
-    try {
-      ensureDir(dirname(session.config.storageStatePath));
-      await session.context.storageState({ path: session.config.storageStatePath });
-    } catch {
-      /* best-effort: never block teardown */
-    }
-  }
-  try {
-    await session.context.close();
-  } catch {
-    /* ignore */
-  }
-  if (session.browser) {
-    try {
-      await session.browser.close();
-    } catch {
-      /* ignore */
-    }
-  }
 }

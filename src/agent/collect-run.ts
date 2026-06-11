@@ -7,7 +7,7 @@
 import type { Page } from "playwright";
 import { selectEngineForConfig } from "../engine/registry.js";
 import { teardownOpened } from "../engine/teardown.js";
-import { gotoWithRetry } from "../net/navigate.js";
+import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 import { type CollectOptions, type CollectResult, scrollCollect } from "../state/scroll-collect.js";
 import type { ResolvedConfig } from "./config.js";
 
@@ -16,7 +16,7 @@ import type { ResolvedConfig } from "./config.js";
  * page-level work with no browser lifecycle (so a pool can drive it).
  */
 export async function collectOnPage(page: Page, config: ResolvedConfig, url: string, opts: CollectOptions): Promise<CollectResult> {
-  await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 30_000 }, config.retry);
+  await gotoWithRetry(page, url, DEFAULT_GOTO, config.retry);
   await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
   return scrollCollect(page, opts);
 }

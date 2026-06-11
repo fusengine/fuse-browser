@@ -7,6 +7,8 @@
 import type { Page } from "playwright";
 import { attachListeners } from "../agent/network.js";
 import { BrowserLostError } from "../lib/errors.js";
+import { attachDialogs } from "./dialogs.js";
+import { attachDownloads } from "./downloads.js";
 import { attachHealth } from "./health.js";
 import type { SessionData } from "./session.js";
 
@@ -35,6 +37,9 @@ export async function recoverSession(session: SessionData): Promise<void> {
   session.health = "ok";
   // Page-only: context/browser listeners persist across recovery (no re-add).
   attachHealth(session, { pageOnly: true });
+  // Idempotent per page; dialog policy and download buffers survive recovery.
+  attachDialogs(session);
+  attachDownloads(session);
 
   if (session.config.harReplay) {
     await page

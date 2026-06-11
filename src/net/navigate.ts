@@ -28,6 +28,9 @@ export interface GotoOptions {
   timeout?: number;
 }
 
+/** Default goto options shared by every navigation call site. */
+export const DEFAULT_GOTO: GotoOptions = { waitUntil: "domcontentloaded", timeout: 30_000 };
+
 /** Navigate to `url`, retrying transient failures and rate-limit responses. */
 export function gotoWithRetry(
   page: Page,

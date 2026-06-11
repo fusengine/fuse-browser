@@ -52,7 +52,7 @@ describe("probe queue", () => {
     const runs = d.map((def) => withQueue(CFG, async () => def.promise));
     await Promise.resolve();
     await expect(withQueue(CFG, async () => "overflow")).rejects.toBeInstanceOf(QueueFullError);
-    d.forEach((x) => x.resolve());
+    for (const x of d) x.resolve();
     await Promise.all(runs);
   });
 

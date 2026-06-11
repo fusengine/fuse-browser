@@ -7,6 +7,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { fetchBatch } from "../../agent/fetch-batch.js";
+import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 
 /** Register `browser_fetch_batch`. */
@@ -26,7 +27,7 @@ export function registerFetchBatchTool(server: McpServer): void {
         concurrency: z.number().int().optional(),
       },
     },
-    async (args) => {
+    async (args, extra) => {
       const a = args as Record<string, unknown>;
       const urls = Array.isArray(a.urls) ? a.urls.map(String) : [];
       const results = await fetchBatch(urls, {
@@ -35,6 +36,7 @@ export function registerFetchBatchTool(server: McpServer): void {
         browserFallback: a.browserFallback === true,
         proxyUrl: typeof a.proxyUrl === "string" ? a.proxyUrl : undefined,
         concurrency: typeof a.concurrency === "number" ? a.concurrency : undefined,
+        onProgress: progressReporter(extra),
       });
       return jsonResult({ count: results.length, results });
     },

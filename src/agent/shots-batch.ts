@@ -25,6 +25,7 @@ export type ShotsBatchItem = { url: string; shots: Shot[] } | { url: string; err
  * @param viewports - Viewports per URL.
  * @param settleMs - Settle delay before each capture.
  * @param concurrency - Max browsers in flight (default 2).
+ * @param onProgress - Called after each URL settles: `(done, total, url)`.
  * @returns One item per input URL, in order.
  */
 export async function captureShotsBatch(
@@ -33,13 +34,19 @@ export async function captureShotsBatch(
   viewports: ViewportInput[],
   settleMs?: number,
   concurrency?: number,
+  onProgress?: (done: number, total: number, label?: string) => void,
 ): Promise<ShotsBatchItem[]> {
   const limit = concurrency && concurrency > 0 ? concurrency : DEFAULT_CONCURRENCY;
   const pool = new BrowserPool(config);
+  let done = 0;
   try {
-    const outcomes = await mapConcurrent(urls, limit, (url) =>
-      pool.withPage((page) => shotsOnPage(page, config, url, viewports, settleMs)),
-    );
+    const outcomes = await mapConcurrent(urls, limit, async (url) => {
+      try {
+        return await pool.withPage((page) => shotsOnPage(page, config, url, viewports, settleMs));
+      } finally {
+        onProgress?.(++done, urls.length, url);
+      }
+    });
     return outcomes.map((o, i) => (o.ok ? { url: urls[i] ?? "", shots: o.value } : { url: urls[i] ?? "", error: String(o.error) }));
   } finally {
     await pool.close();

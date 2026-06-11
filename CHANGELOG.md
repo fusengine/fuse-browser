@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.1.55] - 11-06-2026
+
+### Added
+
+- **Layout-agnostic price extraction** — captures a currency whether it sits before or after the amount (`CHF 6.90`, `6.90 CHF`, `10 €`, `350 kr`), even when the symbol and number land on separate DOM lines (`CHF\n6.90`, the digitec case that previously yielded zero prices). Handles non-breaking/narrow spaces and CH (`1'234.56`) / EU (`1.234,56`) decimal formats. Each price now carries a short `context` label of its surrounding line.
+- **Structured per-card extraction** — `browser_products` MCP tool + `fuse-browser products <url>` CLI return `{title, price, currency, url}` grouped by repeated product card, plus an `extract_schema` container mode that iterates card-by-card.
+- **New MCP tools** — `browser_tabs` (OAuth popups/multi-tab), `browser_dialog` + `browser_downloads`, `browser_console` + `browser_network`, `browser_autoscroll` (infinite-scroll until idle). Screenshots exposed as MCP resources (`screenshot://{sessionId}/last`).
+- **CLI parity** — six one-shot page commands: `run` (multi-step plans via `--steps`/`--steps-file`/stdin), `products`, `extract`, `snapshot`, `screenshot`, `inspect`. `--help` now lists all 15 commands.
+- **Config** — `FUSE_CAPS` tool-group filtering, named auth `profile`, `blockResources`, MCP progress notifications on batch tools, configurable network-log buffer (`FUSE_NETLOG_MAX`) that pins the main document.
+- **Stealth** — self-healing selectors (role/text/re-snapshot fallback) and a weekly anti-bot benchmark workflow.
+
+### Fixed
+
+- **Booking currency** — `prepareBookingCurrency` no longer does an intermediate homepage navigation that landed on the consent wall and blanked the target page; cookies + the in-page picker apply the currency without it.
+- **Probe robustness** — resilient load-state settle + a single re-extraction when the first text/title come back empty, fixing blank reports on heavy/consent-gated pages.
+- **Tabs network capture** — a tab opened with a URL now wires its network log before navigating, so its document and subresources are captured.
+- **mainText** — strips nav/aside/search/filter sub-trees so filter sidebars (e.g. Booking's budget slider) no longer leak into extracted prices, while product grids still yield every card.
+
+### Tooling
+
+- Biome linter wired into CI; full suite green (292 unit, 20 integration on real Chromium).
+
 ## [0.1.54] - 08-06-2026
 
 ### Fixed

@@ -43,6 +43,8 @@ export const agentOptionShape = {
   proxyMapPath: z.string().optional(),
   proxiesPath: z.string().optional(),
   storageStatePath: z.string().optional(),
+  profile: z.string().optional().describe("Named persistent auth profile — shorthand for storageStatePath at ~/.fuse-browser/profiles/<name>.json (ignored when storageStatePath is set)."),
+  blockResources: z.array(z.string()).optional().describe("Resource types to abort (image, media, font, stylesheet, script, xhr, fetch, websocket, manifest, other) — speeds up batches; unknown types ignored."),
   harPath: z.string().optional(),
   harMode: z.enum(["minimal", "full"]).optional(),
   harReplay: z.string().optional(),

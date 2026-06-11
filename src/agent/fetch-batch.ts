@@ -20,6 +20,8 @@ export interface FetchBatchOptions {
   browserFallback?: boolean;
   proxyUrl?: string;
   concurrency?: number;
+  /** Called after each URL settles (success or failure): `(done, total, url)`. */
+  onProgress?: (done: number, total: number, label?: string) => void;
 }
 
 /** One batch result: a rendered fetch, or `{ url, error }` on failure. */
@@ -34,10 +36,15 @@ export type FetchBatchItem = RenderedFetch | { url: string; error: string };
  */
 export async function fetchBatch(urls: string[], opts: FetchBatchOptions = {}): Promise<FetchBatchItem[]> {
   const concurrency = opts.concurrency && opts.concurrency > 0 ? opts.concurrency : DEFAULT_CONCURRENCY;
+  let done = 0;
   const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
-    const r = await fetchFast(url, opts.proxyUrl);
-    const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
-    return renderFetch(body, { format: opts.format, maxChars: opts.maxChars });
+    try {
+      const r = await fetchFast(url, opts.proxyUrl);
+      const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
+      return await renderFetch(body, { format: opts.format, maxChars: opts.maxChars });
+    } finally {
+      opts.onProgress?.(++done, urls.length, url);
+    }
   });
   return outcomes.map((o, i) => (o.ok ? o.value : { url: urls[i] ?? "", error: String(o.error) }));
 }
