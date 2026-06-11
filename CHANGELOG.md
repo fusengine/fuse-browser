@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.56] - 11-06-2026
+
+### Docs
+
+- Republish so npm carries the up-to-date README/docs (the 0.1.55 publish captured the pre-sync README that still said "37 MCP tools"). Surface is now correctly documented as **44 MCP tools** and **15 CLI commands**. No code change.
+
 ## [0.1.55] - 11-06-2026
 
 ### Added
