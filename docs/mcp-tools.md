@@ -1,10 +1,11 @@
 # MCP tools
 
-Complete reference for the 37 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 44 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
 - **One-shot / fast-path** (`browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`) open a fresh browser (or do a pure HTTP fetch) per call and return a report. No session id needed.
+- **Structured extraction** (`browser_products`, `browser_collect`, `browser_extract`, `browser_extract_schema`) and `browser_autoscroll` (drain lazy lists) run against a live session.
 - **Session tools** require a `sessionId` obtained from `browser_open` (or `browser_connect`). They drive one persistent, stateful page.
 
 Every field is optional unless **Required** says `yes`. Defaults shown below come from the tool itself; many can also be set globally via `FUSE_*` environment variables — see [configuration](./configuration.md). Per-call arguments always override env defaults.
@@ -13,13 +14,13 @@ The shared identity/profile options (the `agentOptionShape`) are listed once und
 
 ## Capability groups (`FUSE_CAPS`)
 
-By default all 37 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
+By default all 44 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
 
 | Group | Tools |
 | --- | --- |
-| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`. |
+| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`. |
 | `batch` | `browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`. |
-| `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`. |
+| `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`, `browser_products`. |
 | `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`. |
 | `live` | `browser_handoff`, `browser_live_view`, `browser_live_view_stop`. |
 
@@ -588,6 +589,25 @@ The optional `pipeline` runs a declarative clean→validate→dedupe→emit pass
 { "sessionId": "s_abc123", "item": ".result-card", "extractPrices": true, "maxSteps": 20 }
 ```
 
+### browser_autoscroll
+
+Repeatedly scroll a long / infinite list to the bottom to trigger lazy-load until it stabilises — run it **before** `browser_extract` / `browser_collect` / `browser_products` on lazy-loaded result pages so every item is in the DOM. Stops after `idleRounds` rounds without growth, at `maxScrolls`, or once `untilSelector` reaches `minCount` elements.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `maxScrolls` | integer | no | Hard cap on scroll rounds. |
+| `idleRounds` | integer | no | Stop after this many rounds with no height growth. |
+| `untilSelector` | string | no | Stop once this selector reaches `minCount` matches. |
+| `minCount` | integer | no | Element count target for `untilSelector`. |
+| `delayMs` | integer | no | Pause between scroll rounds. |
+
+Returns `{ rounds, height, url }`.
+
+```json
+{ "sessionId": "s_abc123", "untilSelector": ".result-card", "minCount": 100 }
+```
+
 ---
 
 ## Extract
@@ -624,6 +644,22 @@ Extract typed data from the live page via a field map. Deterministic; reads the 
     "links": { "selector": "a", "attr": "href", "all": true, "abs": true }
   }
 }
+```
+
+### browser_products
+
+Extract structured **per-card** product rows from an e-commerce / search-results page: one `{title, price, currency, url?}` per card, each price tied to its own title (unlike flat price scraping). Generic — detects repeated card containers by structure, so it works on Digitec, Booking, Amazon… Prices are parsed **layout-agnostically** (prefix/suffix currency, thousands/decimal markup, CH/EU formats). Sort the rows by price to answer "which is the cheapest?". Also exposed as the CLI `products` command.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `limit` | integer | no | Cap the number of returned rows. |
+| `containerSelector` | string | no | Pin the card-container selector (auto-detected otherwise). |
+
+Returns `{ url, count, products: [{ title, price, currency, url? }] }`.
+
+```json
+{ "sessionId": "s_abc123", "limit": 20 }
 ```
 
 ---

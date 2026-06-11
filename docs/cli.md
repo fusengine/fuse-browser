@@ -1,6 +1,6 @@
 # CLI
 
-`fuse-browser` is a command-line front-end for the browser agent. It exposes nine one-shot subcommands (`probe`, `fetch`, `fetch-batch`, `crawl`, `collect-batch`, `serp-batch`, `shots`, `shots-batch`, `site-shots`) that all share a single flag parser (`node:util` `parseArgs`, strict mode), so any flag is accepted globally but only consumed by the subcommands documented below. Session-based interaction (open/navigate/click/products/autoscroll/…) is exposed through the MCP server (`browser-mcp`), not the CLI.
+`fuse-browser` is a command-line front-end for the browser agent. It exposes 15 one-shot subcommands — nine batch/fast-path commands (`probe`, `fetch`, `fetch-batch`, `crawl`, `collect-batch`, `serp-batch`, `shots`, `shots-batch`, `site-shots`) plus six [page commands](#page-commands-one-shot) (`run`, `products`, `extract`, `snapshot`, `screenshot`, `inspect`) — that all share a single flag parser (`node:util` `parseArgs`, strict mode), so any flag is accepted globally but only consumed by the subcommands documented below. Stateful, multi-turn session interaction (open → navigate → click → snapshot → …) is exposed through the MCP server (`browser-mcp`), not the CLI.
 
 ```
 fuse-browser probe <url> [flags]
