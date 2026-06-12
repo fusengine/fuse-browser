@@ -2,8 +2,7 @@
  * Session teardown: persist storage state, then close context + browser.
  * @module session/close
  */
-import { dirname } from "node:path";
-import { ensureDir } from "../lib/fs.js";
+import { persistStorageState } from "./persist-auth.js";
 import type { SessionData } from "./session.js";
 
 /**
@@ -20,14 +19,7 @@ export async function closeSession(session: SessionData): Promise<void> {
     }
     return;
   }
-  if (session.config.storageStatePath) {
-    try {
-      ensureDir(dirname(session.config.storageStatePath));
-      await session.context.storageState({ path: session.config.storageStatePath });
-    } catch {
-      /* best-effort: never block teardown */
-    }
-  }
+  await persistStorageState(session.context, session.config.storageStatePath);
   try {
     await session.context.close();
   } catch {

@@ -10,7 +10,7 @@ Shadow DOM + iframes), multi-step plans, structured extraction, visual diff, and
 guardrails** for payments and bookings. It drives real Chromium, so it reads **Next.js / SPA**
 pages after hydration — not just static HTML.
 
-> 44 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · form fill + file upload · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
+> 44 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · form fill + file upload · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles (cookies + localStorage + IndexedDB, saved at login) · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
 
 ## Install
 

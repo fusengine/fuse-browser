@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.58] - 11-06-2026
+
+### Added
+
+- **Complete auth persistence** — named `profile` / `storageStatePath` now persist **cookies + localStorage + IndexedDB** (`storageState({ indexedDB: true })`), so sessions that store their auth token in IndexedDB (modern SPAs, Firebase Auth, …) reopen already logged in. The state is saved **at login time** (right after `browser_login` succeeds) and on session close — auth is no longer lost if a session crashes before a clean teardown. Works identically headless and headed on Chromium. `userDataDir` (full persistent Chromium profile) is unchanged and already covers everything natively. Verified live (IndexedDB token written, then replayed after reopen).
+
 ## [0.1.57] - 11-06-2026
 
 ### Added

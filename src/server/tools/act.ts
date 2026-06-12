@@ -7,6 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { type ActionInput, performAction } from "../../actions/perform.js";
 import type { SessionManager } from "../../session/manager.js";
+import { persistStorageState } from "../../session/persist-auth.js";
 import { runWithMemory } from "../../state/action-memory.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
@@ -29,6 +30,11 @@ function actTool(
       const result = await runWithMemory(s.config.siteMemoryDir, s.page, action, (act) =>
         performAction(s.page, act, s.config.humanMode),
       );
+      // Persist auth immediately after a successful login so the session is
+      // captured at login time, not only on close (cookies + localStorage + IndexedDB).
+      if (action.type === "login" && result.ok) {
+        await persistStorageState(s.context, s.config.storageStatePath);
+      }
       return jsonResult({ result, url: s.page.url() });
     });
   });

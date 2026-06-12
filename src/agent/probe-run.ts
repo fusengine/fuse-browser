@@ -2,7 +2,7 @@
  * Orchestrate a single probe run: launch, navigate, act, capture, report.
  * @module agent/probe-run
  */
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { type ActionInput } from "../actions/perform.js";
 import { prepareBookingCurrency } from "../consent/booking-currency.js";
 import { handleCommonConsent } from "../consent/consent.js";
@@ -14,12 +14,13 @@ import { mainText } from "../extraction/main-text.js";
 import { visualObservation } from "../extraction/visual.js";
 import type { ProbeReport } from "../interfaces/report.js";
 import type { ProbeOptions } from "../interfaces/types.js";
-import { ensureDir, sha1 } from "../lib/fs.js";
+import { sha1 } from "../lib/fs.js";
 import { withBreaker } from "../net/breaker-guard.js";
 import { DEFAULT_GOTO, gotoWithRetry } from "../net/navigate.js";
 import { assertRobotsAllowed } from "../net/robots-guard.js";
 import { throttleHost } from "../net/throttle.js";
 import { reportProxyBlocked } from "../proxy/pool.js";
+import { persistStorageState } from "../session/persist-auth.js";
 import { domSignature } from "../state/dom-signature.js";
 import { runActions } from "./actions-loop.js";
 import type { ResolvedConfig } from "./config.js";
@@ -67,10 +68,7 @@ export async function runProbe(
     await page.screenshot({ path: screenshotPath, fullPage: true });
     const visual = options.observeVisual ? await visualObservation(page, screenshotPath) : {};
     const serp = await extractSerpStep(page, options, config);
-    if (config.storageStatePath) {
-      ensureDir(dirname(config.storageStatePath));
-      await context.storageState({ path: config.storageStatePath });
-    }
+    await persistStorageState(context, config.storageStatePath);
     const report = buildReport({
       config,
       targetUrl,
