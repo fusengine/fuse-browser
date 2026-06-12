@@ -20,7 +20,7 @@ export function registerRunTool(server: McpServer, sessions: SessionManager): vo
     {
       title: "Run multi-step plan",
       description:
-        "Execute an ordered list of steps (navigate, click, fill, scroll, press, select, wait_for, extract) in one call. Stops at the first failed step. Sensitive actions need humanApproved.",
+        "Execute an ordered list of steps (navigate, click, fill, scroll, press, select, upload, wait_for, extract) in one call. `upload` sets local file path(s) on an `<input type=file>` via `files` (single path, comma-separated string, or array). Stops at the first failed step. Sensitive actions need humanApproved.",
       inputSchema: {
         sessionId: z.string(),
         steps: z.array(stepSchema),

@@ -10,7 +10,7 @@ Shadow DOM + iframes), multi-step plans, structured extraction, visual diff, and
 guardrails** for payments and bookings. It drives real Chromium, so it reads **Next.js / SPA**
 pages after hydration — not just static HTML.
 
-> 44 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
+> 44 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · form fill + file upload · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
 
 ## Install
 
@@ -44,7 +44,7 @@ fuse-browser products "https://www.digitec.ch/en/search?q=macbook" --limit 20   
 
 An LLM runs a **perceive → decide → act** loop through the tools: `browser_open` →
 `browser_navigate` → `browser_snapshot` (indexed `ref`s + form state) → `browser_act`
-(click/fill/select/pick, returns a page diff) → `browser_wait_for` → `browser_autoscroll`
+(click/fill/select/pick/upload, returns a page diff) → `browser_wait_for` → `browser_autoscroll`
 (drain lazy lists) → `browser_products` / `browser_collect` / `browser_extract` /
 `browser_screenshot`. Sensitive actions (pay / book / checkout) are **blocked** unless the
 agent passes `humanApproved`.

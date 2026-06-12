@@ -6,42 +6,14 @@
  * @module server/tools/snapshot
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { Page } from "playwright";
 import { z } from "zod";
-import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
-import { pickAutocomplete } from "../../actions/autocomplete.js";
-import { smartClick } from "../../actions/smart-click.js";
-import { smartFill } from "../../actions/smart-fill.js";
 import { annotatedScreenshot } from "../../extraction/annotate.js";
 import { captureSnapshot } from "../../extraction/snapshot.js";
 import { diffSnapshots } from "../../extraction/snapshot-diff.js";
-import type { ActionResult } from "../../interfaces/types.js";
 import type { SessionManager } from "../../session/manager.js";
-import { runWithMemory } from "../../state/action-memory.js";
 import { errorResult, imageJsonResult, jsonResult } from "../result.js";
+import { KIND, runAct } from "./run-act.js";
 import { withSession } from "./with-session.js";
-
-const KIND = z.enum(["click", "fill", "select", "pick"]);
-
-/** Run the chosen action (by ref or text fallback), with site-memory assist. */
-async function runAct(
-  page: Page,
-  a: Record<string, unknown>,
-  human: boolean,
-  dir: string,
-): Promise<ActionResult | null> {
-  const kind = a.kind as RefActionKind;
-  const value = a.value ? String(a.value) : "";
-  const option = a.option ? String(a.option) : "";
-  if (typeof a.ref === "number" || typeof a.ref === "string") return actByRef(page, a.ref, kind, value, option);
-  if (typeof a.target !== "string") return null;
-  const target = a.target;
-  if (kind === "pick") return pickAutocomplete(page, page.locator(target).first(), value, option);
-  return runWithMemory(dir, page, { type: kind, target }, (act) => {
-    const pref = String(act.preferredStrategy ?? "");
-    return kind === "fill" ? smartFill(page, target, value, pref, human) : smartClick(page, target, pref, human);
-  });
-}
 
 /** Register `browser_snapshot` and `browser_act`. */
 export function registerSnapshotTools(server: McpServer, sessions: SessionManager): void {
@@ -70,7 +42,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Act on element",
       description:
-        "Execute click/fill/select/pick on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. Returns a diff of what changed. Pass `annotate:true` to also get a Set-of-Marks screenshot of the NEW state (re-marked, anti-drift) for vision models.",
+        "Execute click/fill/select/pick/upload on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. `upload` = set local file path(s) on an `<input type=file>` via `files` (a single path, a comma-separated string, or an array). Returns a diff of what changed. Pass `annotate:true` to also get a Set-of-Marks screenshot of the NEW state (re-marked, anti-drift) for vision models.",
       inputSchema: {
         sessionId: z.string(),
         kind: KIND,
@@ -78,6 +50,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
         target: z.string().optional(),
         value: z.string().optional(),
         option: z.string().optional(),
+        files: z.union([z.string(), z.array(z.string())]).optional(),
         annotate: z.boolean().optional(),
       },
     },

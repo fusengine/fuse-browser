@@ -536,18 +536,21 @@ Return the indexed interactive elements of the live page, each with a `ref` to u
 
 ### browser_act
 
-Execute click/fill/select/pick on an element by `ref` (from `browser_snapshot`) or by `target` text. Returns a diff of what changed on the page (added/removed/text/url).
+Execute click/fill/select/pick/upload on an element by `ref` (from `browser_snapshot`) or by `target` text. Returns a diff of what changed on the page (added/removed/text/url).
 
 `pick` = type `value` into a combobox, then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes.
+
+`upload` = set local file path(s) on an `<input type=file>` via `files` (single path, a comma-separated string, or an array). Resolves the same `ref`/`target` as the other kinds, then calls Playwright's `setInputFiles`.
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
-| `kind` | enum `click` \| `fill` \| `select` \| `pick` | yes | Action to perform. |
+| `kind` | enum `click` \| `fill` \| `select` \| `pick` \| `upload` | yes | Action to perform. |
 | `ref` | integer \| string | no | Element ref from `browser_snapshot` (e.g. `12` or `"3:4"`). |
 | `target` | string | no | Text/selector fallback when no `ref`. |
 | `value` | string | no | Value to type/select (for `fill`/`select`/`pick`). |
 | `option` | string | no | Suggestion text to click for `pick` (defaults to `value`). |
+| `files` | string \| string[] | no | File path(s) for `upload` — one path, a comma-separated string (split into many), or an array. |
 | `annotate` | boolean | no | Also return a Set-of-Marks JPEG of the NEW state (re-marked, anti-drift). |
 
 Provide either `ref` or `target`.
@@ -556,9 +559,13 @@ Provide either `ref` or `target`.
 { "sessionId": "s_abc123", "kind": "fill", "ref": 12, "value": "Paris" }
 ```
 
+```json
+{ "sessionId": "s_abc123", "kind": "upload", "target": "input[type=file]", "files": "/path/cv.pdf" }
+```
+
 ### browser_run
 
-Execute an ordered multi-step plan (navigate, click, fill, scroll, press, select, wait_for, extract) in one call. Stops at the first failed step. Sensitive actions require `humanApproved`.
+Execute an ordered multi-step plan (navigate, click, fill, scroll, press, select, upload, wait_for, extract) in one call. Stops at the first failed step. Sensitive actions require `humanApproved`. An `upload` step takes `{type:"upload", target, files}` where `files` is a path, a comma-separated string, or an array.
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |

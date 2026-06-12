@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.57] - 11-06-2026
+
+### Added
+
+- **File upload** — new `upload` action (Playwright `setInputFiles`) for `browser_act` (`kind:"upload"`) and `run` step plans (`{"type":"upload","target":"input[type=file]","files":"/path/cv.pdf"}`). `files` accepts one path, a comma-separated string, or an array. Targets by `ref` or selector. Enables forms that need an attachment (job applications, avatars, CSV imports). Verified live (the-internet upload form). No new MCP tool — tool count stays 44.
+
 ## [0.1.56] - 11-06-2026
 
 ### Docs

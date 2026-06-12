@@ -9,6 +9,7 @@ import { login, type LoginAction } from "./login.js";
 import { navigateHistory, pressKey, scroll, selectOption } from "./navigation.js";
 import { smartClick } from "./smart-click.js";
 import { smartFill } from "./smart-fill.js";
+import { type FilesInput, uploadFiles } from "./upload.js";
 
 /** Loose runtime action (may carry `preferredStrategy` injected by site memory). */
 export type ActionInput = Record<string, unknown> & { type: string };
@@ -37,6 +38,8 @@ export async function performAction(
       return pressKey(page, String(action.key ?? ""));
     case "select":
       return selectOption(page, target, String(action.value ?? ""));
+    case "upload":
+      return uploadFiles(page, target, (action.files ?? action.value ?? "") as FilesInput);
     case "pick":
       return pickAutocomplete(page, page.locator(target).first(), String(action.value ?? ""), String(action.option ?? ""));
     case "back":

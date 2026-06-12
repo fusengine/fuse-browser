@@ -30,6 +30,7 @@ export type BrowserAction =
       username?: string;
       password?: string;
     }
+  | { type: "upload"; target: string; files: string | string[] }
   | { type: "wait"; ms?: number };
 
 /** Normalized result of an action. */

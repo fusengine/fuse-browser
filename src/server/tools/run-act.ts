@@ -1,0 +1,47 @@
+/**
+ * `browser_act` dispatch: run the chosen action (by `ref` or text `target`),
+ * with site-memory assist. Extracted from snapshot.ts to keep both < 90 lines.
+ * @module server/tools/run-act
+ */
+import type { Page } from "playwright";
+import { z } from "zod";
+import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
+import { pickAutocomplete } from "../../actions/autocomplete.js";
+import { smartClick } from "../../actions/smart-click.js";
+import { smartFill } from "../../actions/smart-fill.js";
+import { type FilesInput, uploadFiles } from "../../actions/upload.js";
+import type { ActionResult } from "../../interfaces/types.js";
+import { runWithMemory } from "../../state/action-memory.js";
+
+/** Allowed `browser_act` kinds. */
+export const KIND = z.enum(["click", "fill", "select", "pick", "upload"]);
+
+/**
+ * Run the chosen action (by `ref` or text fallback), with site-memory assist.
+ *
+ * @param page - Active Playwright page.
+ * @param a - Raw tool args (`kind`, `ref`/`target`, `value`, `option`, `files`).
+ * @param human - Whether human-like cursor motion is enabled.
+ * @param dir - Site-memory directory for strategy recall.
+ * @returns Action result, or `null` when neither `ref` nor `target` is given.
+ */
+export async function runAct(
+  page: Page,
+  a: Record<string, unknown>,
+  human: boolean,
+  dir: string,
+): Promise<ActionResult | null> {
+  const kind = a.kind as RefActionKind;
+  const value = a.value ? String(a.value) : "";
+  const option = a.option ? String(a.option) : "";
+  const files = (a.files ?? a.value ?? "") as FilesInput;
+  if (typeof a.ref === "number" || typeof a.ref === "string") return actByRef(page, a.ref, kind, value, option, files);
+  if (typeof a.target !== "string") return null;
+  const target = a.target;
+  if (kind === "pick") return pickAutocomplete(page, page.locator(target).first(), value, option);
+  if (kind === "upload") return uploadFiles(page, target, files);
+  return runWithMemory(dir, page, { type: kind, target }, (act) => {
+    const pref = String(act.preferredStrategy ?? "");
+    return kind === "fill" ? smartFill(page, target, value, pref, human) : smartClick(page, target, pref, human);
+  });
+}
