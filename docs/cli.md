@@ -115,7 +115,7 @@ These commands open a page, run one operation, print JSON on stdout (errors on s
 
 ### `run <url>`
 
-Executes a multi-step plan in one session. Steps come from `--steps '<json>'` (inline array) or `--steps-file <path>` (`-` reads stdin). Each step is `{type, …}`: `navigate`, `click`, `fill`, `scroll`, `press`, `wait`, `select`, `upload`, `extract`. An `upload` step is `{"type":"upload","target":"<selector>","files":"<path>"}` — `files` accepts one path, a comma-separated string, or an array, and is set on the matching `<input type=file>`. Prints `{ok, url, steps}`; on a failed step prints `{ok:false, error:{kind:"step_failed", step, message}}` and exits `1`. Malformed/non-array JSON exits `2`.
+Executes a multi-step plan in one session. Steps come from `--steps '<json>'` (inline array) or `--steps-file <path>` (`-` reads stdin). Each step is `{type, …}`: `navigate`, `click`, `fill`, `scroll`, `press`, `wait`, `select`, `upload`, `hover`, `drag`, `extract`. An `upload` step is `{"type":"upload","target":"<selector>","files":"<path>"}` — `files` accepts one path, a comma-separated string, or an array, and is set on the matching `<input type=file>`. A `hover` step is `{"type":"hover","target":"<selector>"}` (moves the pointer over the element to reveal hover menus/tooltips). A `drag` step is `{"type":"drag","target":"<source-selector>","to":"<destination-selector>"}` (drops the source onto the destination). Prints `{ok, url, steps}`; on a failed step prints `{ok:false, error:{kind:"step_failed", step, message}}` and exits `1`. Malformed/non-array JSON exits `2`.
 
 ```bash
 fuse-browser run https://example.com \
@@ -125,6 +125,11 @@ fuse-browser run https://example.com \
 ```bash
 fuse-browser run https://example.com/apply \
   --steps '[{"type":"upload","target":"input[type=file]","files":"/path/cv.pdf"}]'
+```
+
+```bash
+fuse-browser run https://example.com/board \
+  --steps '[{"type":"hover","target":".menu-trigger"},{"type":"drag","target":"#card-1","to":"#column-done"}]'
 ```
 
 ### `products <url>`

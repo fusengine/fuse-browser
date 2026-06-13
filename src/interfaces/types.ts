@@ -31,6 +31,8 @@ export type BrowserAction =
       password?: string;
     }
   | { type: "upload"; target: string; files: string | string[] }
+  | { type: "hover"; target: string }
+  | { type: "drag"; target: string; to: string }
   | { type: "wait"; ms?: number };
 
 /** Normalized result of an action. */

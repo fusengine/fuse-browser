@@ -7,6 +7,7 @@ import type { Page } from "playwright";
 import { z } from "zod";
 import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
 import { pickAutocomplete } from "../../actions/autocomplete.js";
+import { drag, hover } from "../../actions/hover-drag.js";
 import { smartClick } from "../../actions/smart-click.js";
 import { smartFill } from "../../actions/smart-fill.js";
 import { type FilesInput, uploadFiles } from "../../actions/upload.js";
@@ -14,7 +15,7 @@ import type { ActionResult } from "../../interfaces/types.js";
 import { runWithMemory } from "../../state/action-memory.js";
 
 /** Allowed `browser_act` kinds. */
-export const KIND = z.enum(["click", "fill", "select", "pick", "upload"]);
+export const KIND = z.enum(["click", "fill", "select", "pick", "upload", "hover", "drag"]);
 
 /**
  * Run the chosen action (by `ref` or text fallback), with site-memory assist.
@@ -34,12 +35,16 @@ export async function runAct(
   const kind = a.kind as RefActionKind;
   const value = a.value ? String(a.value) : "";
   const option = a.option ? String(a.option) : "";
+  const to = a.to ? String(a.to) : "";
   const files = (a.files ?? a.value ?? "") as FilesInput;
-  if (typeof a.ref === "number" || typeof a.ref === "string") return actByRef(page, a.ref, kind, value, option, files);
+  if (typeof a.ref === "number" || typeof a.ref === "string")
+    return actByRef(page, a.ref, kind, value, option, files, to);
   if (typeof a.target !== "string") return null;
   const target = a.target;
   if (kind === "pick") return pickAutocomplete(page, page.locator(target).first(), value, option);
   if (kind === "upload") return uploadFiles(page, target, files);
+  if (kind === "hover") return hover(page, target);
+  if (kind === "drag") return drag(page, target, to);
   return runWithMemory(dir, page, { type: kind, target }, (act) => {
     const pref = String(act.preferredStrategy ?? "");
     return kind === "fill" ? smartFill(page, target, value, pref, human) : smartClick(page, target, pref, human);

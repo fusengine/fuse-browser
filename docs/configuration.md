@@ -78,7 +78,7 @@ Read by `envAgentDefaults` (`src/server/env-defaults.ts`) and the proxy loader (
 | `FUSE_STORAGE_STATE` | `storageStatePath` | Path to a storage-state JSON. |
 | `FUSE_OUTPUT_DIR` | `outputDir` | Override the artifact output directory. |
 | `FUSE_PROXIES` | proxy pool | Comma- or newline-separated proxy URLs; deduped, blanks dropped. Merged with `proxiesPath`. Treat as a secret. |
-| `FUSE_CAPS` | tool-group filter | Comma-separated [capability groups](./mcp-tools.md#capability-groups-fuse_caps) to register (`core`/`batch`/`extract`/`debug`/`live`). Case-insensitive, whitespace-tolerant; unknown names are ignored. Blank/unset (or only-unknown) = all 44 tools. Server-only (no per-call/library equivalent). |
+| `FUSE_CAPS` | tool-group filter | Comma-separated [capability groups](./mcp-tools.md#capability-groups-fuse_caps) to register (`core`/`batch`/`extract`/`debug`/`live`). Case-insensitive, whitespace-tolerant; unknown names are ignored. Blank/unset (or only-unknown) = all 49 tools. Server-only (no per-call/library equivalent). |
 | `FUSE_NETLOG_MAX` | network/console log cap | Max entries kept per session in `browser_console` / `browser_network` (oldest dropped). Positive integer; default `250`. |
 
 ### MCP config example

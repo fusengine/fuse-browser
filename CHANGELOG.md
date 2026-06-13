@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.59] - 13-06-2026
+
+### Added
+
+- **Two new interaction gestures** — `hover` (open menus/tooltips on mouse-over) and `drag` (drag&drop, `target`→`to`) as `browser_act` kinds and `run` step types. Closes the most common "the agent sees the link but the click fails because the hover menu never opened" gap.
+- **Five new MCP tools** (44 → **49**): `browser_pdf` (page → PDF, headless Chromium), `browser_cookies` (get/set/clear — inject or export an auth token without a UI login), `browser_route` (mock/abort/unroute a network response — stub an API without a live backend), `browser_permissions` (grant/clear geolocation, clipboard, notifications…), `browser_clipboard` (read/write).
+- **`browser_downloads` now reads file content** — pass `read` (index or filename) + `encoding` (utf8/base64) to get the downloaded bytes, not just the path (5 MB cap).
+- All verified live: hover reveal, drag, cookies round-trip, network mock (`fulfill`), PDF bytes, clipboard write/read.
+
 ## [0.1.58] - 11-06-2026
 
 ### Added

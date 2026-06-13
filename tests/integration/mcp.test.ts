@@ -63,6 +63,11 @@ const EXPECTED = [
   "browser_downloads",
   "browser_console",
   "browser_network",
+  "browser_pdf",
+  "browser_cookies",
+  "browser_route",
+  "browser_permissions",
+  "browser_clipboard",
 ];
 
 test("MCP exposes the expected tool set with no duplicates", async () => {

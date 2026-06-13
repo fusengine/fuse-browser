@@ -6,9 +6,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { attachDialogs, recentDialogs, setDialogPolicy } from "../../session/dialogs.js";
+import { readDownload } from "../../session/download-read.js";
 import { attachDownloads, listDownloads } from "../../session/downloads.js";
 import type { SessionManager } from "../../session/manager.js";
-import { jsonResult } from "../result.js";
+import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
 /** Register `browser_dialog` and `browser_downloads`. */
@@ -44,8 +45,13 @@ export function registerDialogTools(server: McpServer, sessions: SessionManager)
     "browser_downloads",
     {
       title: "List downloads",
-      description: "List the files downloaded by this session (saved under outputDir/downloads).",
-      inputSchema: { sessionId: z.string() },
+      description:
+        "List the files downloaded by this session (saved under outputDir/downloads). Pass `read` (index or filename) to also return one file's content, decoded as `encoding` (utf8 or base64).",
+      inputSchema: {
+        sessionId: z.string(),
+        read: z.union([z.number(), z.string()]).optional(),
+        encoding: z.enum(["utf8", "base64"]).default("utf8"),
+      },
     },
     async (args) => {
       const a = args as Record<string, unknown>;
@@ -53,7 +59,12 @@ export function registerDialogTools(server: McpServer, sessions: SessionManager)
         // Idempotent: a no-op when the session wiring already attached it.
         attachDownloads(s);
         const downloads = listDownloads(s);
-        return jsonResult({ count: downloads.length, downloads });
+        const base = { count: downloads.length, downloads };
+        if (a.read === undefined) return jsonResult(base);
+        const encoding = a.encoding as "utf8" | "base64";
+        const content = readDownload(downloads, a.read as number | string, encoding);
+        if ("error" in content) return errorResult(content.error, "DOWNLOAD_READ_FAILED");
+        return jsonResult({ ...base, content });
       });
     },
   );

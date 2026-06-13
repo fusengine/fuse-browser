@@ -42,7 +42,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Act on element",
       description:
-        "Execute click/fill/select/pick/upload on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. `upload` = set local file path(s) on an `<input type=file>` via `files` (a single path, a comma-separated string, or an array). Returns a diff of what changed. Pass `annotate:true` to also get a Set-of-Marks screenshot of the NEW state (re-marked, anti-drift) for vision models.",
+        "Execute click/fill/select/pick/upload/hover/drag on an element by `ref` (from browser_snapshot) or by `target` text. `pick` = type `value` into a combobox then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes. `upload` = set local file path(s) on an `<input type=file>` via `files` (a single path, a comma-separated string, or an array). `hover` = move the pointer over the element (reveals hover menus/tooltips). `drag` = drag the source element onto a destination given by `to` (a snapshot `ref` or a CSS selector). Returns a diff of what changed. Pass `annotate:true` to also get a Set-of-Marks screenshot of the NEW state (re-marked, anti-drift) for vision models.",
       inputSchema: {
         sessionId: z.string(),
         kind: KIND,
@@ -51,6 +51,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
         value: z.string().optional(),
         option: z.string().optional(),
         files: z.union([z.string(), z.array(z.string())]).optional(),
+        to: z.string().optional(),
         annotate: z.boolean().optional(),
       },
     },

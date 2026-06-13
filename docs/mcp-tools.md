@@ -14,14 +14,14 @@ The shared identity/profile options (the `agentOptionShape`) are listed once und
 
 ## Capability groups (`FUSE_CAPS`)
 
-By default all 44 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
+By default all 49 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
 
 | Group | Tools |
 | --- | --- |
 | `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`. |
 | `batch` | `browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`. |
 | `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`, `browser_products`. |
-| `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`. |
+| `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`, `browser_pdf`, `browser_cookies`. |
 | `live` | `browser_handoff`, `browser_live_view`, `browser_live_view_stop`. |
 
 ```sh
@@ -346,11 +346,23 @@ List the files downloaded by this session. Download capture is auto-attached whe
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
+| `read` | number \| string | no | Index in the list, or a `suggestedFilename`, of the download whose content to also return. |
+| `encoding` | `"utf8"` \| `"base64"` | no | How to decode the read file. Default `utf8`. Use `base64` for binary files (PDF, images, archives). |
 
 Returns `{ count, downloads }` — each download is `{ url, suggestedFilename, path, at, error? }` (`path` is empty while saving or when `error` is set).
 
+When `read` is given, the result also includes `content: { filename, encoding, data }`. Files over 5 MB, an invalid index/filename, or a file not yet on disk return an error (`code: DOWNLOAD_READ_FAILED`). Without `read`, the behaviour is unchanged (list only).
+
 ```json
 { "sessionId": "s_abc123" }
+```
+
+```json
+{ "sessionId": "s_abc123", "read": 0, "encoding": "utf8" }
+```
+
+```json
+{ "sessionId": "s_abc123", "read": "invoice.pdf", "encoding": "base64" }
 ```
 
 ---
@@ -536,21 +548,26 @@ Return the indexed interactive elements of the live page, each with a `ref` to u
 
 ### browser_act
 
-Execute click/fill/select/pick/upload on an element by `ref` (from `browser_snapshot`) or by `target` text. Returns a diff of what changed on the page (added/removed/text/url).
+Execute click/fill/select/pick/upload/hover/drag on an element by `ref` (from `browser_snapshot`) or by `target` text. Returns a diff of what changed on the page (added/removed/text/url).
 
 `pick` = type `value` into a combobox, then click the matching suggestion (`option` text, defaults to `value`) — for airport/city autocompletes.
 
 `upload` = set local file path(s) on an `<input type=file>` via `files` (single path, a comma-separated string, or an array). Resolves the same `ref`/`target` as the other kinds, then calls Playwright's `setInputFiles`.
 
+`hover` = move the pointer over the element (Playwright's `locator.hover()`) — reveals hover menus/tooltips so a follow-up `browser_snapshot` sees the newly-shown elements.
+
+`drag` = drag the source element (`ref`/`target`) onto a destination given by `to` (a snapshot `ref` or a CSS selector), via Playwright's `locator.dragTo()`.
+
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
-| `kind` | enum `click` \| `fill` \| `select` \| `pick` \| `upload` | yes | Action to perform. |
+| `kind` | enum `click` \| `fill` \| `select` \| `pick` \| `upload` \| `hover` \| `drag` | yes | Action to perform. |
 | `ref` | integer \| string | no | Element ref from `browser_snapshot` (e.g. `12` or `"3:4"`). |
 | `target` | string | no | Text/selector fallback when no `ref`. |
 | `value` | string | no | Value to type/select (for `fill`/`select`/`pick`). |
 | `option` | string | no | Suggestion text to click for `pick` (defaults to `value`). |
 | `files` | string \| string[] | no | File path(s) for `upload` — one path, a comma-separated string (split into many), or an array. |
+| `to` | string | no | Drop destination for `drag` — a snapshot `ref` (e.g. `"7"`) or a CSS selector. |
 | `annotate` | boolean | no | Also return a Set-of-Marks JPEG of the NEW state (re-marked, anti-drift). |
 
 Provide either `ref` or `target`.
@@ -561,6 +578,14 @@ Provide either `ref` or `target`.
 
 ```json
 { "sessionId": "s_abc123", "kind": "upload", "target": "input[type=file]", "files": "/path/cv.pdf" }
+```
+
+```json
+{ "sessionId": "s_abc123", "kind": "hover", "ref": 5 }
+```
+
+```json
+{ "sessionId": "s_abc123", "kind": "drag", "ref": 3, "to": "7" }
 ```
 
 ### browser_run
@@ -819,6 +844,121 @@ Returns `{ count, requests }`.
 
 ```json
 { "sessionId": "s_abc123", "status": 404 }
+```
+
+### browser_pdf
+
+Render the live page to PDF. **Headless chromium only** — Playwright's `page.pdf()` throws in headed mode or on a non-chromium engine; in that case the tool returns a clear error (`code: pdf_unsupported`, message `browser_pdf requires headless chromium`). With `path` the PDF is written to disk; otherwise it is returned base64-encoded.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `path` | string | no | If set, write the PDF here and return `{ path }`. |
+| `format` | string | no | Paper format (`Letter`, `Legal`, `Tabloid`, `Ledger`, `A0`–`A6`). |
+| `landscape` | boolean | no | Landscape orientation. |
+| `printBackground` | boolean | no | Print background graphics. |
+
+Returns `{ path, bytes }` when `path` is given, otherwise `{ pdfBase64, bytes }`.
+
+```json
+{ "sessionId": "s_abc123", "format": "A4", "printBackground": true }
+```
+
+```json
+{ "sessionId": "s_abc123", "path": "/tmp/page.pdf", "landscape": true }
+```
+
+### browser_cookies
+
+Read, set, or clear cookies on this session's `BrowserContext`. Cookies use the Playwright shape (`{ name, value, domain?, url?, path?, expires?, httpOnly?, secure?, sameSite? }`); either `url` or both `domain` and `path` are required per cookie when setting. Errors surface as `code: cookies_failed`.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `action` | enum `get` \| `set` \| `clear` | yes | Operation to perform. |
+| `cookies` | array | for `set` | Playwright cookies to add. |
+| `urls` | string[] | no | For `get`: return only cookies that affect these URLs. |
+
+Returns `{ cookies }` for `get`, `{ added: n }` for `set`, `{ cleared: true }` for `clear`.
+
+```json
+{ "sessionId": "s_abc123", "action": "get", "urls": ["https://example.com"] }
+```
+
+```json
+{ "sessionId": "s_abc123", "action": "set", "cookies": [{ "name": "sid", "value": "abc", "url": "https://example.com" }] }
+```
+
+```json
+{ "sessionId": "s_abc123", "action": "clear" }
+```
+
+### browser_route
+
+Intercept network requests matching a glob/URL `pattern` on this session. `mock` fulfills matching requests with a canned response (`status` / `body` / `contentType`); `abort` blocks them; `unroute` removes a route previously installed with the same pattern. Patterns are Playwright globs, e.g. `**/api/**` or `https://x/*`.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `pattern` | string | yes | Playwright URL glob to match. |
+| `action` | enum `mock` \| `abort` \| `unroute` | yes | Fulfill, block, or remove the route. |
+| `status` | number | no | HTTP status for `mock` (Playwright default `200`). |
+| `body` | string | no | Response body for `mock`. |
+| `contentType` | string | no | `Content-Type` header for `mock`. |
+
+Returns `{ routed, action }`.
+
+```json
+{ "sessionId": "s_abc123", "pattern": "**/api/me", "action": "mock", "status": 200, "body": "{\"id\":1}", "contentType": "application/json" }
+```
+
+```json
+{ "sessionId": "s_abc123", "pattern": "**/analytics/**", "action": "abort" }
+```
+
+```json
+{ "sessionId": "s_abc123", "pattern": "**/api/me", "action": "unroute" }
+```
+
+### browser_permissions
+
+Grant or clear runtime browser permissions on this session. `grant` (default) allows the listed permissions, optionally scoped to a single `origin`; `clear` revokes every permission granted so far. Names follow Playwright: `geolocation`, `notifications`, `clipboard-read`, `clipboard-write`, `camera`, `microphone`, `midi`, etc.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `permissions` | string[] | no | Permissions to grant (default `[]`; ignored on `clear`). |
+| `origin` | string | no | Scope the grant to this origin (`grant` only). |
+| `action` | enum `grant` \| `clear` | no | Default `grant`. |
+
+Returns `{ granted, origin }` for `grant`, `{ cleared: true }` for `clear`.
+
+```json
+{ "sessionId": "s_abc123", "permissions": ["geolocation", "clipboard-read", "clipboard-write"], "origin": "https://example.com" }
+```
+
+```json
+{ "sessionId": "s_abc123", "action": "clear" }
+```
+
+### browser_clipboard
+
+Read from or write to the page clipboard via `navigator.clipboard`. `read` returns the current text; `write` sets it to `text`. The clipboard API needs the `clipboard-read` / `clipboard-write` permissions — they are granted best-effort before the call, but if the browser still denies access the tool returns `code: clipboard_denied`; grant them explicitly with `browser_permissions` first.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `action` | enum `read` \| `write` | yes | Read from or write to the clipboard. |
+| `text` | string | for `write` | Text to put on the clipboard. |
+
+Returns `{ text }` for `read`, `{ written: true }` for `write`.
+
+```json
+{ "sessionId": "s_abc123", "action": "write", "text": "copied value" }
+```
+
+```json
+{ "sessionId": "s_abc123", "action": "read" }
 ```
 
 ---

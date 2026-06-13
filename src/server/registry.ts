@@ -9,8 +9,10 @@ import type { CapGroup } from "./caps.js";
 import { registerActTools } from "./tools/act.js";
 import { registerAutoScrollTool } from "./tools/autoscroll.js";
 import { registerCollectTool } from "./tools/collect.js";
+import { registerClipboardTool } from "./tools/clipboard.js";
 import { registerCollectBatchTool } from "./tools/collect-batch.js";
 import { registerConnectTool } from "./tools/connect.js";
+import { registerCookiesTool } from "./tools/cookies.js";
 import { registerCrawlTool } from "./tools/crawl.js";
 import { registerDialogTools } from "./tools/dialogs.js";
 import { registerExtractTool } from "./tools/extract.js";
@@ -23,8 +25,11 @@ import { registerLiveViewTool } from "./tools/live-view.js";
 import { registerLogTools } from "./tools/logs.js";
 import { registerMetricsTool } from "./tools/metrics.js";
 import { registerNavigateTool } from "./tools/navigate.js";
+import { registerPdfTool } from "./tools/pdf.js";
+import { registerPermissionsTool } from "./tools/permissions.js";
 import { registerProbeTools } from "./tools/probe.js";
 import { registerProductsTool } from "./tools/products.js";
+import { registerRouteTool } from "./tools/route.js";
 import { registerRunTool } from "./tools/run.js";
 import { registerScreenshotTool } from "./tools/screenshot.js";
 import { registerSerpBatchTool } from "./tools/serp-batch.js";
@@ -76,6 +81,11 @@ export function toolGroups(
       () => registerLogTools(server, sessions),
       () => registerVisualDiffTool(server, sessions),
       () => registerMetricsTool(server),
+      () => registerPdfTool(server, sessions),
+      () => registerCookiesTool(server, sessions),
+      () => registerRouteTool(server, sessions),
+      () => registerPermissionsTool(server, sessions),
+      () => registerClipboardTool(server, sessions),
     ],
     live: [
       () => registerHandoffTool(server, sessions),
