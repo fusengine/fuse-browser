@@ -78,8 +78,10 @@ Read by `envAgentDefaults` (`src/server/env-defaults.ts`) and the proxy loader (
 | `FUSE_STORAGE_STATE` | `storageStatePath` | Path to a storage-state JSON. |
 | `FUSE_OUTPUT_DIR` | `outputDir` | Override the artifact output directory. |
 | `FUSE_PROXIES` | proxy pool | Comma- or newline-separated proxy URLs; deduped, blanks dropped. Merged with `proxiesPath`. Treat as a secret. |
-| `FUSE_CAPS` | tool-group filter | Comma-separated [capability groups](./mcp-tools.md#capability-groups-fuse_caps) to register (`core`/`batch`/`extract`/`debug`/`live`). Case-insensitive, whitespace-tolerant; unknown names are ignored. Blank/unset (or only-unknown) = all 49 tools. Server-only (no per-call/library equivalent). |
+| `FUSE_CAPS` | tool-group filter | Comma-separated [capability groups](./mcp-tools.md#capability-groups-fuse_caps) to register (`core`/`batch`/`extract`/`debug`/`live`). Case-insensitive, whitespace-tolerant; unknown names are ignored. Blank/unset (or only-unknown) = all 50 tools. Server-only (no per-call/library equivalent). |
 | `FUSE_NETLOG_MAX` | network/console log cap | Max entries kept per session in `browser_console` / `browser_network` (oldest dropped). Positive integer; default `250`. |
+| `FUSE_VAULT_KEY` | vault master key | Base64 of exactly 32 bytes. When unset, a random key is generated at `<home>/vault.key` (`0600`). Lets you inject the key from a secret manager instead of the disk. At-rest AES-256-GCM protects the blob when it travels without its key (backup, sync, accidental `git add`) — it is **not** a defense against local malware running as the same user. Treat as a secret. |
+| `FUSE_VAULT_ALLOW_ANY_ORIGIN` | vault origin binding | Set to `1` to disable origin binding on credential fills (off by default). Removes the anti-phishing guard that refuses a fill on any origin other than the credential's bound one — only for trusted automation. |
 
 ### MCP config example
 

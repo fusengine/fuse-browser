@@ -58,6 +58,8 @@ export interface InteractiveElement {
   visible: boolean;
   box: { x: number; y: number; width: number; height: number };
   value?: string | null;
+  /** Present when a value exists but is withheld (password field / redacted). */
+  hasValue?: boolean;
   placeholder?: string | null;
   disabled?: boolean;
   checked?: boolean;

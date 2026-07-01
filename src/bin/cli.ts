@@ -19,6 +19,7 @@ import { runSerpBatch } from "./serp-batch-cli.js";
 import { runShotsBatch } from "./shots-batch-cli.js";
 import { runShots } from "./shots-cli.js";
 import { runSiteShotsCli } from "./site-shots-cli.js";
+import { runVaultCli } from "./vault-cli.js";
 
 const argv = process.argv.slice(2);
 handleMetaFlags(argv, CLI_USAGE);
@@ -50,6 +51,8 @@ if (command === "serp-batch") {
   await runFetchCli(rest[0], opts);
 } else if (command === "probe" && rest[0]) {
   await runProbeCli(rest[0], opts);
+} else if (command === "vault") {
+  await runVaultCli(rest);
 } else if (command && (await routePageCommand(command, rest, opts))) {
   // Handled by a one-shot page command (run/products/extract/snapshot/screenshot/inspect).
 } else {

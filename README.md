@@ -10,7 +10,7 @@ Shadow DOM + iframes), multi-step plans, structured extraction, visual diff, and
 guardrails** for payments and bookings. It drives real Chromium, so it reads **Next.js / SPA**
 pages after hydration — not just static HTML.
 
-> 49 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · form fill + file upload · hover + drag&drop · PDF export · cookies / permissions · network mocking · clipboard · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles (cookies + localStorage + IndexedDB, saved at login) · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
+> 50 MCP tools · stealth + rotating proxies · HTTP fast-path (single, batch & crawl) · full-site content + screenshot snapshots · structured per-card product extraction · form fill + file upload · encrypted credential vault + TOTP (fill-by-reference, origin-bound, never exposed to the LLM) · hover + drag&drop · PDF export · cookies / permissions · network mocking · clipboard · virtualized-list scraping + autoscroll · tabs / dialogs / downloads · console + network logs · MCP screenshot resources · `FUSE_CAPS` tool-group filtering · named auth profiles (cookies + localStorage + IndexedDB, saved at login) · `blockResources` · HAR record/replay · pixel visual-diff · human handoff + live view.
 
 ## Install
 
@@ -68,7 +68,7 @@ Full reference in **[`docs/`](./docs/README.md)**:
 
 [Installation](./docs/installation.md) ·
 [CLI](./docs/cli.md) ·
-[MCP tools (49)](./docs/mcp-tools.md) ·
+[MCP tools (50)](./docs/mcp-tools.md) ·
 [Configuration](./docs/configuration.md) ·
 [Sessions](./docs/sessions.md) ·
 [Extraction](./docs/extraction.md) ·

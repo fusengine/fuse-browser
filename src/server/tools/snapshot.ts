@@ -8,6 +8,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { annotatedScreenshot } from "../../extraction/annotate.js";
+import { redactElements } from "../../extraction/redact.js";
 import { captureSnapshot } from "../../extraction/snapshot.js";
 import { diffSnapshots } from "../../extraction/snapshot-diff.js";
 import type { SessionManager } from "../../session/manager.js";
@@ -28,7 +29,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        const elements = await captureSnapshot(s.page, a.selectors === true);
+        const elements = redactElements(await captureSnapshot(s.page, a.selectors === true), s.secrets);
         const payload = { url: s.page.url(), count: elements.length, elements };
         if (a.annotate !== true) return jsonResult(payload);
         const shot = await annotatedScreenshot(s.page);
@@ -58,11 +59,11 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        const before = await captureSnapshot(s.page);
+        const before = redactElements(await captureSnapshot(s.page), s.secrets);
         const urlBefore = s.page.url();
         const result = await runAct(s.page, a, s.config.humanMode, s.config.siteMemoryDir);
         if (!result) return errorResult("browser_act requires either `ref` or `target`");
-        const after = await captureSnapshot(s.page);
+        const after = redactElements(await captureSnapshot(s.page), s.secrets);
         const diff = diffSnapshots(before, after, s.page.url() !== urlBefore);
         const out = { result, url: s.page.url(), diff };
         if (a.annotate !== true) return jsonResult(out);

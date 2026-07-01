@@ -26,6 +26,12 @@ Page commands (one-shot, JSON on stdout):
   screenshot <url>        Capture a PNG (--full-page, --output <file> or base64)
   inspect <url>           Computed style + WCAG contrast for one element (--ref <ref>)
 
+Vault (local encrypted credentials — secrets never touch argv or the LLM):
+  vault set <ref>         Store a credential (prompts: username/password/TOTP/origins)
+  vault list              List stored refs — metadata only, no secrets
+  vault rm <ref>          Delete a stored credential
+  vault test <ref>        Print the current TOTP code + confirm the password is set
+
 Common options:
   --engine <name>     playwright | patchright | firefox | webkit
   --country <cc>      Geo/locale identity (e.g. CH, FR)   --currency <code>   e.g. CHF, EUR

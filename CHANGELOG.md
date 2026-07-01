@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.60] - 01-07-2026
+
+### Added
+
+- **Encrypted credential vault + TOTP** (`browser_vault`, 49 → **50** tools) — store credentials locally (AES-256-GCM, key at `~/.fuse-browser/vault.key` `0600` or `FUSE_VAULT_KEY`) and fill them by reference: `browser_login { credentialRef }` and `browser_fill { credentialRef, field }` resolve username / password / TOTP **server-side**, so the secret never enters the MCP arguments, the tool result, or the model context. RFC 6238 TOTP is generated on the fly (zero dependencies, `node:crypto`).
+- **Origin binding (anti-phishing)** — every credential is bound to one or more `scheme://host` origins; a fill is refused on any other origin (`FUSE_VAULT_ALLOW_ANY_ORIGIN=1` opts out). A prompt-injected login on a look-alike domain is rejected.
+- **Snapshot redaction** — Tier 1 nulls `input[type=password]` values browser-side (with a `hasValue` flag); Tier 2 scrubs any vault-filled secret (password/TOTP) from `browser_snapshot` / `browser_act` output before it reaches the LLM.
+- **CLI `vault set|list|rm|test`** — the only write path; secrets are read from stdin **without echo**, never from argv. `list` returns metadata only; `test` prints the current TOTP code.
+- Verified: 22 new unit tests (crypto round-trip/tamper, RFC 6238 vectors, origin binding, fill wiring, list-only tool, redaction) + a real-Chromium integration test for Tier-1 masking.
+
 ## [0.1.59] - 13-06-2026
 
 ### Added

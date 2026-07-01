@@ -38,6 +38,7 @@ import { registerShotsBatchTool } from "./tools/shots-batch.js";
 import { registerSiteShotsTool } from "./tools/site-shots.js";
 import { registerSnapshotTools } from "./tools/snapshot.js";
 import { registerTabsTool } from "./tools/tabs.js";
+import { registerVaultTool } from "./tools/vault.js";
 import { registerVisualDiffTool } from "./tools/visual-diff.js";
 import { registerWaitTool } from "./tools/wait.js";
 
@@ -58,6 +59,7 @@ export function toolGroups(
       () => registerWaitTool(server, sessions),
       () => registerScreenshotTool(server, sessions),
       () => registerAutoScrollTool(server, sessions),
+      () => registerVaultTool(server, sessions),
     ],
     batch: [
       () => registerProbeTools(server),
