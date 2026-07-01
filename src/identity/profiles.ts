@@ -5,16 +5,11 @@
  * works on `storageStatePath`; profiles are just a friendly path resolver.
  * @module identity/profiles
  */
-import { homedir } from "node:os";
 import { join } from "node:path";
+import { fuseBrowserHome } from "../lib/home.js";
 
 /** Allowed profile names: alnum start, then alnum/`-`/`_`, 1-41 chars. */
 const PROFILE_NAME = /^[a-z0-9][a-z0-9_-]{0,40}$/i;
-
-/** Fuse-browser home dir (`FUSE_BROWSER_HOME` override, else `~/.fuse-browser`). */
-function fuseBrowserHome(): string {
-  return process.env.FUSE_BROWSER_HOME ?? join(homedir(), ".fuse-browser");
-}
 
 /**
  * Resolve the storage-state file for a named auth profile.

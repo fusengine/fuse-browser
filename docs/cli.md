@@ -174,6 +174,21 @@ fuse-browser inspect https://example.com --ref 0
 
 ---
 
+## `vault <set|list|rm|test>`
+
+Manage the local encrypted credential vault (AES-256-GCM). Secrets are read from stdin **without echo**, never from argv, and never leave the machine except to fill a field in the browser. This is the only vault write path — the MCP surface is read-only.
+
+```bash
+fuse-browser vault set github     # prompts: username, password, TOTP (optional), allowed origins
+fuse-browser vault list           # ref, username, totp?, origins — no secrets
+fuse-browser vault test github    # prints the current TOTP code + confirms the password is set
+fuse-browser vault rm github
+```
+
+Each credential is bound to one or more origins (`scheme://host`); a fill is refused on any other origin (anti-phishing). Reference it from an agent with `browser_login { credentialRef: "github" }` or `browser_fill { credentialRef, field }` — the secret is resolved server-side and never enters the model context. Set `FUSE_VAULT_KEY` to inject the master key from a secret manager; see [configuration](./configuration.md).
+
+---
+
 ## Approval guardrail
 
 Sensitive actions (pay / book / checkout / confirm) are blocked unless `--approved` is passed. When blocked, `probe` prints `BLOCKED: <reason>` to stderr and exits `2`. `--approved` sets the `humanApproved` flag on the probe.

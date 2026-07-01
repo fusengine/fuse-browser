@@ -26,6 +26,8 @@ export interface SessionData {
   health: SessionHealth;
   /** Last main-frame URL, tracked for recovery re-navigation. */
   lastUrl: string;
+  /** Secrets filled from the vault this session; redacted from snapshots. */
+  secrets: Set<string>;
   createdAt: number;
   expiresAt: number;
 }
@@ -55,6 +57,7 @@ export async function openSession(
     connected: opened.connected ?? false,
     health: "ok",
     lastUrl: page.url(),
+    secrets: new Set(),
     createdAt: now,
     expiresAt: now + ttlMs,
   };

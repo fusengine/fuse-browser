@@ -68,6 +68,7 @@ const EXPECTED = [
   "browser_route",
   "browser_permissions",
   "browser_clipboard",
+  "browser_vault",
 ];
 
 test("MCP exposes the expected tool set with no duplicates", async () => {

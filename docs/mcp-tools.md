@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 49 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 50 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
@@ -14,11 +14,11 @@ The shared identity/profile options (the `agentOptionShape`) are listed once und
 
 ## Capability groups (`FUSE_CAPS`)
 
-By default all 49 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
+By default all 50 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
 
 | Group | Tools |
 | --- | --- |
-| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`. |
+| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`, `browser_vault`. |
 | `batch` | `browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`. |
 | `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`, `browser_products`. |
 | `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`, `browser_pdf`, `browser_cookies`. |
@@ -462,10 +462,12 @@ Fill a field in the session.
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
 | `target` | string | yes | Selector or label of the field. |
-| `value` | string | yes | Value to type. |
+| `value` | string | no | Value to type (omit when using `credentialRef`). |
+| `credentialRef` | string | no | Fill a vault secret by reference instead of `value` — resolved server-side, never exposed to the LLM. |
+| `field` | enum `username`/`password`/`totp` | no | Which credential field to fill when `credentialRef` is set (default `password`). |
 
 ```json
-{ "sessionId": "s_abc123", "target": "#email", "value": "a@b.com" }
+{ "sessionId": "s_abc123", "target": "#otp", "credentialRef": "github", "field": "totp" }
 ```
 
 ### browser_login
@@ -475,14 +477,15 @@ Structured login (username + password + submit).
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
-| `username` | string | yes | Username/email value. |
-| `password` | string | yes | Password value. |
+| `username` | string | no | Username/email value (omit when using `credentialRef`). |
+| `password` | string | no | Password value (omit when using `credentialRef`). |
+| `credentialRef` | string | no | Fill username + password from the vault — resolved server-side, never exposed to the LLM, and refused off the credential's bound origin (anti-phishing). |
 | `usernameTarget` | string | no | Selector for the username field (auto-detected otherwise). |
 | `passwordTarget` | string | no | Selector for the password field. |
 | `submitTarget` | string | no | Selector for the submit button. |
 
 ```json
-{ "sessionId": "s_abc123", "username": "a@b.com", "password": "secret" }
+{ "sessionId": "s_abc123", "credentialRef": "github" }
 ```
 
 ### browser_scroll
@@ -991,4 +994,19 @@ Stop a session's live view and shut down its local server. Returns `{ stopped: t
 
 ```json
 { "sessionId": "s_abc123" }
+```
+
+### browser_vault
+
+List stored credential references — **metadata only, never secrets**. Writing is CLI-only (`fuse-browser vault set <ref>`); the MCP surface is read-only by design so a secret never travels through a tool argument.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `action` | enum `list` | yes | Only `list` is supported. |
+| `sessionId` | string | no | When set, only credentials whose bound origin matches the live page are returned (origin-scoped discovery). |
+
+Returns `{ credentials: [{ ref, username, hasTotp, origins }] }`. To actually use a secret, pass `credentialRef` to `browser_login` or `browser_fill` — the value is resolved server-side and never enters the model context. See [CLI `vault`](./cli.md#vault-setlistrmtest) to store credentials and [configuration](./configuration.md) for `FUSE_VAULT_KEY` / `FUSE_VAULT_ALLOW_ANY_ORIGIN`.
+
+```json
+{ "action": "list" }
 ```
