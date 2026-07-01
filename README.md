@@ -68,7 +68,7 @@ Full reference in **[`docs/`](./docs/README.md)**:
 
 [Installation](./docs/installation.md) ·
 [CLI](./docs/cli.md) ·
-[MCP tools (44)](./docs/mcp-tools.md) ·
+[MCP tools (49)](./docs/mcp-tools.md) ·
 [Configuration](./docs/configuration.md) ·
 [Sessions](./docs/sessions.md) ·
 [Extraction](./docs/extraction.md) ·
