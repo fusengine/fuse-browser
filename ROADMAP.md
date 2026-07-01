@@ -5,7 +5,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 
 ## ✅ Shipped (v0.1.x)
 
-- ✅ MCP server + CLI + library, 37 tools, double binary (`browser-mcp`, `fuse-browser`)
+- ✅ MCP server + CLI + library, 49 tools, double binary (`browser-mcp`, `fuse-browser`)
 - ✅ Engines: Chromium (Patchright stealth) / Firefox / WebKit + CDP attach (drive a real browser)
 - ✅ Remote CDP (Browserless): auth `cdpHeaders`/`?token=`, configurable timeout, fresh identity context + stealth re-injection (`addInitScript` parity with launch), `cdpCloseOnDone` closes remote sessions while never closing a local browser
 - ✅ Per-country identity (locale / timezone / geo / currency), realistic profile
@@ -72,6 +72,18 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Scroll-jacked filmstrip** — when `scrollJacked`, drive the site's own scroll with real wheel events and save N viewport frames (`frame0..N`): real sections on smooth-scroll sites, animation states on pure-WebGL ones (no fake stitch) *(shipped 0.1.52)*
 - ✅ **Human mouse paths (Bézier)** — in `humanMode`, the cursor travels to the target along a cubic Bézier (ease-in-out + jitter + variable timing) before clicking, vs ML mouse-movement detection *(shipped 0.1.53)*
 
+## ⬜ v0.7 — Agentic hardening (FSB / market-inspired)
+
+Source: comparative analysis vs FSB (fullselfbrowsing), Stagehand, Skyvern (2026-07-01).
+Kept: everything below. Rejected: internal LLM loop (the MCP host is the loop), hand-curated site guides (learned memory scales better), telemetry/QR-pairing/STT (out of scope).
+
+- ⬜ **Credentials vault + TOTP** — local encrypted vault (AES-GCM, `~/.fuse-browser/vault`); `browser_login { credentialRef }` fills secrets **without them ever entering the model context or transcripts** (today the password travels in the tool-call args); TOTP generation (otplib) for 2FA portals — Skyvern's key differentiator for real-portal automation *(src/identity/ + src/actions/login.ts)*
+- ⬜ **Post-action verification / stuck detection** — structured `{ domChanged, urlChanged }` result on `browser_act`/`browser_run` + optional `expect` postcondition (reuses `wait_for`); a no-op click is reported immediately instead of the host agent discovering it late and looping *(src/actions/perform.ts + src/state/dom-signature.ts)*
+- ⬜ **Differential snapshot** — `browser_snapshot { diff: true }` returns only what changed since the previous snapshot; large token savings in interaction loops *(base exists: src/state/dom-signature.ts)*
+- ⬜ **Procedural site memory** — persist successful `browser_run` plans per domain and offer them for replay; extends the per-action winning-strategy memory (`site-memory.ts`) to whole workflows (login path, cookie-dismiss path) — Stagehand-style action caching at workflow level *(src/state/site-memory.ts + src/agent/run-steps.ts)*
+- ⬜ **Coordinate click fallback** — `browser_act kind:"click_xy"` for canvas/maps/WebGL pages where the DOM is not enough; reuses the existing Bézier human-mouse paths + Set-of-Marks `annotate` screenshots (hybrid tree+vision, the benchmark-recommended posture) *(src/actions/human-mouse.ts, schema only)*
+- ⬜ **Per-session mutation lock** — serialize mutating tools when several MCP clients/subagents share a `sessionId` (reads bypass the queue), avoids action races *(src/session/manager.ts)*
+
 ## ⬜ Backlog — gated / optional
 - ⬜ **Web Bot Auth** (Ed25519 + RFC 9421 request signing) — the "verified bot" lane; **needs an operator domain + a hosted JWKS** at `/.well-known/http-message-signatures-directory` (a random key defeats the purpose) *(infra decision)*
 - ⬜ **Headful + Xvfb** for 100%-undetected headless on servers — *(ops decision; option+doc vs auto-launch)*
@@ -83,6 +95,7 @@ Status legend: ✅ done · 🟡 in progress · ⬜ planned.
 - ✅ **Human-in-the-loop** takeover — `browser_handoff` pauses for a human (headed) to finish login/2FA/captcha, resumes on a url/selector condition *(shipped 0.1.20)*; streaming **live view** later added (`browser_live_view`, JPEG-over-SSE, works headless) *(shipped 0.1.38)*
 - ✅ Session persistence: auto-save `storageState` on `browser_close` (when `storageStatePath` set) *(shipped 0.1.20)*
 - ⬜ Hosted endpoint (open-core) — managed sessions + proxies + scheduling *(product decision)*
+- ⬜ Chrome extension bridge (FSB-style: drive the user's real profile via an MV3 extension + local WS bridge) — **not needed for now**: `browser_connect` (CDP attach) already drives a real logged-in browser without `<all_urls>`/`debugger` extension permissions; revisit only if CDP attach proves insufficient
 
 ## Known limits (today)
 

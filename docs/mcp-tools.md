@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 44 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 49 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
