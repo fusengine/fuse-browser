@@ -12,9 +12,25 @@ import { extractPrices } from "../../extraction/prices.js";
 import { htmlToMarkdown, renderMarkdown } from "../../extraction/serialize/to-markdown.js";
 import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
+import { challengesSchema, hotelOffersSchema } from "./schemas-hotel-challenges-output.js";
+import { priceSchema } from "./schemas-price-output.js";
 import { withSession } from "./with-session.js";
 
 const KIND = z.enum(["text", "prices", "hotels", "challenges", "all"]);
+
+/**
+ * `browser_extract` output shape. Precise, not permissive: `kind` fully
+ * determines which optional keys are populated (see the handler below), and
+ * hotelOffers/challenges' all-optional-field schemas already validate their
+ * `{}` empty variant.
+ */
+export const EXTRACT_OUTPUT_SHAPE = {
+  url: z.string(),
+  text: z.string().optional(),
+  prices: z.array(priceSchema).optional(),
+  hotelOffers: hotelOffersSchema.optional(),
+  challenges: challengesSchema.optional(),
+};
 
 /** Register `browser_extract`. */
 export function registerExtractTool(server: McpServer, sessions: SessionManager): void {
@@ -29,6 +45,7 @@ export function registerExtractTool(server: McpServer, sessions: SessionManager)
         kind: KIND.optional(),
         format: z.enum(["markdown", "text"]).optional(),
       },
+      outputSchema: EXTRACT_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

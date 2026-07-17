@@ -9,7 +9,10 @@ import type { BrowserContext } from "playwright";
 import { z } from "zod";
 import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
+import { COOKIES_OUTPUT_SHAPE } from "./cookies-output.js";
 import { withSession } from "./with-session.js";
+
+export { COOKIES_OUTPUT_SHAPE } from "./cookies-output.js";
 
 /** A Playwright cookie object as accepted by `context.addCookies()`. */
 type CookieInput = Parameters<BrowserContext["addCookies"]>[0][number];
@@ -61,6 +64,7 @@ export function registerCookiesTool(server: McpServer, sessions: SessionManager)
         cookies: z.array(COOKIE_SCHEMA).optional(),
         urls: z.array(z.string()).optional(),
       },
+      outputSchema: COOKIES_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

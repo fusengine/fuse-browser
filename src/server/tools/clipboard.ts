@@ -48,6 +48,12 @@ export async function applyClipboard(
   return evalScript<string>(page, READ_SCRIPT);
 }
 
+/** Merged success shape across the 2 actions (read/write). */
+export const CLIPBOARD_OUTPUT_SHAPE = {
+  written: z.literal(true).optional(),
+  text: z.string().optional(),
+};
+
 /** Register `browser_clipboard`. */
 export function registerClipboardTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -60,6 +66,7 @@ export function registerClipboardTool(server: McpServer, sessions: SessionManage
         action: z.enum(["read", "write"]),
         text: z.string().optional(),
       },
+      outputSchema: CLIPBOARD_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

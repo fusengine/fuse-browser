@@ -9,6 +9,13 @@ import { z } from "zod";
 import { fetchBatch } from "../../agent/fetch-batch.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
+import { renderedFetchSchema, urlErrorSchema } from "./schemas-fetch-output.js";
+
+/** `browser_fetch_batch` output shape: one rendered fetch or `{url,error}` per input URL. */
+export const FETCH_BATCH_OUTPUT_SHAPE = {
+  count: z.number(),
+  results: z.array(z.union([renderedFetchSchema, urlErrorSchema])),
+};
 
 /** Register `browser_fetch_batch`. */
 export function registerFetchBatchTool(server: McpServer): void {
@@ -26,6 +33,7 @@ export function registerFetchBatchTool(server: McpServer): void {
         proxyUrl: z.string().optional(),
         concurrency: z.number().int().optional(),
       },
+      outputSchema: FETCH_BATCH_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

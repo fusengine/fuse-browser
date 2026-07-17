@@ -9,6 +9,10 @@ import { z } from "zod";
 import { crawl } from "../../agent/crawl.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
+import { crawlPageSchema } from "./schemas-fetch-output.js";
+
+/** `browser_crawl` output shape: the discovered pages, in crawl order. */
+export const CRAWL_OUTPUT_SHAPE = { count: z.number(), pages: z.array(crawlPageSchema) };
 
 /** Register `browser_crawl`. */
 export function registerCrawlTool(server: McpServer): void {
@@ -31,6 +35,7 @@ export function registerCrawlTool(server: McpServer): void {
         throttleMs: z.number().int().optional(),
         proxyUrl: z.string().optional(),
       },
+      outputSchema: CRAWL_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

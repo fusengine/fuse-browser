@@ -4,10 +4,15 @@
  */
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
-/** Text + structured JSON result. */
+/**
+ * Text + structured JSON result. The text block carries compact (non-indented)
+ * JSON: the pretty-print whitespace only inflated the wire/token cost with no
+ * gain for the consuming model, which reads the same data from
+ * `structuredContent` anyway. The two stay semantically equivalent (MCP spec).
+ */
 export function jsonResult(payload: Record<string, unknown>): CallToolResult {
   return {
-    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+    content: [{ type: "text", text: JSON.stringify(payload) }],
     structuredContent: payload,
   };
 }
@@ -21,7 +26,7 @@ export function imageJsonResult(
   return {
     content: [
       { type: "image", data: base64, mimeType },
-      { type: "text", text: JSON.stringify(payload, null, 2) },
+      { type: "text", text: JSON.stringify(payload) },
     ],
     structuredContent: payload,
   };

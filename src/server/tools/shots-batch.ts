@@ -13,6 +13,14 @@ import { parseViewports } from "../../engine/viewport.js";
 import { toAgentOptions } from "../map-options.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
+import { urlErrorSchema } from "./schemas-fetch-output.js";
+import { shotSchema } from "./schemas-shots-output.js";
+
+/** `browser_shots_batch` output shape: saved shots or `{url,error}` per input URL. */
+export const SHOTS_BATCH_OUTPUT_SHAPE = {
+  count: z.number(),
+  results: z.array(z.union([z.object({ url: z.string(), shots: z.array(shotSchema) }), urlErrorSchema])),
+};
 
 /** Register `browser_shots_batch`. */
 export function registerShotsBatchTool(server: McpServer): void {
@@ -32,6 +40,7 @@ export function registerShotsBatchTool(server: McpServer): void {
         headless: z.boolean().optional(),
         proxyUrl: z.string().optional(),
       },
+      outputSchema: SHOTS_BATCH_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

@@ -9,7 +9,11 @@ import { type RunStep, runSteps } from "../../agent/run-steps.js";
 import { preflight } from "../../guardrails/preflight.js";
 import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
+import { actionResultSchema } from "./schemas-action-output.js";
 import { withSession } from "./with-session.js";
+
+/** `browser_run` output shape: overall success flag, per-step results, final URL. */
+export const RUN_OUTPUT_SHAPE = { ok: z.boolean(), steps: z.array(actionResultSchema), url: z.string() };
 
 const stepSchema = z.object({ type: z.string() }).catchall(z.unknown());
 
@@ -26,6 +30,7 @@ export function registerRunTool(server: McpServer, sessions: SessionManager): vo
         steps: z.array(stepSchema),
         humanApproved: z.boolean().optional(),
       },
+      outputSchema: RUN_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

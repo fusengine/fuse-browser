@@ -12,7 +12,14 @@ import { applyColorScheme } from "../../lib/color-scheme.js";
 import { type ViewportInput, resolveViewport, viewportLabel } from "../../engine/viewport.js";
 import type { SessionManager } from "../../session/manager.js";
 import { settleForCapture } from "../../state/settle-capture.js";
-import { errorResult, imageJsonResult, imageResult, multiImageResult } from "../result.js";
+import { errorResult } from "../result.js";
+import {
+  annotatedScreenshotResult,
+  elementScreenshotResult,
+  multiScreenshotResult,
+  pageScreenshotResult,
+  screenshotOutputShape,
+} from "./screenshot-result.js";
 import { withSession } from "./with-session.js";
 
 const VIEWPORT_SCHEMA = z.union([
@@ -38,6 +45,7 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
         themeClass: z.string().optional(),
         annotate: z.boolean().optional(),
       },
+      outputSchema: screenshotOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
@@ -51,7 +59,7 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
             const locator = refLocator(s.page, a.ref);
             if (!locator || (await locator.count()) === 0) return errorResult("ref_not_found");
             const buf = await locator.screenshot({ timeout: 5_000 });
-            return imageResult(buf.toString("base64"), `element ref=${a.ref}`);
+            return elementScreenshotResult(buf.toString("base64"), a.ref);
           }
           const fullPage = Boolean(a.fullPage);
           const list = (Array.isArray(a.viewports) ? a.viewports : a.viewport ? [a.viewport] : []) as ViewportInput[];
@@ -59,10 +67,10 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
             if (a.annotate === true) {
               await captureSnapshot(s.page);
               const shot = await annotatedScreenshot(s.page);
-              return imageJsonResult(shot.base64, { url: s.page.url(), marks: shot.marks });
+              return annotatedScreenshotResult(shot.base64, s.page.url(), shot.marks);
             }
             const buffer = await s.page.screenshot({ fullPage });
-            return imageResult(buffer.toString("base64"), `screenshot of ${s.page.url()}`);
+            return pageScreenshotResult(buffer.toString("base64"), s.page.url());
           }
           const original = s.page.viewportSize();
           const shots: Array<{ base64: string; note: string }> = [];
@@ -73,7 +81,7 @@ export function registerScreenshotTool(server: McpServer, sessions: SessionManag
             shots.push({ base64: buf.toString("base64"), note: viewportLabel(v) });
           }
           if (original) await s.page.setViewportSize(original);
-          return multiImageResult(shots);
+          return multiScreenshotResult(shots);
         } finally {
           if (restore) await restore();
         }

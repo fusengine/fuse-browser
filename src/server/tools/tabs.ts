@@ -21,6 +21,12 @@ const DESCRIPTION =
 
 type TabAction = "list" | "new" | "select" | "close";
 
+/** Mirrors `TabInfo` (session/tabs.ts). Exported so tests can validate `structuredContent`. */
+export const tabsOutputShape = {
+  tabs: z.array(z.object({ index: z.number(), url: z.string(), title: z.string(), active: z.boolean() })),
+  active: z.number(),
+};
+
 /** Apply a mutating tab action; `list` is a no-op (the listing happens after). */
 async function applyAction(s: SessionData, action: TabAction, index: number, url?: string): Promise<void> {
   if (action === "new") await openTab(s, url);
@@ -49,6 +55,7 @@ export function registerTabsTool(server: McpServer, sessions: SessionManager): v
         index: z.number().optional(),
         url: z.string().optional(),
       },
+      outputSchema: tabsOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

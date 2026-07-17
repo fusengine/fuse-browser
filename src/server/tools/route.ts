@@ -53,6 +53,12 @@ export async function applyRoute(
   });
 }
 
+/** Shape of the `browser_route` success payload. */
+export const ROUTE_OUTPUT_SHAPE = {
+  routed: z.string(),
+  action: z.enum(["mock", "abort", "unroute"]),
+};
+
 /** Register `browser_route`. */
 export function registerRouteTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -68,6 +74,7 @@ export function registerRouteTool(server: McpServer, sessions: SessionManager): 
         body: z.string().optional(),
         contentType: z.string().optional(),
       },
+      outputSchema: ROUTE_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

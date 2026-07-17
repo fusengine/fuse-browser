@@ -11,6 +11,17 @@ import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** One product card (matches `interfaces/products.ts#Product`). */
+const productSchema = z.object({
+  title: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  url: z.string().optional(),
+});
+
+/** `browser_products` output shape: the extracted product cards. */
+export const PRODUCTS_OUTPUT_SHAPE = { url: z.string(), count: z.number(), products: z.array(productSchema) };
+
 /** Register `browser_products`. */
 export function registerProductsTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -24,6 +35,7 @@ export function registerProductsTool(server: McpServer, sessions: SessionManager
         limit: z.number().int().positive().optional(),
         containerSelector: z.string().optional(),
       },
+      outputSchema: PRODUCTS_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

@@ -13,6 +13,19 @@ import { parseViewports } from "../../engine/viewport.js";
 import { toAgentOptions } from "../map-options.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
+import { shotSchema } from "./schemas-shots-output.js";
+
+/** One crawled page with its content + responsive shots (matches `agent/site-shots.ts#SitePage`). */
+const sitePageSchema = z.object({
+  url: z.string(),
+  depth: z.number(),
+  text: z.string(),
+  shots: z.array(shotSchema),
+  shotsError: z.string().optional(),
+});
+
+/** `browser_site_shots` output shape: content + responsive shots per crawled page. */
+export const SITE_SHOTS_OUTPUT_SHAPE = { count: z.number(), pages: z.array(sitePageSchema) };
 
 /** Register `browser_site_shots`. */
 export function registerSiteShotsTool(server: McpServer): void {
@@ -37,6 +50,7 @@ export function registerSiteShotsTool(server: McpServer): void {
         headless: z.boolean().optional(),
         proxyUrl: z.string().optional(),
       },
+      outputSchema: SITE_SHOTS_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

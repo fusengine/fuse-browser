@@ -4,10 +4,11 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { z } from "zod";
 import { redactElements } from "../../src/extraction/redact.js";
 import type { InteractiveElement } from "../../src/interfaces/extraction.js";
 import type { SessionManager } from "../../src/session/manager.js";
-import { registerVaultTool } from "../../src/server/tools/vault.js";
+import { registerVaultTool, vaultOutputShape } from "../../src/server/tools/vault.js";
 import { setEntry } from "../../src/vault/store.js";
 
 type Handler = (args: Record<string, unknown>) => Promise<CallToolResult>;
@@ -42,6 +43,7 @@ describe("browser_vault (list-only)", () => {
     const creds = (res.structuredContent as { credentials: unknown[] }).credentials;
     expect(creds).toEqual([{ ref: "gh", username: "u", hasTotp: false, origins: ["https://github.com"] }]);
     expect(JSON.stringify(res)).not.toContain("p@ss");
+    expect(() => z.object(vaultOutputShape).parse(res.structuredContent)).not.toThrow();
   });
 });
 

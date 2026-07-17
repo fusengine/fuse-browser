@@ -12,6 +12,25 @@ import { resolveConfig } from "../../agent/config.js";
 import { toAgentOptions } from "../map-options.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
+import { urlErrorSchema } from "./schemas-fetch-output.js";
+import { collectedItemSchema } from "./schemas-price-output.js";
+
+/** `browser_collect_batch` output shape: one collected list or `{url,error}` per input URL. */
+export const COLLECT_BATCH_OUTPUT_SHAPE = {
+  count: z.number(),
+  results: z.array(
+    z.union([
+      z.object({
+        url: z.string(),
+        count: z.number(),
+        steps: z.number(),
+        reachedEnd: z.boolean(),
+        items: z.array(collectedItemSchema),
+      }),
+      urlErrorSchema,
+    ]),
+  ),
+};
 
 /** Register `browser_collect_batch`. */
 export function registerCollectBatchTool(server: McpServer): void {
@@ -34,6 +53,7 @@ export function registerCollectBatchTool(server: McpServer): void {
         headless: z.boolean().optional(),
         proxyUrl: z.string().optional(),
       },
+      outputSchema: COLLECT_BATCH_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

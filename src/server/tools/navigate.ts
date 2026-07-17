@@ -9,6 +9,8 @@ import { DEFAULT_GOTO, gotoWithRetry } from "../../net/navigate.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+const navigateOutputShape = { url: z.string(), title: z.string() };
+
 /** Register `browser_navigate`. */
 export function registerNavigateTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -17,6 +19,7 @@ export function registerNavigateTool(server: McpServer, sessions: SessionManager
       title: "Navigate",
       description: "Navigate a live session to a URL and return the resulting title.",
       inputSchema: { sessionId: z.string(), url: z.string(), waitMs: z.number().int().optional() },
+      outputSchema: navigateOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

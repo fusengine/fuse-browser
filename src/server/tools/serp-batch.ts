@@ -10,6 +10,18 @@ import { toAgentOptions } from "../map-options.js";
 import { progressReporter } from "../progress.js";
 import { jsonResult } from "../result.js";
 import { agentOptionShape } from "../schemas.js";
+import { domainRankSchema, serpResultSchema } from "./schemas-serp-output.js";
+
+/** One query's outcome (matches `interfaces/serp.ts#SerpBatchRow`). */
+const serpBatchRowSchema = z.object({
+  query: z.string(),
+  rank: domainRankSchema.optional(),
+  results: z.array(serpResultSchema),
+  error: z.string().optional(),
+});
+
+/** `browser_serp_batch` output shape: one SERP row per query. */
+export const SERP_BATCH_OUTPUT_SHAPE = { rows: z.array(serpBatchRowSchema) };
 
 /** Register `browser_serp_batch`. */
 export function registerSerpBatchTool(server: McpServer): void {
@@ -28,6 +40,7 @@ export function registerSerpBatchTool(server: McpServer): void {
         delayMs: z.number().int().optional(),
         ...agentOptionShape,
       },
+      outputSchema: SERP_BATCH_OUTPUT_SHAPE,
     },
     async (args, extra) => {
       const a = args as Record<string, unknown>;

@@ -12,6 +12,13 @@ import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** Shape of the `browser_handoff` success payload (resumed or timeout branch). */
+export const HANDOFF_OUTPUT_SHAPE = {
+  status: z.enum(["resumed", "timeout"]),
+  url: z.string(),
+  warning: z.string().optional(),
+};
+
 /** Register `browser_handoff`. */
 export function registerHandoffTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -27,6 +34,7 @@ export function registerHandoffTool(server: McpServer, sessions: SessionManager)
         selector: z.string().optional(),
         timeoutMs: z.number().int().optional(),
       },
+      outputSchema: HANDOFF_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
