@@ -18,12 +18,34 @@ export { REF_ATTRIBUTE } from "./snapshot-walk.js";
 const MAX_ELEMENTS = 400;
 
 /**
+ * Browser-returned element plus the internal `ariaHidden` scratch flag (see
+ * `snapshot-hidden.ts`). Never exposed on the final {@link InteractiveElement}
+ * output — used only to decide pruning, then stripped in {@link captureSnapshot}.
+ */
+type RawElement = InteractiveElement & { ariaHidden?: boolean };
+
+/**
+ * Whether a raw element survives pruning: kept unless `prune` is on AND the
+ * element was flagged hidden-for-accessibility. Exported for unit testing.
+ */
+export function shouldKeep(ariaHidden: boolean | undefined, prune: boolean): boolean {
+  return !(prune && ariaHidden === true);
+}
+
+/**
  * Capture the indexed interactive snapshot across all frames, tagging each
  * element with a (frame-local) ref attribute and exposing a frame-scoped `ref`.
  * Detached frames and frames that reject evaluation (e.g. mid-navigation) are
- * skipped rather than aborting the whole snapshot.
+ * skipped rather than aborting the whole snapshot. When `prune` is `true`,
+ * elements hidden for accessibility (`aria-hidden`, `display:none`, ancestor-
+ * hidden, or `visibility:hidden`/`collapse`) are dropped; default `false`
+ * keeps the output identical to the pre-pruning behavior.
  */
-export async function captureSnapshot(page: Page, selectors = false): Promise<InteractiveElement[]> {
+export async function captureSnapshot(
+  page: Page,
+  selectors = false,
+  prune = false,
+): Promise<InteractiveElement[]> {
   const frames = page.frames();
   const all: InteractiveElement[] = [];
   const arg = { selectors };
@@ -31,14 +53,16 @@ export async function captureSnapshot(page: Page, selectors = false): Promise<In
   for (let f = 0; f < frames.length && all.length < MAX_ELEMENTS; f++) {
     const frame = frames[f];
     if (!frame || frame.isDetached()) continue;
-    let local: InteractiveElement[];
+    let local: RawElement[];
     try {
-      local = await evalScriptArg<InteractiveElement[], typeof arg>(frame, SNAPSHOT_SCRIPT, arg);
+      local = await evalScriptArg<RawElement[], typeof arg>(frame, SNAPSHOT_SCRIPT, arg);
     } catch {
       continue;
     }
-    for (const el of local) {
+    for (const raw of local) {
       if (all.length >= MAX_ELEMENTS) break;
+      const { ariaHidden, ...el } = raw;
+      if (!shouldKeep(ariaHidden, prune)) continue;
       el.ref = f === 0 ? String(el.index) : `${f}:${el.index}`;
       if (f > 0) el.frame = f;
       el.index = global++;

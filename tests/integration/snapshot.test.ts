@@ -3,11 +3,14 @@
  * (each interactive element tagged with a stable ref), then act on a chosen
  * ref deterministically. Runs under Node with a real headless Chromium.
  */
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { resolveConfig } from "../../src/agent/config.js";
 import { actByRef } from "../../src/actions/act-by-ref.js";
 import { captureSnapshot } from "../../src/extraction/snapshot.js";
+import { createServer } from "../../src/server/server.js";
 import { SessionManager } from "../../src/session/manager.js";
 
 // Encoded data URL: an unencoded data: URL truncates at the first space, which
@@ -74,3 +77,70 @@ test("pick types into a combobox and clicks the matching suggestion", { timeout:
     await sessions.close(session.id);
   }
 });
+
+const PRUNE_PAGE =
+  "<button>Visible</button>" +
+  "<div aria-hidden='true'><button>HiddenAria</button></div>" +
+  "<button style='display:none'>HiddenDisplay</button>";
+const PRUNE_URL = `data:text/html,${encodeURIComponent(PRUNE_PAGE)}`;
+
+test(
+  "prune:true drops aria-hidden/display:none elements; prune omitted keeps the exact prior set",
+  { timeout: 120_000 },
+  async () => {
+    const sessions = new SessionManager();
+    const session = await sessions.open(resolveConfig({ headless: true, engine: "patchright" }));
+    try {
+      await session.page.goto(PRUNE_URL, { waitUntil: "domcontentloaded", timeout: 30_000 });
+
+      const unpruned = await captureSnapshot(session.page);
+      const unprunedTexts = unpruned.map((e) => e.text).sort();
+      assert.deepEqual(
+        unprunedTexts,
+        ["HiddenAria", "HiddenDisplay", "Visible"],
+        "default (prune omitted) is byte-for-byte the pre-pruning behavior",
+      );
+
+      const pruned = await captureSnapshot(session.page, false, true);
+      const prunedTexts = pruned.map((e) => e.text).sort();
+      assert.deepEqual(prunedTexts, ["Visible"], "prune:true drops the aria-hidden and display:none elements");
+    } finally {
+      await sessions.close(session.id);
+    }
+  },
+);
+
+test(
+  "browser_snapshot and browser_act return structuredContent honoring their declared outputSchema (no McpError)",
+  { timeout: 120_000 },
+  async () => {
+    const { server } = createServer();
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "0.0.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    try {
+      const open = await client.callTool({ name: "browser_open", arguments: { headless: true, engine: "patchright" } });
+      assert.equal(open.isError, undefined, "browser_open should not error");
+      const { sessionId } = open.structuredContent as { sessionId: string };
+
+      await client.callTool({
+        name: "browser_navigate",
+        arguments: { sessionId, url: URL },
+      });
+
+      const snap = await client.callTool({ name: "browser_snapshot", arguments: { sessionId } });
+      assert.equal(snap.isError, undefined, "browser_snapshot should not throw an outputSchema McpError");
+      const { elements } = snap.structuredContent as { elements: Array<{ index: number; text: string }> };
+      const button = elements.find((e) => e.text === "Go");
+      assert.ok(button, "snapshot should list the Go button through the real MCP layer");
+
+      const act = await client.callTool({
+        name: "browser_act",
+        arguments: { sessionId, kind: "click", ref: button.index },
+      });
+      assert.equal(act.isError, undefined, "browser_act should not throw an outputSchema McpError");
+    } finally {
+      await client.close();
+    }
+  },
+);

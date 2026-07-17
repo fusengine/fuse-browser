@@ -14,6 +14,20 @@ import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** Merged success shape across the 3 branches (a/b diff, baseline created, baseline diff). */
+export const VISUAL_DIFF_OUTPUT_SHAPE = {
+  width: z.number().optional(),
+  height: z.number().optional(),
+  diffPixels: z.number().optional(),
+  diffRatio: z.number().optional(),
+  regions: z
+    .array(z.object({ x: z.number(), y: z.number(), width: z.number(), height: z.number() }))
+    .optional(),
+  diffImage: z.string().optional(),
+  baseline: z.string().optional(),
+  baselineCreated: z.literal(true).optional(),
+};
+
 /** Register `browser_visual_diff`. */
 export function registerVisualDiffTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -30,6 +44,7 @@ export function registerVisualDiffTool(server: McpServer, sessions: SessionManag
         fullPage: z.boolean().optional(),
         threshold: z.number().optional(),
       },
+      outputSchema: VISUAL_DIFF_OUTPUT_SHAPE,
     },
     async (args) => {
       const x = args as Record<string, unknown>;

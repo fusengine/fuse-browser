@@ -34,7 +34,7 @@ function registerRunsIndex(server: McpServer): void {
     },
     async (uri) => ({
       contents: [
-        { uri: uri.href, mimeType: "application/json", text: JSON.stringify(listRuns(), null, 2) },
+        { uri: uri.href, mimeType: "application/json", text: JSON.stringify(listRuns()) },
       ],
     }),
   );

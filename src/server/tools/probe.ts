@@ -9,6 +9,7 @@ import { BudgetExhaustedError, CircuitOpenError, GuardrailViolation, QueueFullEr
 import { toAgentOptions, toProbeOptions } from "../map-options.js";
 import { errorResult, jsonResult } from "../result.js";
 import { probeHtmlShape, probeShape } from "../schemas.js";
+import { probeReportShape } from "./probe-output-schema.js";
 
 /** Expected, user-actionable probe failures returned as an error result (not thrown). */
 function isProbeUserError(err: unknown): boolean {
@@ -29,6 +30,7 @@ export function registerProbeTools(server: McpServer): void {
       description:
         "Open a real browser page and return text, screenshot path, network/console logs, optional prices, visual observation and challenge detection.",
       inputSchema: probeShape,
+      outputSchema: probeReportShape,
     },
     async (args) => {
       const raw = args as Record<string, unknown>;
@@ -49,6 +51,7 @@ export function registerProbeTools(server: McpServer): void {
       title: "Browser probe HTML",
       description: "Probe an inline HTML fixture with the same engine. Useful for tests and dry-runs.",
       inputSchema: probeHtmlShape,
+      outputSchema: probeReportShape,
     },
     async (args) => {
       const raw = args as Record<string, unknown>;

@@ -31,6 +31,13 @@ async function renderPdf(page: Page, opts: PdfOptions): Promise<Buffer> {
   });
 }
 
+/** Merged success shape: `path` branch (on-disk) or `pdfBase64` branch (inline). */
+export const PDF_OUTPUT_SHAPE = {
+  path: z.string().optional(),
+  pdfBase64: z.string().optional(),
+  bytes: z.number(),
+};
+
 /** Register `browser_pdf`. */
 export function registerPdfTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -46,6 +53,7 @@ export function registerPdfTool(server: McpServer, sessions: SessionManager): vo
         landscape: z.boolean().optional(),
         printBackground: z.boolean().optional(),
       },
+      outputSchema: PDF_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

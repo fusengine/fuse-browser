@@ -12,6 +12,13 @@ import { originAllowed } from "../../vault/resolve.js";
 import { listEntries, loadVault } from "../../vault/store.js";
 import { errorResult, jsonResult } from "../result.js";
 
+/** Mirrors `VaultMeta` (interfaces/vault.ts) — non-secret metadata only. Exported for tests. */
+export const vaultOutputShape = {
+  credentials: z.array(
+    z.object({ ref: z.string(), username: z.string(), hasTotp: z.boolean(), origins: z.array(z.string()) }),
+  ),
+};
+
 /** Register `browser_vault` (list-only, metadata-only). */
 export function registerVaultTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -24,6 +31,7 @@ export function registerVaultTool(server: McpServer, sessions: SessionManager): 
         action: z.literal("list"),
         sessionId: z.string().optional(),
       },
+      outputSchema: vaultOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

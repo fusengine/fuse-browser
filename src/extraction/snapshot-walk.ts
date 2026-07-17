@@ -7,6 +7,7 @@
  * @module extraction/snapshot-walk
  */
 
+import { HIDDEN_DEFS } from "./snapshot-hidden.js";
 import { SELECTOR_DEFS } from "./selector.js";
 
 /** Attribute injected on each interactive element to anchor a stable ref. */
@@ -23,7 +24,7 @@ const SELECTOR =
  */
 export const SNAPSHOT_SCRIPT = `(arg) => {
   const SEL = '${SELECTOR}';
-  const wantSel = !!(arg && arg.selectors);${SELECTOR_DEFS}
+  const wantSel = !!(arg && arg.selectors);${SELECTOR_DEFS}${HIDDEN_DEFS}
   const obscured = (el, r) => {
     const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
     if (r.width === 0 || cx < 0 || cy < 0 || cx > innerWidth || cy > innerHeight) return false;
@@ -48,6 +49,7 @@ export const SNAPSHOT_SCRIPT = `(arg) => {
       options: el.tagName === 'SELECT' ? [...el.options].slice(0, 12).map((o) => o.label || o.value) : undefined,
       ariaExpanded: el.getAttribute('aria-expanded'), ariaControls: el.getAttribute('aria-controls'),
       visible: r.width > 0 && r.height > 0, obscured: obscured(el, r),
+      ariaHidden: isElementHiddenForAria(el),
       selector: wantSel ? genSelector(el) : undefined,
       box: {x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height)}
     };

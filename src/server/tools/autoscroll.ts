@@ -10,6 +10,8 @@ import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+const autoScrollOutputShape = { rounds: z.number(), height: z.number(), url: z.string() };
+
 /** Register `browser_autoscroll`. */
 export function registerAutoScrollTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -26,6 +28,7 @@ export function registerAutoScrollTool(server: McpServer, sessions: SessionManag
         minCount: z.number().int().positive().optional(),
         delayMs: z.number().int().nonnegative().optional(),
       },
+      outputSchema: autoScrollOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

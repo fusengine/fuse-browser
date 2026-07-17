@@ -14,6 +14,7 @@ import { diffSnapshots } from "../../extraction/snapshot-diff.js";
 import type { SessionManager } from "../../session/manager.js";
 import { errorResult, imageJsonResult, jsonResult } from "../result.js";
 import { KIND, runAct } from "./run-act.js";
+import { actOutputShape, snapshotOutputShape } from "./snapshot-output.js";
 import { withSession } from "./with-session.js";
 
 /** Register `browser_snapshot` and `browser_act`. */
@@ -23,13 +24,22 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
     {
       title: "Snapshot",
       description:
-        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting. Pass `selectors:true` to also get a durable CSS `selector` per element. Pass `annotate:true` for a Set-of-Marks JPEG screenshot with numbered badges (= each `ref`) — for vision models: they see the page and target by ref.",
-      inputSchema: { sessionId: z.string(), selectors: z.boolean().optional(), annotate: z.boolean().optional() },
+        "Return the indexed interactive elements of the live page, including those inside open Shadow DOM and iframes (same- and cross-origin). Use each element's `ref` (e.g. \"12\" or \"3:4\" for a sub-frame) with browser_act for deterministic targeting. Pass `selectors:true` to also get a durable CSS `selector` per element. Pass `prune:true` to drop elements hidden for accessibility (aria-hidden, display:none, or an aria-hidden/display:none ancestor, or visibility:hidden/collapse) — off by default, output unchanged. Pass `annotate:true` for a Set-of-Marks JPEG screenshot with numbered badges (= each `ref`) — for vision models: they see the page and target by ref.",
+      inputSchema: {
+        sessionId: z.string(),
+        selectors: z.boolean().optional(),
+        annotate: z.boolean().optional(),
+        prune: z.boolean().optional(),
+      },
+      outputSchema: snapshotOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
       return withSession(sessions, String(a.sessionId), async (s) => {
-        const elements = redactElements(await captureSnapshot(s.page, a.selectors === true), s.secrets);
+        const elements = redactElements(
+          await captureSnapshot(s.page, a.selectors === true, a.prune === true),
+          s.secrets,
+        );
         const payload = { url: s.page.url(), count: elements.length, elements };
         if (a.annotate !== true) return jsonResult(payload);
         const shot = await annotatedScreenshot(s.page);
@@ -55,6 +65,7 @@ export function registerSnapshotTools(server: McpServer, sessions: SessionManage
         to: z.string().optional(),
         annotate: z.boolean().optional(),
       },
+      outputSchema: actOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

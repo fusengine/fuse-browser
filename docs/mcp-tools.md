@@ -12,6 +12,10 @@ Every field is optional unless **Required** says `yes`. Defaults shown below com
 
 The shared identity/profile options (the `agentOptionShape`) are listed once under [`browser_open`](#browser_open); tools that accept them say so and link back.
 
+## Return format (structured output)
+
+Every tool declares an `outputSchema` (zod) and returns a **typed `structuredContent`** validated against it, alongside the human-readable `content`. Clients that support MCP structured output read `structuredContent` directly (typed, no parsing); clients that don't fall back to the `content` block. The `content` text is **compact JSON** (non-indented) — the pretty-print whitespace only inflated the token cost, and it stays semantically identical to `structuredContent`. Image tools (`browser_screenshot`, and any tool called with `annotate:true`) return the image in `content` **plus** the structured metadata in `structuredContent`. Error results set `isError` and, when a machine-readable code applies, expose `structuredContent: { code, message }`.
+
 ## Capability groups (`FUSE_CAPS`)
 
 By default all 50 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
@@ -543,10 +547,15 @@ Return the indexed interactive elements of the live page, each with a `ref` to u
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
 | `selectors` | boolean | no | Also return a durable CSS `selector` per element (cacheable to act later without re-snapshotting). |
+| `prune` | boolean | no | Drop elements hidden for accessibility (default `false`, output unchanged). When `true`, prunes any element that is `aria-hidden` (self or ancestor), `display:none` (self or ancestor), or `visibility:hidden`/`collapse` — **never** on off-screen, `opacity:0`, or off-viewport position. |
 | `annotate` | boolean | no | Also return a Set-of-Marks JPEG: numbered badges (= each `ref`) drawn over the page, for vision models (main-frame, viewport-only). |
 
 ```json
 { "sessionId": "s_abc123", "annotate": true }
+```
+
+```json
+{ "sessionId": "s_abc123", "prune": true }
 ```
 
 ### browser_act

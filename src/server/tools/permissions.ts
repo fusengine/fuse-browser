@@ -36,6 +36,13 @@ export async function applyPermissions(
   return context.grantPermissions(permissions, origin ? { origin } : undefined);
 }
 
+/** Merged success shape across the 2 actions (grant/clear). */
+export const PERMISSIONS_OUTPUT_SHAPE = {
+  cleared: z.literal(true).optional(),
+  granted: z.array(z.string()).optional(),
+  origin: z.string().optional(),
+};
+
 /** Register `browser_permissions`. */
 export function registerPermissionsTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -49,6 +56,7 @@ export function registerPermissionsTool(server: McpServer, sessions: SessionMana
         origin: z.string().optional(),
         action: z.enum(["grant", "clear"]).default("grant"),
       },
+      outputSchema: PERMISSIONS_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

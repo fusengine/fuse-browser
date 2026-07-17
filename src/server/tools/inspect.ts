@@ -11,6 +11,24 @@ import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** Shape of the `browser_inspect` success payload (mirrors {@link StyleReport}). */
+export const INSPECT_OUTPUT_SHAPE = {
+  ref: z.string(),
+  box: z.object({ x: z.number(), y: z.number(), width: z.number(), height: z.number() }),
+  font: z.object({
+    family: z.string(),
+    size: z.string(),
+    weight: z.string(),
+    lineHeight: z.string(),
+  }),
+  color: z.string(),
+  background: z.string(),
+  padding: z.string(),
+  margin: z.string(),
+  border: z.string(),
+  contrast: z.object({ ratio: z.number(), AA: z.boolean(), AAA: z.boolean() }).nullable(),
+};
+
 /** Register `browser_inspect`. */
 export function registerInspectTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -20,6 +38,7 @@ export function registerInspectTool(server: McpServer, sessions: SessionManager)
       description:
         "Computed styles, box model and WCAG text-contrast (AA/AAA) for one element by `ref` (from browser_snapshot). For design review: typography, color, spacing, contrast. Main-frame refs.",
       inputSchema: { sessionId: z.string(), ref: z.union([z.number().int(), z.string()]) },
+      outputSchema: INSPECT_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

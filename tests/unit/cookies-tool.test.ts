@@ -2,9 +2,13 @@ import { describe, expect, test } from "bun:test";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { BrowserContext } from "playwright";
+import { z } from "zod";
 import type { SessionManager } from "../../src/session/manager.js";
 import type { SessionData } from "../../src/session/session.js";
-import { registerCookiesTool } from "../../src/server/tools/cookies.js";
+import { COOKIES_OUTPUT_SHAPE, registerCookiesTool } from "../../src/server/tools/cookies.js";
+
+/** The SDK's own runtime gate: throws if `structuredContent` violates the tool's `outputSchema`. */
+const cookiesOutputSchema = z.object(COOKIES_OUTPUT_SHAPE);
 
 type Handler = (args: Record<string, unknown>) => Promise<CallToolResult>;
 
@@ -61,6 +65,7 @@ describe("browser_cookies", () => {
     expect((res.structuredContent as Record<string, unknown>).cookies).toEqual([
       { name: "sid", value: "1" },
     ]);
+    expect(() => cookiesOutputSchema.parse(res.structuredContent)).not.toThrow();
   });
 
   test("set -> calls addCookies and returns {added}", async () => {
@@ -71,6 +76,7 @@ describe("browser_cookies", () => {
     const res = await handler()({ sessionId: "s", action: "set", cookies });
     expect(calls.added).toEqual(cookies);
     expect((res.structuredContent as Record<string, unknown>).added).toBe(1);
+    expect(() => cookiesOutputSchema.parse(res.structuredContent)).not.toThrow();
   });
 
   test("clear -> calls clearCookies and returns {cleared}", async () => {
@@ -80,6 +86,7 @@ describe("browser_cookies", () => {
     const res = await handler()({ sessionId: "s", action: "clear" });
     expect(calls.cleared).toBe(1);
     expect((res.structuredContent as Record<string, unknown>).cleared).toBe(true);
+    expect(() => cookiesOutputSchema.parse(res.structuredContent)).not.toThrow();
   });
 
   test("a thrown error becomes a cookies_failed error result", async () => {

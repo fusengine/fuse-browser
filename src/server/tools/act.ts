@@ -17,6 +17,25 @@ import { withSession } from "./with-session.js";
 type Shape = Record<string, z.ZodTypeAny>;
 type Build = (a: Record<string, unknown>) => ActionInput;
 
+/**
+ * `ActionResult` (interfaces/types.ts) has an index signature — model extra
+ * keys permissively. Shared with wait.ts (`waitForCondition` also returns an
+ * `ActionResult`, tagged `wait_for` with extra `condition`/`value` fields).
+ */
+export const actionResultShape = z
+  .object({
+    type: z.string(),
+    ok: z.boolean(),
+    target: z.string().optional(),
+    strategy: z.string().optional(),
+    error: z.string().optional(),
+    ms: z.number().optional(),
+  })
+  .catchall(z.unknown());
+
+/** Every `actTool` handler returns `{ result, url }` via `jsonResult`. */
+const actOutputShape = { result: actionResultShape, url: z.string() };
+
 function actTool(
   server: McpServer,
   sessions: SessionManager,
@@ -25,7 +44,7 @@ function actTool(
   inputSchema: Shape,
   build: Build,
 ): void {
-  server.registerTool(name, { title: name, description, inputSchema }, async (args) => {
+  server.registerTool(name, { title: name, description, inputSchema, outputSchema: actOutputShape }, async (args) => {
     const a = args as Record<string, unknown>;
     return withSession(sessions, String(a.sessionId), async (s) => {
       const action = build(a);

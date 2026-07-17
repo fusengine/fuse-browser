@@ -20,6 +20,18 @@ const fieldSpec = z.object({
   abs: z.boolean().optional(),
 });
 
+/**
+ * `browser_extract_schema` output shape. Permissive: `data`/`items` come from
+ * a caller-supplied field map, so the record keys and per-field value shapes
+ * are arbitrary by design.
+ */
+export const EXTRACT_SCHEMA_OUTPUT_SHAPE = {
+  url: z.string(),
+  count: z.number().optional(),
+  items: z.array(z.record(z.string(), z.unknown())).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
+};
+
 /** Register `browser_extract_schema`. */
 export function registerExtractSchemaTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -33,6 +45,7 @@ export function registerExtractSchemaTool(server: McpServer, sessions: SessionMa
         schema: z.record(z.string(), fieldSpec),
         containerSelector: z.string().optional(),
       },
+      outputSchema: EXTRACT_SCHEMA_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

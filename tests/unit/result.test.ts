@@ -25,6 +25,28 @@ describe("imageJsonResult", () => {
   });
 });
 
+describe("compact JSON encoding", () => {
+  test("jsonResult text block is compact (no pretty-print whitespace) yet parses back", () => {
+    const payload = { url: "https://x.com", count: 2, nested: { a: 1 } };
+    const r = jsonResult(payload);
+    const text = r.content.find((c) => c.type === "text");
+    const raw = text && "text" in text ? text.text : "";
+    expect(raw).not.toContain("\n");
+    expect(raw).toBe(JSON.stringify(payload));
+    expect(JSON.parse(raw)).toEqual(payload);
+    expect(r.structuredContent).toEqual(payload);
+  });
+
+  test("imageJsonResult text block is compact and equivalent to structuredContent", () => {
+    const payload = { marks: 3, url: "https://x.com" };
+    const r = imageJsonResult("BASE64", payload);
+    const text = r.content.find((c) => c.type === "text");
+    const raw = text && "text" in text ? text.text : "";
+    expect(raw).not.toContain("\n");
+    expect(JSON.parse(raw)).toEqual(r.structuredContent);
+  });
+});
+
 describe("errorResult", () => {
   test("without code: text + isError, no structuredContent (back-compat)", () => {
     const r = errorResult("boom");

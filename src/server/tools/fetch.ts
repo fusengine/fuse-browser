@@ -12,6 +12,16 @@ import { contactsFromHtml } from "../../extraction/contacts/from-html.js";
 import { extractPrices } from "../../extraction/prices.js";
 import { fetchFast } from "../../net/fetch-fast.js";
 import { jsonResult } from "../result.js";
+import { contactsSchema } from "./schemas-contacts-output.js";
+import { renderedFetchSchema } from "./schemas-fetch-output.js";
+import { priceSchema } from "./schemas-price-output.js";
+
+/** `browser_fetch` output shape: a rendered fetch plus optional prices/contacts. */
+export const FETCH_OUTPUT_SHAPE = {
+  ...renderedFetchSchema.shape,
+  prices: z.array(priceSchema).optional(),
+  contacts: contactsSchema.optional(),
+};
 
 /** Register `browser_fetch`. */
 export function registerFetchTool(server: McpServer): void {
@@ -32,6 +42,7 @@ export function registerFetchTool(server: McpServer): void {
         maxChars: z.number().int().optional(),
         browserFallback: z.boolean().optional(),
       },
+      outputSchema: FETCH_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

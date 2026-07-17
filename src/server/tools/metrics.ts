@@ -9,6 +9,21 @@ import { z } from "zod";
 import { metricsSnapshot, resetMetrics } from "../../net/metrics.js";
 import { jsonResult } from "../result.js";
 
+/** Shape of the `browser_metrics` success payload (mirrors `metricsSnapshot()`). */
+export const METRICS_OUTPUT_SHAPE = {
+  uptimeMs: z.number(),
+  probesOk: z.number(),
+  probesFailed: z.number(),
+  avgDurationMs: z.number(),
+  minDurationMs: z.number(),
+  maxDurationMs: z.number(),
+  breakerRejects: z.number(),
+  queueRejects: z.number(),
+  budgetRejects: z.number(),
+  queue: z.object({ running: z.number(), admitted: z.number(), waiting: z.number() }),
+  rssBytes: z.number(),
+};
+
 /** Register `browser_metrics`. */
 export function registerMetricsTool(server: McpServer): void {
   server.registerTool(
@@ -18,6 +33,7 @@ export function registerMetricsTool(server: McpServer): void {
       description:
         "Process-global scraping metrics: probes ok/failed, avg/min/max duration, circuit-breaker/queue/budget rejects, live queue depth, RSS, uptime. Pass reset:true to zero the counters after reading (e.g. at the start of a new job).",
       inputSchema: { reset: z.boolean().optional() },
+      outputSchema: METRICS_OUTPUT_SHAPE,
     },
     async (args) => {
       const snapshot = metricsSnapshot();

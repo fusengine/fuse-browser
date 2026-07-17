@@ -7,7 +7,10 @@ import { z } from "zod";
 import { waitForCondition } from "../../actions/wait-for.js";
 import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
+import { actionResultShape } from "./act.js";
 import { withSession } from "./with-session.js";
+
+const waitForOutputShape = { result: actionResultShape, url: z.string() };
 
 /** Register `browser_wait_for`. */
 export function registerWaitTool(server: McpServer, sessions: SessionManager): void {
@@ -25,6 +28,7 @@ export function registerWaitTool(server: McpServer, sessions: SessionManager): v
         urlContains: z.string().optional(),
         timeoutMs: z.number().int().optional(),
       },
+      outputSchema: waitForOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

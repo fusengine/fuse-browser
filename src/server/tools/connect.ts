@@ -12,6 +12,13 @@ import { errorResult, jsonResult } from "../result.js";
 
 const BROWSERS = ["dia", "chrome", "edge", "brave", "arc"] as const;
 
+const connectOutputShape = {
+  sessionId: z.string(),
+  endpoint: z.string(),
+  url: z.string(),
+  connected: z.boolean(),
+};
+
 /** Register `browser_connect`. */
 export function registerConnectTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -27,6 +34,7 @@ export function registerConnectTool(server: McpServer, sessions: SessionManager)
         userDataDir: z.string().optional(),
         launch: z.boolean().optional(),
       },
+      outputSchema: connectOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

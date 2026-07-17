@@ -12,6 +12,12 @@ import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** Shape of the `browser_live_view` success payload. */
+export const LIVE_VIEW_OUTPUT_SHAPE = { url: z.string(), note: z.string() };
+
+/** Shape of the `browser_live_view_stop` success payload. */
+export const LIVE_VIEW_STOP_OUTPUT_SHAPE = { stopped: z.boolean() };
+
 /** Register the live-view tools. */
 export function registerLiveViewTool(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -27,6 +33,7 @@ export function registerLiveViewTool(server: McpServer, sessions: SessionManager
         maxHeight: z.number().int().optional(),
         open: z.boolean().optional(),
       },
+      outputSchema: LIVE_VIEW_OUTPUT_SHAPE,
     },
     async (a) =>
       withSession(sessions, String(a.sessionId), async (s) => {
@@ -46,6 +53,7 @@ export function registerLiveViewTool(server: McpServer, sessions: SessionManager
       title: "Stop live view",
       description: "Stop the live view for a session and shut down its local server.",
       inputSchema: { sessionId: z.string() },
+      outputSchema: LIVE_VIEW_STOP_OUTPUT_SHAPE,
     },
     async (a) =>
       withSession(sessions, String(a.sessionId), async (s) => {

@@ -12,6 +12,24 @@ import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 import { withSession } from "./with-session.js";
 
+/** Mirrors `DialogRecord` (session/dialogs.ts). */
+const dialogRecordShape = z.object({ type: z.string(), message: z.string(), at: z.number(), handled: z.enum(["accept", "dismiss"]) });
+
+const dialogOutputShape = {
+  policy: z.object({ action: z.enum(["accept", "dismiss"]), promptText: z.string().optional() }),
+  recent: z.array(dialogRecordShape),
+};
+
+/** Mirrors `DownloadRecord` (session/downloads.ts). */
+const downloadRecordShape = z.object({ url: z.string(), suggestedFilename: z.string(), path: z.string(), at: z.number(), error: z.string().optional() });
+
+/** `content` is only present when `read` was requested (mirrors `DownloadContent`). */
+const downloadsOutputShape = {
+  count: z.number(),
+  downloads: z.array(downloadRecordShape),
+  content: z.object({ filename: z.string(), encoding: z.enum(["utf8", "base64"]), data: z.string() }).optional(),
+};
+
 /** Register `browser_dialog` and `browser_downloads`. */
 export function registerDialogTools(server: McpServer, sessions: SessionManager): void {
   server.registerTool(
@@ -25,6 +43,7 @@ export function registerDialogTools(server: McpServer, sessions: SessionManager)
         action: z.enum(["accept", "dismiss"]),
         promptText: z.string().optional(),
       },
+      outputSchema: dialogOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
@@ -52,6 +71,7 @@ export function registerDialogTools(server: McpServer, sessions: SessionManager)
         read: z.union([z.number(), z.string()]).optional(),
         encoding: z.enum(["utf8", "base64"]).default("utf8"),
       },
+      outputSchema: downloadsOutputShape,
     },
     async (args) => {
       const a = args as Record<string, unknown>;

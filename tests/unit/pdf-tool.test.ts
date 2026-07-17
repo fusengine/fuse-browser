@@ -4,9 +4,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 import type { SessionManager } from "../../src/session/manager.js";
 import type { SessionData } from "../../src/session/session.js";
-import { registerPdfTool } from "../../src/server/tools/pdf.js";
+import { PDF_OUTPUT_SHAPE, registerPdfTool } from "../../src/server/tools/pdf.js";
+
+/** The SDK's own runtime gate: throws if `structuredContent` violates the tool's `outputSchema`. */
+const pdfOutputSchema = z.object(PDF_OUTPUT_SHAPE);
 
 type Handler = (args: Record<string, unknown>) => Promise<CallToolResult>;
 
@@ -51,6 +55,7 @@ describe("browser_pdf", () => {
     expect(seen).toEqual({ format: "A4", landscape: true, printBackground: true });
     const payload = res.structuredContent as Record<string, unknown>;
     expect(Buffer.from(payload.pdfBase64 as string, "base64").toString()).toBe("%PDF-1.4 fake");
+    expect(() => pdfOutputSchema.parse(res.structuredContent)).not.toThrow();
   });
 
   test("with path -> writes the file and returns {path}", async () => {
@@ -63,6 +68,7 @@ describe("browser_pdf", () => {
     const res = await handler()({ sessionId: "s", path: out });
     expect((res.structuredContent as Record<string, unknown>).path).toBe(out);
     expect(readFileSync(out, "utf-8")).toBe("ONDISK");
+    expect(() => pdfOutputSchema.parse(res.structuredContent)).not.toThrow();
   });
 
   test("page.pdf throwing -> clear headless-only error", async () => {

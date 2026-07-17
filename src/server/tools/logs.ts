@@ -8,7 +8,10 @@ import { z } from "zod";
 import type { SessionManager } from "../../session/manager.js";
 import { jsonResult } from "../result.js";
 import { CONSOLE_LEVELS, filterConsole, filterNetwork, mergeNetwork } from "./logs-filter.js";
+import { CONSOLE_OUTPUT_SHAPE, NETWORK_OUTPUT_SHAPE } from "./logs-output.js";
 import { withSession } from "./with-session.js";
+
+export { CONSOLE_OUTPUT_SHAPE, NETWORK_OUTPUT_SHAPE } from "./logs-output.js";
 
 const CONSOLE_DESC =
   "Console messages captured in the session since open (last 80). Use to debug JS errors, CSP " +
@@ -31,6 +34,7 @@ export function registerLogTools(server: McpServer, sessions: SessionManager): v
         level: z.enum(CONSOLE_LEVELS).optional(),
         limit: z.number().optional(),
       },
+      outputSchema: CONSOLE_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
@@ -55,6 +59,7 @@ export function registerLogTools(server: McpServer, sessions: SessionManager): v
         urlContains: z.string().optional(),
         limit: z.number().optional(),
       },
+      outputSchema: NETWORK_OUTPUT_SHAPE,
     },
     async (args) => {
       const a = args as Record<string, unknown>;
