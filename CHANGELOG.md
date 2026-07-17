@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.61] - 17-07-2026
+
+### Added
+
+- **Structured tool output** — every one of the 50 MCP tools now declares a zod `outputSchema`, and `structuredContent` is emitted on all return paths, including `browser_screenshot`'s 4 branches (new `screenshot-result.ts` helper). Downstream clients can now consume typed results instead of parsing text.
+- **`browser_snapshot` `prune` option** — opt-in (default `false`, behavior unchanged) param that elides hidden elements (`aria-hidden`, `display:none`, `visibility:hidden`) from the accessibility tree, shrinking snapshots on dense pages.
+
+### Changed
+
+- MCP text `content` is now compact (non-indented) JSON — `structuredContent` unchanged — cutting tokens on every tool response with no semantic difference.
+- Dependencies bumped to latest: `typescript` 6 → 7, `patchright`/`playwright` 1.60 → 1.61.1, `defuddle` 0.18 → 0.19, `@biomejs/biome` 2.4 → 2.5.4, plus patch bumps for `impit`/`libphonenumber-js`/`linkedom`/`tsx`. `@types/node` → `^22` and `engines.node` → `">=22"` (Node 20 is EOL 2026-04-30).
+
+### Verified
+
+- New unit coverage: batched `outputSchema` parsing across tools, `prune`, and all 4 `browser_screenshot` branches. New integration coverage: `browser_snapshot`/`browser_act` `outputSchema` + `prune` on real Chromium.
+
 ## [0.1.60] - 01-07-2026
 
 ### Added
