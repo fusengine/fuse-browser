@@ -78,37 +78,9 @@ test("pick types into a combobox and clicks the matching suggestion", { timeout:
   }
 });
 
-const PRUNE_PAGE =
-  "<button>Visible</button>" +
-  "<div aria-hidden='true'><button>HiddenAria</button></div>" +
-  "<button style='display:none'>HiddenDisplay</button>";
-const PRUNE_URL = `data:text/html,${encodeURIComponent(PRUNE_PAGE)}`;
-
-test(
-  "prune:true drops aria-hidden/display:none elements; prune omitted keeps the exact prior set",
-  { timeout: 120_000 },
-  async () => {
-    const sessions = new SessionManager();
-    const session = await sessions.open(resolveConfig({ headless: true, engine: "patchright" }));
-    try {
-      await session.page.goto(PRUNE_URL, { waitUntil: "domcontentloaded", timeout: 30_000 });
-
-      const unpruned = await captureSnapshot(session.page);
-      const unprunedTexts = unpruned.map((e) => e.text).sort();
-      assert.deepEqual(
-        unprunedTexts,
-        ["HiddenAria", "HiddenDisplay", "Visible"],
-        "default (prune omitted) is byte-for-byte the pre-pruning behavior",
-      );
-
-      const pruned = await captureSnapshot(session.page, false, true);
-      const prunedTexts = pruned.map((e) => e.text).sort();
-      assert.deepEqual(prunedTexts, ["Visible"], "prune:true drops the aria-hidden and display:none elements");
-    } finally {
-      await sessions.close(session.id);
-    }
-  },
-);
+// `prune:true` coverage (C4 rule: genuinely-hidden OR decorative-under-aria-
+// hidden) moved to tests/integration/snapshot-prune.test.ts to keep this file
+// under the SOLID line cap — see that file for the modal-fix regression test.
 
 test(
   "browser_snapshot and browser_act return structuredContent honoring their declared outputSchema (no McpError)",

@@ -547,7 +547,7 @@ Return the indexed interactive elements of the live page, each with a `ref` to u
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
 | `selectors` | boolean | no | Also return a durable CSS `selector` per element (cacheable to act later without re-snapshotting). |
-| `prune` | boolean | no | Drop elements hidden for accessibility (default `false`, output unchanged). When `true`, prunes any element that is `aria-hidden` (self or ancestor), `display:none` (self or ancestor), or `visibility:hidden`/`collapse` — **never** on off-screen, `opacity:0`, or off-viewport position. |
+| `prune` | boolean | no | Drop only genuinely hidden or decorative elements (default `false`, output unchanged). When `true`, prunes an element iff it is **CSS-hidden** — `display:none`/`visibility:hidden`/`collapse`/`content-visibility` on itself or an ancestor, via `Element.checkVisibility()` — **or decorative**: under an `aria-hidden="true"` ancestor **and** not focusable. A **visible, focusable** element is **kept even under an `aria-hidden` ancestor**, so the controls of an **open modal** (whose SPA focus-trap marks a root/sibling wrapper `aria-hidden`) stay in the snapshot. Never prunes on off-screen, `opacity:0`, or off-viewport position. |
 | `annotate` | boolean | no | Also return a Set-of-Marks JPEG: numbered badges (= each `ref`) drawn over the page, for vision models (main-frame, viewport-only). |
 
 ```json
@@ -748,9 +748,19 @@ Capture the live page as PNG(s) for vision. Pass `ref` for one element, `viewpor
 | `colorScheme` | enum `light` \| `dark` | no | Emulate `prefers-color-scheme` and toggle `themeClass` on `<html>`, then restore. |
 | `themeClass` | string | no | Class toggled on `<html>` for class-based dark themes (default `dark`). |
 | `annotate` | boolean | no | Set-of-Marks JPEG: numbered badges (= each `ref`) over the viewport, for vision models. |
+| `path` | string | no | Also write the captured image to disk and return its `path` in `structuredContent`. Single-image captures only. Without `path`, the image is returned base64-inline as before (unchanged). |
+
+When `path` is set, its extension must match the output mime — `.png` for element/page/multi captures, `.jpg`/`.jpeg` for the `annotate` JPEG. Error codes:
+
+- `path_multi_viewport_unsupported` — `path` given with `viewports.length > 1` (multiple images); use a single viewport with `path`.
+- `path_extension_mismatch` — `path`'s extension does not match the output mime (e.g. `.png` for the `annotate` JPEG, or `.jpg` for a PNG capture).
 
 ```json
 { "sessionId": "s_abc123", "annotate": true, "colorScheme": "dark" }
+```
+
+```json
+{ "sessionId": "s_abc123", "fullPage": true, "path": "./shots/home.png" }
 ```
 
 ### browser_inspect
