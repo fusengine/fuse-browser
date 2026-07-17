@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.62] - 17-07-2026
+
+### Fixed
+
+- **`browser_snapshot` `prune:true` on modals** — an element is now kept if it is itself visible+focusable (`checkVisibility()`), even under an `aria-hidden` ancestor. Fixes SPA modals rendered under a global `aria-hidden` wrapper returning `count:0`. Only genuinely CSS-hidden or non-focusable decorative nodes under `aria-hidden` are still elided. Default (`prune` off) behavior is unchanged.
+
+### Added
+
+- **`browser_screenshot` `path` option** — optional param that writes the PNG/JPEG to disk and returns `path` in `structuredContent` instead of inline base64. Refuses multi-viewport captures (`path_multi_viewport_unsupported`) and mismatched extension/mime (`path_extension_mismatch`). Omitting `path` keeps the existing inline-base64 behavior.
+
 ## [0.1.61] - 17-07-2026
 
 ### Added
