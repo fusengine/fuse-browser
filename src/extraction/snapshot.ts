@@ -18,18 +18,23 @@ export { REF_ATTRIBUTE } from "./snapshot-walk.js";
 const MAX_ELEMENTS = 400;
 
 /**
- * Browser-returned element plus the internal `ariaHidden` scratch flag (see
- * `snapshot-hidden.ts`). Never exposed on the final {@link InteractiveElement}
- * output — used only to decide pruning, then stripped in {@link captureSnapshot}.
+ * Browser-returned element plus the internal `prunable` scratch flag (the C4
+ * decision from `snapshot-hidden.ts`). Never exposed on the final {@link
+ * InteractiveElement} output — used only to decide pruning, then stripped in
+ * {@link captureSnapshot}.
  */
-type RawElement = InteractiveElement & { ariaHidden?: boolean };
+type RawElement = InteractiveElement & { prunable?: boolean };
 
 /**
  * Whether a raw element survives pruning: kept unless `prune` is on AND the
- * element was flagged hidden-for-accessibility. Exported for unit testing.
+ * element was flagged prunable (genuinely hidden, or decorative under an
+ * `aria-hidden` ancestor and not focusable — see `snapshot-hidden.ts`).
+ * A visible+focusable element under an `aria-hidden` ancestor (e.g. inside an
+ * open modal dialog) is NOT prunable and is always kept. Exported for unit
+ * testing.
  */
-export function shouldKeep(ariaHidden: boolean | undefined, prune: boolean): boolean {
-  return !(prune && ariaHidden === true);
+export function shouldKeep(prunable: boolean | undefined, prune: boolean): boolean {
+  return !(prune && prunable === true);
 }
 
 /**
@@ -37,9 +42,13 @@ export function shouldKeep(ariaHidden: boolean | undefined, prune: boolean): boo
  * element with a (frame-local) ref attribute and exposing a frame-scoped `ref`.
  * Detached frames and frames that reject evaluation (e.g. mid-navigation) are
  * skipped rather than aborting the whole snapshot. When `prune` is `true`,
- * elements hidden for accessibility (`aria-hidden`, `display:none`, ancestor-
- * hidden, or `visibility:hidden`/`collapse`) are dropped; default `false`
- * keeps the output identical to the pre-pruning behavior.
+ * elements that are genuinely hidden (`Element.checkVisibility()` false —
+ * `display:none`, `content-visibility:hidden`, `visibility:hidden`/`collapse`)
+ * OR decorative under an `aria-hidden` ancestor (present but NOT focusable)
+ * are dropped. A visible AND focusable element under an `aria-hidden`
+ * ancestor — e.g. an open modal `<dialog>`/`[role=dialog]` whose SPA also
+ * marks a sibling/root wrapper `aria-hidden` — is always kept. Default
+ * `false` keeps the output identical to the pre-pruning behavior.
  */
 export async function captureSnapshot(
   page: Page,
@@ -61,8 +70,8 @@ export async function captureSnapshot(
     }
     for (const raw of local) {
       if (all.length >= MAX_ELEMENTS) break;
-      const { ariaHidden, ...el } = raw;
-      if (!shouldKeep(ariaHidden, prune)) continue;
+      const { prunable, ...el } = raw;
+      if (!shouldKeep(prunable, prune)) continue;
       el.ref = f === 0 ? String(el.index) : `${f}:${el.index}`;
       if (f > 0) el.frame = f;
       el.index = global++;

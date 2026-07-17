@@ -6,6 +6,9 @@
  * @module tests/unit/screenshot-tool
  */
 import { describe, expect, test } from "bun:test";
+import { existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -93,5 +96,53 @@ describe("browser_screenshot outputSchema", () => {
     expect(res.structuredContent).toBeDefined();
     expect(() => outputSchema.parse(res.structuredContent)).not.toThrow();
     expect(outputSchema.parse(res.structuredContent).kind).toBe("annotated");
+  });
+
+  test("full-page branch: without path, structuredContent.path stays undefined", async () => {
+    const { server, getHandler } = mockServer();
+    registerScreenshotTool(server, fakeSessions(fakePage()));
+    const res = await getHandler()({ sessionId: "s", fullPage: true });
+    const parsed = outputSchema.parse(res.structuredContent);
+    expect(parsed.path).toBeUndefined();
+  });
+
+  test("full-page branch: with path, writes the file and returns {path}", async () => {
+    const out = join(tmpdir(), `fuse-screenshot-${Date.now()}.png`);
+    const { server, getHandler } = mockServer();
+    registerScreenshotTool(server, fakeSessions(fakePage()));
+    const res = await getHandler()({ sessionId: "s", fullPage: true, path: out });
+    const parsed = outputSchema.parse(res.structuredContent);
+    expect(parsed.path).toBe(out);
+    expect(readFileSync(out).toString()).toBe("PNG-PAGE");
+  });
+
+  test("annotate branch: mismatched extension (.png for JPEG output) is rejected, not silently renamed", async () => {
+    const out = join(tmpdir(), `fuse-screenshot-mismatch-${Date.now()}.png`);
+    const { server, getHandler } = mockServer();
+    registerScreenshotTool(server, fakeSessions(fakePage()));
+    const res = await getHandler()({ sessionId: "s", annotate: true, path: out });
+    expect(res.isError).toBe(true);
+    expect((res.structuredContent as Record<string, unknown>).code).toBe("path_extension_mismatch");
+    expect(existsSync(out)).toBe(false);
+  });
+
+  test("multi-viewport branch: path with viewports.length > 1 returns an explicit error", async () => {
+    const out = join(tmpdir(), `fuse-screenshot-multi-${Date.now()}.png`);
+    const { server, getHandler } = mockServer();
+    registerScreenshotTool(server, fakeSessions(fakePage()));
+    const res = await getHandler()({ sessionId: "s", viewports: ["mobile", "desktop"], path: out });
+    expect(res.isError).toBe(true);
+    expect((res.structuredContent as Record<string, unknown>).code).toBe("path_multi_viewport_unsupported");
+    expect(existsSync(out)).toBe(false);
+  });
+
+  test("multi-viewport branch: path with a single-item viewports array writes the file", async () => {
+    const out = join(tmpdir(), `fuse-screenshot-single-multi-${Date.now()}.png`);
+    const { server, getHandler } = mockServer();
+    registerScreenshotTool(server, fakeSessions(fakePage()));
+    const res = await getHandler()({ sessionId: "s", viewports: ["mobile"], path: out });
+    const parsed = outputSchema.parse(res.structuredContent);
+    expect(parsed).toMatchObject({ kind: "multi", count: 1, path: out });
+    expect(readFileSync(out).toString()).toBe("PNG-PAGE");
   });
 });

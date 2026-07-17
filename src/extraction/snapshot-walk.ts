@@ -49,7 +49,7 @@ export const SNAPSHOT_SCRIPT = `(arg) => {
       options: el.tagName === 'SELECT' ? [...el.options].slice(0, 12).map((o) => o.label || o.value) : undefined,
       ariaExpanded: el.getAttribute('aria-expanded'), ariaControls: el.getAttribute('aria-controls'),
       visible: r.width > 0 && r.height > 0, obscured: obscured(el, r),
-      ariaHidden: isElementHiddenForAria(el),
+      prunable: isPrunable(el),
       selector: wantSel ? genSelector(el) : undefined,
       box: {x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height)}
     };

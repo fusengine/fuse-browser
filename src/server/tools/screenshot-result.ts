@@ -3,6 +3,7 @@
  * `structuredContent` payload conforming to `screenshotOutputShape`, required
  * once the tool declares an `outputSchema` — the SDK (^1.29) throws `McpError`
  * at runtime if a non-error `CallToolResult` lacks matching `structuredContent`.
+ * Disk-persistence (`writeScreenshotOrError`) lives in `screenshot-write.ts`.
  * @module server/tools/screenshot-result
  */
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -16,6 +17,7 @@ export const screenshotOutputShape = {
   notes: z.array(z.string()).optional(),
   url: z.string().optional(),
   marks: z.number().optional(),
+  path: z.string().optional(),
 };
 
 type Structured = z.infer<z.ZodObject<typeof screenshotOutputShape>>;
@@ -31,36 +33,53 @@ function single(base64: string, mimeType: string, note: string, structured: Stru
   };
 }
 
-/** Single-element capture (`ref`). */
-export function elementScreenshotResult(base64: string, ref: number | string): CallToolResult {
+/** Single-element capture (`ref`). `path`, when given, has already been written by the caller. */
+export function elementScreenshotResult(base64: string, ref: number | string, path?: string): CallToolResult {
   const note = `element ref=${ref}`;
   return single(base64, "image/png", note, {
     kind: "element",
     count: 1,
     mimeType: "image/png",
     notes: [note],
+    ...(path ? { path } : {}),
   });
 }
 
 /** Full-page / default single-viewport capture. */
-export function pageScreenshotResult(base64: string, url: string): CallToolResult {
+export function pageScreenshotResult(base64: string, url: string, path?: string): CallToolResult {
   const note = `screenshot of ${url}`;
-  return single(base64, "image/png", note, { kind: "page", count: 1, mimeType: "image/png", url, notes: [note] });
+  return single(base64, "image/png", note, {
+    kind: "page",
+    count: 1,
+    mimeType: "image/png",
+    url,
+    notes: [note],
+    ...(path ? { path } : {}),
+  });
 }
 
 /** Annotated capture (`annotate: true`). Kept as JPEG to match `annotatedScreenshot`. */
-export function annotatedScreenshotResult(base64: string, url: string, marks: number): CallToolResult {
+export function annotatedScreenshotResult(
+  base64: string,
+  url: string,
+  marks: number,
+  path?: string,
+): CallToolResult {
   return single(base64, "image/jpeg", JSON.stringify({ url, marks }), {
     kind: "annotated",
     count: 1,
     mimeType: "image/jpeg",
     url,
     marks,
+    ...(path ? { path } : {}),
   });
 }
 
 /** Multi-viewport capture: several images, each preceded by a label note. */
-export function multiScreenshotResult(items: Array<{ base64: string; note: string }>): CallToolResult {
+export function multiScreenshotResult(
+  items: Array<{ base64: string; note: string }>,
+  path?: string,
+): CallToolResult {
   const content = items.flatMap((it) => [
     { type: "text" as const, text: it.note },
     { type: "image" as const, data: it.base64, mimeType: "image/png" as const },
@@ -72,6 +91,7 @@ export function multiScreenshotResult(items: Array<{ base64: string; note: strin
       count: items.length,
       mimeType: "image/png",
       notes: items.map((it) => it.note),
+      ...(path ? { path } : {}),
     },
   };
 }
