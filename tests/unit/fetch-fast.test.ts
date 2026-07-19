@@ -27,6 +27,21 @@ describe("htmlToText", () => {
   test("fragment page with no <html>/<body> still yields its text", () => {
     expect(htmlToText("<h1>Title</h1><pre>BODY CONTENT</pre>")).toContain("BODY CONTENT");
   });
+
+  test("strips <script>/<style> source out of the readable text", () => {
+    // Regression: a live SPA (Skoda stock listing) injects a large critical-CSS
+    // <style> tag directly in <body> — textContent includes tag source verbatim
+    // unless script/style elements are removed from the DOM first, which used to
+    // leak raw CSS into hollow-extraction "recovered" output.
+    const html =
+      "<html><body><style>body{color:#161718FF;font-family:SKODA Next}</style>" +
+      '<script>var x = "should not appear";</script>' +
+      "<p>Real page copy.</p></body></html>";
+    const t = htmlToText(html);
+    expect(t).toContain("Real page copy.");
+    expect(t).not.toContain("color:#161718FF");
+    expect(t).not.toContain("should not appear");
+  });
 });
 
 describe("isHtmlContentType", () => {

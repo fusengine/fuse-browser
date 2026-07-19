@@ -2,14 +2,15 @@
  * Smart multi-strategy click with heuristic fallback.
  * @module actions/smart-click
  */
-import type { Locator, Page } from "playwright";
+import type { Page } from "playwright";
 import { captureSnapshot } from "../extraction/snapshot.js";
 import type { ActionResult } from "../interfaces/types.js";
 import { evalScriptArg } from "../lib/evaluate.js";
-import { escapeRegExp } from "../lib/text.js";
 import { healLocator } from "./heal-locator.js";
 import { humanPause } from "./human.js";
 import { humanMoveTo } from "./human-mouse.js";
+import { clickTargetStrategies } from "./resolve-click-target.js";
+import { robustClick } from "./robust-click.js";
 
 const HEURISTIC_CLICK = `(target) => {
   const needle = target.toLowerCase();
@@ -29,18 +30,8 @@ export async function smartClick(
   preferredStrategy = "",
   humanMode = false,
 ): Promise<ActionResult> {
-  const rx = new RegExp(escapeRegExp(target), "i");
-  const strategies: Array<[string, () => Locator]> = [
-    ["selector", () => page.locator(target).first()],
-    ["role", () => page.getByRole("button", { name: rx }).first()],
-    ["text", () => page.getByText(rx).first()],
-    ["label", () => page.getByLabel(rx).first()],
-  ];
-  if (preferredStrategy) {
-    strategies.sort((a, b) => (a[0] === preferredStrategy ? 0 : 1) - (b[0] === preferredStrategy ? 0 : 1));
-  }
   let lastError = "not_tried";
-  for (const [strategy, factory] of strategies) {
+  for (const [strategy, factory] of clickTargetStrategies(page, target, preferredStrategy)) {
     try {
       const locator = factory();
       if ((await locator.count()) > 0) {
@@ -51,8 +42,9 @@ export async function smartClick(
           await locator.hover({ timeout: 2_000 });
           await humanPause(page);
         }
-        await locator.click({ timeout: 2_000 });
-        return { type: "click", target, ok: true, strategy };
+        const clicked = await robustClick(page, locator, 2_000);
+        if (clicked.ok) return { type: "click", target, ok: true, strategy, rung: clicked.rung };
+        lastError = clicked.error ?? lastError;
       }
     } catch (err) {
       lastError = String(err).split("\n")[0] ?? "error";

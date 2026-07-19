@@ -35,6 +35,7 @@ const EXPECTED = [
   "browser_fill",
   "browser_scroll",
   "browser_press",
+  "browser_type",
   "browser_select",
   "browser_back",
   "browser_forward",

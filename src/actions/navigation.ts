@@ -50,6 +50,20 @@ export async function pressKey(page: Page, key: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Type text into whatever element currently has focus — no ref/locator
+ * needed. For targets a locator can't reach (e.g. a closed shadow-DOM input):
+ * click the field first (`browser_click`), then call this.
+ */
+export async function typeText(page: Page, text: string): Promise<ActionResult> {
+  try {
+    await page.keyboard.type(text, { delay: 20 });
+    return { type: "type", ok: true, text };
+  } catch (err) {
+    return { type: "type", ok: false, text, error: String(err).split("\n")[0] ?? "error" };
+  }
+}
+
 /** Select option(s) in a <select> by value, label or index. */
 export async function selectOption(
   page: Page,

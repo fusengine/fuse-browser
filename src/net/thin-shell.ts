@@ -36,11 +36,25 @@ export function visibleText(html: string): string {
 }
 
 /**
+ * True when raw HTML carries JS-rendering markers — an SPA hydration mount
+ * point or a heavy `<script>` count — regardless of visible text length. A
+ * chrome-heavy shell (nav/footer markup) can clear the `isThinShell` text
+ * threshold yet still ship its real content only after client-side hydration;
+ * this is the raw-HTML half of that check, reusable post-extraction to gate
+ * escalation on an actually-empty extraction rather than raw-HTML length.
+ *
+ * @param html - Raw response body.
+ */
+export function looksJsRendered(html: string): boolean {
+  const scriptHeavy = (html.match(/<script\b/gi)?.length ?? 0) >= SCRIPT_HEAVY;
+  return SPA_ROOT.test(html) || scriptHeavy;
+}
+
+/**
  * True when `html` looks like an unrendered SPA shell worth a browser pass.
  * @param html - Raw response body.
  */
 export function isThinShell(html: string): boolean {
   if (visibleText(html).length >= THIN_TEXT_CHARS) return false; // already has real content
-  const scriptHeavy = (html.match(/<script\b/gi)?.length ?? 0) >= SCRIPT_HEAVY;
-  return SPA_ROOT.test(html) || scriptHeavy;
+  return looksJsRendered(html);
 }

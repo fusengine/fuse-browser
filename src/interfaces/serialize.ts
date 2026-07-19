@@ -40,4 +40,32 @@ export interface SerializeOptions {
    * Defaults to {@link DEFAULT_MAX_INPUT_CHARS} when omitted.
    */
   maxInputChars?: number;
+  /**
+   * CSS selector pinning the main content element, bypassing Defuddle's
+   * auto-detection. When set, `removeContentPatterns` is also disabled — both
+   * are needed together to keep a selected container's repeated sub-elements
+   * (e.g. every post in a forum thread) from being stripped as "boilerplate".
+   */
+  contentSelector?: string;
+}
+
+/** Which extraction path produced a rendered fetch's final text. */
+export type ExtractionKind = "primary" | "recovered";
+
+/** Inputs available where hollow-extraction recovery is decided (markdown branch only). */
+export interface RecoveryInput {
+  /** Raw page HTML — source for non-link prose length and the page's true visible-text budget. */
+  html: string;
+  /** Defuddle's markdown content (the "c1" candidate). */
+  c1Text: string;
+  /** Defuddle's own word count for `c1Text`. */
+  wordCount: number;
+  /** Raw body text (pre-Defuddle) — the recovery candidate. */
+  rawText: string;
+}
+
+/** The chosen text plus which extraction path produced it. */
+export interface RecoveryResult {
+  text: string;
+  extraction: ExtractionKind;
 }

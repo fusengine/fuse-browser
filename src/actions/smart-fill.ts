@@ -6,6 +6,7 @@ import type { Locator, Page } from "playwright";
 import { captureSnapshot } from "../extraction/snapshot.js";
 import type { ActionResult } from "../interfaces/types.js";
 import { escapeRegExp, randInt } from "../lib/text.js";
+import { fillRange, sliderKind } from "./fill-range.js";
 import { healLocator } from "./heal-locator.js";
 import { humanPause } from "./human.js";
 
@@ -23,7 +24,11 @@ async function humanType(page: Page, locator: Locator, value: string): Promise<v
   }
 }
 
-/** Fill a field via selector, label or placeholder, with a preferred strategy. */
+/**
+ * Fill a field via selector, label or placeholder, with a preferred strategy.
+ * Never diverts to the combobox pick flow — a `fill` always types the
+ * literal value; use `kind:"pick"` to select a listbox option instead.
+ */
 export async function smartFill(
   page: Page,
   target: string,
@@ -45,6 +50,11 @@ export async function smartFill(
     try {
       const locator = factory();
       if ((await locator.count()) > 0) {
+        const slider = await sliderKind(locator);
+        if (slider) {
+          const snapped = await fillRange(page, locator, value, slider);
+          return { type: "fill", target, ok: snapped.reached, strategy: "range", value: snapped.value, reached: snapped.reached };
+        }
         if (humanMode) await humanType(page, locator, value);
         else await locator.fill(value, { timeout: 2_000 });
         return { type: "fill", target, ok: true, strategy };
@@ -56,6 +66,11 @@ export async function smartFill(
   try {
     const healed = await healLocator(page, target, captureSnapshot);
     if (healed) {
+      const healedSlider = await sliderKind(healed);
+      if (healedSlider) {
+        const snapped = await fillRange(page, healed, value, healedSlider);
+        return { type: "fill", target, ok: snapped.reached, strategy: "range-heal", value: snapped.value, reached: snapped.reached };
+      }
       if (humanMode) await humanType(page, healed, value);
       else await healed.fill(value, { timeout: 2_000 });
       return { type: "fill", target, ok: true, strategy: "heal" };

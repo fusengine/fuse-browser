@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://forum.opnsense.org/Themes/Steyle-V4/css/minified_a25607b3c075459f33ac7ce2c9c5d4d5.css?smf217_1773599850">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css">
+	<link rel="stylesheet" href="https://use.typekit.net/asa5fpa.css">
+	<style>.main_icons.sfs::before { background: url(https://forum.opnsense.org/Themes/default/images/admin/sfs.webp) no-repeat; background-size: contain;}
+	
+	img.avatar { max-width: 65px !important; max-height: 65px !important; }
+	
+	</style>
+	<script>
+		var smf_theme_url = "https://forum.opnsense.org/Themes/Steyle-V4";
+		var smf_default_theme_url = "https://forum.opnsense.org/Themes/default";
+		var smf_images_url = "https://forum.opnsense.org/Themes/Steyle-V4/images";
+		var smf_smileys_url = "https://forum.opnsense.org/Smileys";
+		var smf_smiley_sets = "";
+		var smf_smiley_sets_default = "";
+		var smf_avatars_url = "https://forum.opnsense.org/avatars";
+		var smf_scripturl = "https://forum.opnsense.org/index.php";
+		var smf_iso_case_folding = false;
+		var smf_charset = "UTF-8";
+		var smf_session_id = "d4c492582245b5d1d2544a7876b6e90b";
+		var smf_session_var = "a2a09c960";
+		var smf_member_id = 0;
+		var ajax_notification_text = 'Loading...';
+		var help_popup_heading_text = 'A little lost? Let me explain:';
+		var banned_text = 'Sorry Guest, you are banned from using this forum!';
+		var smf_txt_expand = 'Expand';
+		var smf_txt_shrink = 'Shrink';
+		var smf_collapseAlt = 'Hide';
+		var smf_expandAlt = 'Show';
+		var smf_quote_expand = false;
+		var allow_xhjr_credentials = false;
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+	<script src="https://forum.opnsense.org/Themes/default/scripts/jquery.sceditor.bbcode.min.js?smf217_1773599850"></script>
+	<script src="https://forum.opnsense.org/Themes/Steyle-V4/scripts/minified_ab8cc93c7e23279d61c5e225bbbc9598.js?smf217_1773599850"></script>
+	<script src="https://forum.opnsense.org/Themes/Steyle-V4/scripts/minified_ab9c9f26c9f038b7b5f1562b97bbd23e.js?smf217_1773599850" defer></script>
+	<script>
+		var smf_smileys_url = 'https://forum.opnsense.org/Smileys/';
+		var bbc_quote_from = 'Quote from';
+		var bbc_quote = 'Quote';
+		var bbc_search_on = 'on';
+	var smf_you_sure ='Are you sure you want to do this?';
+	</script>
+	<title>Recovery with a backup file</title>		<link rel="shortcut icon" href="/Themes/Steyle-V4/images/favicon/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/Themes/Steyle-V4/images/favicon/favicon.ico" type="image/x-icon">
+		<link rel="apple-touch-icon" sizes="57x57" href="/Themes/Steyle-V4/images/favicon/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/Themes/Steyle-V4/images/favicon/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/Themes/Steyle-V4/images/favicon/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/Themes/Steyle-V4/images/favicon/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/Themes/Steyle-V4/images/favicon/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/Themes/Steyle-V4/images/favicon/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/Themes/Steyle-V4/images/favicon/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/Themes/Steyle-V4/images/favicon/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/Themes/Steyle-V4/images/favicon/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/Themes/Steyle-V4/images/favicon/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/Themes/Steyle-V4/images/favicon/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/Themes/Steyle-V4/images/favicon/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/Themes/Steyle-V4/images/favicon/favicon-16x16.png">
+		<link rel="manifest" href="/Themes/Steyle-V4/images/favicon/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/Themes/Steyle-V4/images/favicon/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:site_name" content="OPNsense Forum">
+	<meta property="og:title" content="Recovery with a backup file">
+	<meta property="og:url" content="https://forum.opnsense.org/index.php?topic=52453.0">
+	<meta property="og:description" content="Recovery with a backup file">
+	<meta name="description" content="Recovery with a backup file">
+	<meta name="theme-color" content="#557EA0">
+	<link rel="canonical" href="https://forum.opnsense.org/index.php?topic=52453.0">
+	<link rel="help" href="https://forum.opnsense.org/index.php?action=help">
+	<link rel="contents" href="https://forum.opnsense.org/index.php">
+	<link rel="search" href="https://forum.opnsense.org/index.php?action=search">
+	<link rel="alternate" type="application/rss+xml" title="OPNsense Forum - RSS" href="https://forum.opnsense.org/index.php?action=.xml;type=rss2;board=1">
+	<link rel="alternate" type="application/atom+xml" title="OPNsense Forum - Atom" href="https://forum.opnsense.org/index.php?action=.xml;type=atom;board=1">
+	<link rel="index" href="https://forum.opnsense.org/index.php?board=1.0">
+		<script async src="https://www.googletagmanager.com/gtag/js?id='G-77ZHCN75PY'"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+
+			gtag('config',  'G-77ZHCN75PY');
+		</script>
+</head>
+<body id="chrome" class="action_messageindex board_1">
+<div id="footerfix">
+	<div id="top_section">
+       <div id="lkHeader_main">
+       <div class="inner_wrap">
+       <div class="floatleft forumtitle">
+	   <a id="top" href="https://forum.opnsense.org/index.php"> <img class="header-logo" src="https://forum.opnsense.org/Themes/Steyle-V4/images/OPNsense-logo.svg" alt="OPNsense Forum"></a>
+		</div>
+		<a class="mobile_user_menu floatright">
+		<i class="fa-solid fa-align-right"></i>
+		</a>
+				<div id="main_menu" class="floatright">
+					<div id="mobile_user_menu" class="popup_container">
+						<div class="popup_window description">
+							<div class="popup_heading">Main Menu
+								<a href="javascript:void(0);" class="main_icons hide_popup"></a>
+							</div>
+							
+					<ul class="dropmenu menu_nav lkNav_primary">
+						<li class="button_home">
+						<a class="active firstlevel" href="https://forum.opnsense.org/index.php">
+								<div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-home fa-lg"></i></div><span class="textmenu">Home</span>
+							</a>
+						</li>
+						<li class="button_search">
+						<a class="firstlevel" href="https://forum.opnsense.org/index.php?action=search">
+								<div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-search fa-lg"></i></div><span class="textmenu">Search</span>
+							</a>
+						</li><li><a class="firstlevel" href="https://shop.opnsense.com/" target="_blank"><div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-shopping-cart"></i></div><span class="textmenu">Shop</span></a></li></ul><!-- .menu_nav -->
+						</div>
+					</div>
+				</div>
+      </div></div>
+    <div id="lkHeader_sub">
+    <div class="inner_wrap">
+			<form class="custom_search floatleft" action="https://forum.opnsense.org/index.php?action=search2" method="post" accept-charset="UTF-8">
+				<input type="search" name="search" value="" placeholder="Search">
+				<button><i class="fa-solid fa-magnifying-glass"></i></button>
+				<select name="search_selection">
+					<option value="all">Entire forum </option>
+					<option value="topic" selected>This topic</option>
+					<option value="board">This board</option>
+				</select>
+				<input type="hidden" name="sd_topic" value="52453">
+				<input type="hidden" name="advanced" value="0">
+			</form>
+			<ul class="floatright" id="top_info">
+				<li class="welcome">
+					Welcome to <strong>OPNsense Forum</strong>.
+				</li>
+				<li class="button_login">
+					<a href="https://forum.opnsense.org/index.php?action=login" class="open" onclick="return reqOverlayDiv(this.href, 'Log in', 'login');">
+						<span class="main_icons login"></span>
+						<span class="textmenu">Log in</span>
+					</a>
+				</li>
+				<li class="button_signup">
+					<a href="https://forum.opnsense.org/index.php?action=signup" class="open">
+						<span class="main_icons regcenter"></span>
+						<span class="textmenu">Sign up</span>
+					</a>
+				</li>
+			</ul>
+		</div><!-- .inner_wrap -->
+     </div>
+	</div><!-- #top_section -->
+	<div id="header">
+		<div id="siteslogan"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/banner/docs-opnsense-header.jpg" alt="OPNSense"/>"</div>
+						<div class="p-title-pageAction">
+								<a href="https://forum.opnsense.org/index.php?action=unread" class="button button--icon button--icon--bolt" title="Show unread posts since last visit."><span class="button-text">Unread Posts</span></a>
+								<a href="https://forum.opnsense.org/index.php?action=unreadreplies" class="button--cta button button--icon button--icon--write" title="Show new replies to your posts."><span class="button-text">Updated Topics</span></a>
+						</div>
+	</div>
+	<div id="wrapper">
+				<div class="navigate_section">
+					<ul>
+						<li>
+							<a href="https://forum.opnsense.org/index.php"><span>OPNsense Forum</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php#c2"><span>English Forums</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?board=1.0"><span>General Discussion</span></a>
+						</li>
+						<li class="last">
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?topic=52453.0"><span>Recovery with a backup file</span></a>
+						</li>
+					</ul>
+				</div><!-- .navigate_section -->
+		<div id="content_section">
+			<div id="main_content_section">
+		<div id="display_head" class="information">
+			<h2 class="display_title">
+				<span id="top_subject">Recovery with a backup file</span>
+			</h2>
+			<p>Started by tdalej, July 18, 2026, 05:51:14 PM</p>
+			<span class="nextlinks floatright"><a href="https://forum.opnsense.org/index.php?topic=52453.0;prev_next=prev#new">Previous topic</a> - <a href="https://forum.opnsense.org/index.php?topic=52453.0;prev_next=next#new">Next topic</a></span>
+		</div><!-- #display_head -->
+		<a id="msg270943"></a>
+		<div class="pagesection top">
+			
+		<div class="buttonlist floatright">
+			
+				<a class="button button_strip_print" href="https://forum.opnsense.org/index.php?action=printpage;topic=52453.0"  rel="nofollow">Print</a>
+		</div>
+			 
+			<div class="pagelinks floatleft">
+				<a href="#bot" class="button">Go Down</a>
+				<span class="pages">Pages</span><span class="current_page">1</span> 
+			</div>
+		</div>
+		<div class="mobile_buttons floatright">
+			<a class="button mobile_act">User actions</a>
+			
+		</div>
+		<div id="forumposts" class="post-container">
+			<form action="https://forum.opnsense.org/index.php?action=quickmod2;topic=52453.0" method="post" accept-charset="UTF-8" name="quickModForm" id="quickModForm" onsubmit="return oQuickModify.bInEditMode ? oQuickModify.modifySave('d4c492582245b5d1d2544a7876b6e90b', 'a2a09c960') : false">
+				<div class="postblock ">
+					
+					<div class="post_wrapper">
+						<div class="poster">
+                           <div class="postbit-banner"></div>
+							<div class="avatar">
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374"><img class="avatar" src="https://forum.opnsense.org/avatars/default.png" alt=""></a>
+							</div>
+							<ul class="user_info">
+							<li class="poster-name">
+								<h4>
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374" title="View the profile of tdalej">tdalej</a>
+								</h4>
+							</li>
+								<li class="postgroup">Jr. Member</li>
+								<li class="icons"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"></li>
+								<li class="postcount">Posts<span class="floatright"> 80</span></li>
+								<li class="profile">
+									<ol class="profile_icons">
+									</ol>
+								</li><!-- .profile -->
+								<li class="poster_ip">Logged</li>
+							</ul>
+						</div><!-- .poster -->
+						<div class="postarea">
+							<div class="keyinfo">
+								<div id="subject_270943" class="subject_title subject_hidden">
+									<a href="https://forum.opnsense.org/index.php?msg=270943" rel="nofollow">Recovery with a backup file</a>
+								</div>
+								<h5>
+									<span class="messageicon" >
+										<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/question.png" alt="">
+									</span>
+									<a href="https://forum.opnsense.org/index.php?msg=270943" rel="nofollow" title="Recovery with a backup file" class="smalltext">July 18, 2026, 05:51:14 PM</a>
+									<span class="page_number floatright">
+										 
+									</span>
+									<span class="smalltext modified floatright" id="modified_270943">
+									</span>
+								</h5>
+								<div id="msg_270943_quick_mod"></div>
+							</div><!-- .keyinfo -->
+							<div class="post">
+								<div class="inner" data-msgid="270943" id="msg_270943">
+									I&#39;m doing some poking, and I have to identical servers for firewalls -- MAC addresses are different of course.<br>Last time I did a recovery from one to the other, restoring the backup caused all sort of fun because the MAC addresses don&#39;t align.<br><br>Is it an accepted practice to edit the backup to alter the MAC addresses first?<br>Is there a more elegant way to handle the MAC address changes that I&#39;m just missing?<br><br>
+								</div>
+							</div><!-- .post -->
+							<div class="under_message">
+							</div><!-- .under_message -->
+						<div class="moderatorbar">
+						</div><!-- .moderatorbar -->
+						</div><!-- .postarea -->
+					</div><!-- .post_wrapper -->
+				</div><!-- $message[css_class] -->
+				<hr class="post_separator">
+				<div class="postblock ">
+					
+					<a id="msg270946"></a>
+					<div class="post_wrapper">
+						<div class="poster">
+                           <div class="postbit-banner"></div>
+							<div class="avatar">
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=51337"><img class="avatar" src="https://forum.opnsense.org/custom_avatar/avatar_51337_1771504938.png" alt=""></a>
+							</div>
+							<ul class="user_info">
+							<li class="poster-name">
+								<h4>
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=51337" title="View the profile of nero355">nero355</a>
+								</h4>
+							</li>
+								<li class="postgroup">Hero Member</li>
+								<li class="icons"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"></li>
+								<li class="postcount">Posts<span class="floatright"> 859</span></li>
+								<li class="blurb">OPNsense @ TopTon</li>
+								<li class="im_icons">
+									<ol>
+										<li class="custom cust_gender"><span class=" main_icons gender_1" title="Male"></span></li>
+									</ol>
+								</li>
+								<li class="profile">
+									<ol class="profile_icons">
+									</ol>
+								</li><!-- .profile -->
+								<li class="custom cust_loca">Location: The Netherlands</li>
+								<li class="poster_ip">Logged</li>
+							</ul>
+						</div><!-- .poster -->
+						<div class="postarea">
+							<div class="keyinfo">
+								<div id="subject_270946" class="subject_title subject_hidden">
+									<a href="https://forum.opnsense.org/index.php?msg=270946" rel="nofollow">Re: Recovery with a backup file</a>
+								</div>
+								<h5>
+									<span class="messageicon"  style="position: absolute; z-index: -1;">
+										<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+									</span>
+									<a href="https://forum.opnsense.org/index.php?msg=270946" rel="nofollow" title="Reply #1 - Re: Recovery with a backup file" class="smalltext">July 18, 2026, 06:09:53 PM</a>
+									<span class="page_number floatright">
+										 #1 
+									</span>
+									<span class="smalltext modified floatright" id="modified_270946">
+									</span>
+								</h5>
+								<div id="msg_270946_quick_mod"></div>
+							</div><!-- .keyinfo -->
+							<div class="post">
+								<div class="inner" data-msgid="270946" id="msg_270946">
+									Have a look at this topic : <a href="https://forum.opnsense.org/index.php?topic=51075.msg261489#msg261489" class="bbc_link" target="_blank" rel="noopener">https://forum.opnsense.org/index.php?topic=51075.msg261489#msg261489</a><br><br>Maybe it applies to your situation :)
+								</div>
+							</div><!-- .post -->
+							<div class="under_message">
+							</div><!-- .under_message -->
+						<div class="moderatorbar">
+							<div class="signature" id="msg_270946_signature">
+								Weird guy who likes everything Linux and *BSD on PC/Laptop/Tablet/Mobile and funny little ARM based boards :)
+							</div>
+						</div><!-- .moderatorbar -->
+						</div><!-- .postarea -->
+					</div><!-- .post_wrapper -->
+				</div><!-- $message[css_class] -->
+				<hr class="post_separator">
+				<div class="postblock ">
+					
+					<a id="msg270948"></a>
+					<div class="post_wrapper">
+						<div class="poster">
+                           <div class="postbit-banner"></div>
+							<div class="avatar">
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374"><img class="avatar" src="https://forum.opnsense.org/avatars/default.png" alt=""></a>
+							</div>
+							<ul class="user_info">
+							<li class="poster-name">
+								<h4>
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374" title="View the profile of tdalej">tdalej</a>
+								</h4>
+							</li>
+								<li class="postgroup">Jr. Member</li>
+								<li class="icons"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"></li>
+								<li class="postcount">Posts<span class="floatright"> 80</span></li>
+								<li class="profile">
+									<ol class="profile_icons">
+									</ol>
+								</li><!-- .profile -->
+								<li class="poster_ip">Logged</li>
+							</ul>
+						</div><!-- .poster -->
+						<div class="postarea">
+							<div class="keyinfo">
+								<div id="subject_270948" class="subject_title subject_hidden">
+									<a href="https://forum.opnsense.org/index.php?msg=270948" rel="nofollow">Re: Recovery with a backup file</a>
+								</div>
+								<h5>
+									<span class="messageicon"  style="position: absolute; z-index: -1;">
+										<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+									</span>
+									<a href="https://forum.opnsense.org/index.php?msg=270948" rel="nofollow" title="Reply #2 - Re: Recovery with a backup file" class="smalltext">July 18, 2026, 06:34:04 PM</a>
+									<span class="page_number floatright">
+										 #2 
+									</span>
+									<span class="smalltext modified floatright" id="modified_270948">
+									</span>
+								</h5>
+								<div id="msg_270948_quick_mod"></div>
+							</div><!-- .keyinfo -->
+							<div class="post">
+								<div class="inner" data-msgid="270948" id="msg_270948">
+									Sort of.&nbsp; <br><br>I&#39;m trying to the recovery with the importer script to see how it gets handled there compared to manual restore.<br><br>I can&#39;t get the importer to mount the second USB device -- both the boot USB device and the second fat formatted USB device show up as da0 and da1, an it fails to mount with an &quot;invalid device&quot; message.&nbsp; <br><br><br><br>
+								</div>
+							</div><!-- .post -->
+							<div class="under_message">
+							</div><!-- .under_message -->
+						<div class="moderatorbar">
+						</div><!-- .moderatorbar -->
+						</div><!-- .postarea -->
+					</div><!-- .post_wrapper -->
+				</div><!-- $message[css_class] -->
+				<hr class="post_separator">
+				<div class="postblock ">
+					
+					<a id="msg270954"></a>
+					<div class="post_wrapper">
+						<div class="poster">
+                           <div class="postbit-banner"></div>
+							<div class="avatar">
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374"><img class="avatar" src="https://forum.opnsense.org/avatars/default.png" alt=""></a>
+							</div>
+							<ul class="user_info">
+							<li class="poster-name">
+								<h4>
+								<a href="https://forum.opnsense.org/index.php?action=profile;u=18374" title="View the profile of tdalej">tdalej</a>
+								</h4>
+							</li>
+								<li class="postgroup">Jr. Member</li>
+								<li class="icons"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/membericons/icon.png" alt="*"></li>
+								<li class="postcount">Posts<span class="floatright"> 80</span></li>
+								<li class="profile">
+									<ol class="profile_icons">
+									</ol>
+								</li><!-- .profile -->
+								<li class="poster_ip">Logged</li>
+							</ul>
+						</div><!-- .poster -->
+						<div class="postarea">
+							<div class="keyinfo">
+								<div id="subject_270954" class="subject_title subject_hidden">
+									<a href="https://forum.opnsense.org/index.php?msg=270954" rel="nofollow">Re: Recovery with a backup file</a>
+								</div>
+								<h5>
+									<span class="messageicon"  style="position: absolute; z-index: -1;">
+										<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+									</span>
+									<a href="https://forum.opnsense.org/index.php?msg=270954" rel="nofollow" title="Reply #3 - Re: Recovery with a backup file" class="smalltext">July 18, 2026, 06:59:31 PM</a>
+									<span class="page_number floatright">
+										 #3 
+									</span>
+									<span class="smalltext modified floatright" id="modified_270954">
+									</span>
+								</h5>
+								<div id="msg_270954_quick_mod"></div>
+							</div><!-- .keyinfo -->
+							<div class="post">
+								<div class="inner" data-msgid="270954" id="msg_270954">
+									Got the mount solved.&nbsp; <br><br>I have never used the importer script before, always just bulled through manually transferring configurations when needed.<br>In this case I have two identical Supermicro X10SLH-N6-ST031F (that used to be used for separate locations) that I am going to use one as primary and one as backup.<br><br>
+								</div>
+							</div><!-- .post -->
+							<div class="under_message">
+							</div><!-- .under_message -->
+						<div class="moderatorbar">
+						</div><!-- .moderatorbar -->
+						</div><!-- .postarea -->
+					</div><!-- .post_wrapper -->
+				</div><!-- $message[css_class] -->
+				<hr class="post_separator">
+			</form>
+		</div><!-- #forumposts -->
+		<div class="pagesection">
+			
+		<div class="buttonlist floatright">
+			
+				<a class="button button_strip_print" href="https://forum.opnsense.org/index.php?action=printpage;topic=52453.0"  rel="nofollow">Print</a>
+		</div>
+			 
+			<div class="pagelinks floatleft">
+				<a href="#main_content_section" class="button" id="bot">Go Up</a>
+				<span class="pages">Pages</span><span class="current_page">1</span> 
+			</div>
+		<div class="mobile_buttons floatright">
+			<a class="button mobile_act">User actions</a>
+			
+		</div>
+		</div>
+				<div class="navigate_section">
+					<ul>
+						<li>
+							<a href="https://forum.opnsense.org/index.php"><span>OPNsense Forum</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php#c2"><span>English Forums</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?board=1.0"><span>General Discussion</span></a>
+						</li>
+						<li class="last">
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?topic=52453.0"><span>Recovery with a backup file</span></a>
+						</li>
+					</ul>
+				</div><!-- .navigate_section -->
+		<div id="moderationbuttons">
+			
+		</div>
+		<div id="display_jump_to"></div>
+		<div id="mobile_action" class="popup_container">
+			<div class="popup_window description">
+				<div class="popup_heading">
+					User actions
+					<a href="javascript:void(0);" class="main_icons hide_popup"></a>
+				</div>
+				
+		<div class="buttonlist">
+			
+				<a class="button button_strip_print" href="https://forum.opnsense.org/index.php?action=printpage;topic=52453.0"  rel="nofollow">Print</a>
+		</div>
+			</div>
+		</div>
+		<script>
+			if ('XMLHttpRequest' in window)
+			{
+				var oQuickModify = new QuickModify({
+					sScriptUrl: smf_scripturl,
+					sClassName: 'quick_edit',
+					bShowModify: true,
+					iTopicId: 52453,
+					sTemplateBodyEdit: '\n\t\t\t\t\t\t<div id="quick_edit_body_container">\n\t\t\t\t\t\t\t<div id="error_box" class="error"><' + '/div>\n\t\t\t\t\t\t\t<textarea class="editor" name="message" rows="12" tabindex="1">%body%<' + '/textarea><br>\n\t\t\t\t\t\t\t<input type="hidden" name="a2a09c960" value="d4c492582245b5d1d2544a7876b6e90b">\n\t\t\t\t\t\t\t<input type="hidden" name="topic" value="52453">\n\t\t\t\t\t\t\t<input type="hidden" name="msg" value="%msg_id%">\n\t\t\t\t\t\t\t<div class="righttext quickModifyMargin">\n\t\t\t\t\t\t\t\t<input type="submit" name="post" value="Save" tabindex="2" onclick="return oQuickModify.modifySave(\'d4c492582245b5d1d2544a7876b6e90b\', \'a2a09c960\');" accesskey="s" class="button"> <input type="submit" name="cancel" value="Cancel" tabindex="3" onclick="return oQuickModify.modifyCancel();" class="button">\n\t\t\t\t\t\t\t<' + '/div>\n\t\t\t\t\t\t<' + '/div>',
+					sTemplateSubjectEdit: '<input type="text" name="subject" value="%subject%" size="80" maxlength="80" tabindex="4">',
+					sTemplateBodyNormal: '%body%',
+					sTemplateSubjectNormal: '<a hr'+'ef="' + smf_scripturl + '?topic=52453.msg%msg_id%#msg%msg_id%" rel="nofollow">%subject%<' + '/a>',
+					sTemplateTopSubject: '%subject%',
+					sTemplateReasonEdit: 'Reason for editing: <input type="text" name="modify_reason" value="%modify_reason%" size="80" maxlength="80" tabindex="5" class="quickModifyMargin">',
+					sTemplateReasonNormal: '%modify_text',
+					sErrorBorderStyle: '1px solid red'
+				});
+
+				aJumpTo[aJumpTo.length] = new JumpTo({
+					sContainerId: "display_jump_to",
+					sJumpToTemplate: "<label class=\"smalltext jump_to\" for=\"%select_id%\">Jump to<" + "/label> %dropdown_list%",
+					iCurBoardId: 1,
+					iCurBoardChildLevel: 0,
+					sCurBoardName: "General Discussion",
+					sBoardChildLevelIndicator: "==",
+					sBoardPrefix: "=> ",
+					sCatSeparator: "-----------------------------",
+					sCatPrefix: "",
+					sGoButtonLabel: "Go"
+				});
+
+				aIconLists[aIconLists.length] = new IconList({
+					sBackReference: "aIconLists[" + aIconLists.length + "]",
+					sIconIdPrefix: "msg_icon_",
+					sScriptUrl: smf_scripturl,
+					bShowModify: true,
+					iBoardId: 1,
+					iTopicId: 52453,
+					sSessionId: smf_session_id,
+					sSessionVar: smf_session_var,
+					sLabelIconList: "Message icon",
+					sBoxBackground: "transparent",
+					sBoxBackgroundHover: "#ffffff",
+					iBoxBorderWidthHover: 1,
+					sBoxBorderColorHover: "#adadad" ,
+					sContainerBackground: "#ffffff",
+					sContainerBorder: "1px solid #adadad",
+					sItemBorder: "1px solid #ffffff",
+					sItemBorderHover: "1px dotted gray",
+					sItemBackground: "transparent",
+					sItemBackgroundHover: "#e0e0f0"
+				});
+			}
+		</script>
+			</div><!-- #main_content_section -->
+		</div><!-- #content_section -->
+	</div><!-- #wrapper -->
+</div><!-- #footerfix -->
+	<div id="footer">
+		<div class="wt_footer">
+		<div class="inner_wrap">
+		<div class="footer__align">
+		</div>
+	   </div>
+	</div>
+	<div class="bottom">
+	  <div class="inner_wrap">
+		<ul>
+			<li class="footer-terms"><a href="https://forum.opnsense.org/index.php?action=help">Help</a> | <a href="https://forum.opnsense.org/index.php?action=agreement">Terms and Rules</a> | <a href="#top_section">Go Up &#9650;</a></li>
+						<li class="copyright"><a href="https://forum.opnsense.org/index.php?action=credits" title="License" target="_blank" rel="noopener">SMF 2.1.7 &copy; 2026</a>, <a href="https://www.simplemachines.org" title="Simple Machines" target="_blank" rel="noopener">Simple Machines</a>, <a class="deciso-brand" href="https://deciso.com" target="_blank" rel="noopener">
+		<img class="regular-logo" src="/Themes/Steyle-V4/images/deciso-brand.svg">
+		<img class="hover-logo" src="/Themes/Steyle-V4/images/deciso-brand-hover.svg">
+	</a></li>
+		</ul>
+		</div>
+	  </div>
+	</div><!-- #footer -->
+<script>
+window.addEventListener("DOMContentLoaded", function() {
+	function triggerCron()
+	{
+		$.get('https://forum.opnsense.org' + "/cron.php?ts=1784422365");
+	}
+	window.setTimeout(triggerCron, 1);
+		$.sceditor.locale["en"] = {
+			"Width (optional):": "Width (optional):",
+			"Height (optional):": "Height (optional):",
+			"Insert": "Insert",
+			"Description (optional):": "Description (optional)",
+			"Rows:": "Rows:",
+			"Cols:": "Cols:",
+			"URL:": "URL:",
+			"E-mail:": "E-mail:",
+			"Video URL:": "Video URL:",
+			"More": "More",
+			"Close": "Close",
+			dateFormat: "month/day/year"
+		};
+});
+</script>
+</body>
+</html>

@@ -55,6 +55,7 @@ export async function htmlToMarkdown(html: string, opts: SerializeOptions = {}):
       useAsync: false,
       removeImages: opts.removeImages ?? false,
       language: opts.language,
+      ...(opts.contentSelector ? { contentSelector: opts.contentSelector, removeContentPatterns: false } : {}),
     });
     markdown = (r.content ?? "").trim();
     meta = {

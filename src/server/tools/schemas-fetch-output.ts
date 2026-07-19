@@ -12,6 +12,10 @@ export const renderedFetchSchema = z.object({
   format: z.enum(["markdown", "text"]),
   escalated: z.boolean(),
   text: z.string(),
+  /** Defuddle's word count for the markdown content. Markdown branch only. */
+  wordCount: z.number().optional(),
+  /** Which extraction path produced `text`. Markdown branch only. */
+  extraction: z.enum(["primary", "recovered"]).optional(),
 });
 
 /** A batch/crawl entry that failed instead of resolving. */
