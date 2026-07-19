@@ -7,8 +7,11 @@
 import type { Locator, Page } from "playwright";
 import type { ActionResult } from "../interfaces/types.js";
 import { pickAutocomplete } from "./autocomplete.js";
+import { isComboboxTrigger, openComboboxAndPick } from "./combobox.js";
+import { fillRange, sliderKind } from "./fill-range.js";
 import { dragLocator, hoverLocator } from "./hover-drag.js";
-import { refLocator } from "./ref-locator.js";
+import { parseRef, refLocator } from "./ref-locator.js";
+import { robustClick } from "./robust-click.js";
 import { type FilesInput, setFiles } from "./upload.js";
 
 /** Action kinds that can target a snapshot ref. */
@@ -50,15 +53,30 @@ export async function actByRef(
     if (!locator || (await locator.count()) === 0) {
       return { type: kind, ok: false, ref, error: "ref_not_found" };
     }
-    if (kind === "pick") return { ...(await pickAutocomplete(page, locator, value, option)), ref };
+    if (kind === "pick") {
+      if (await isComboboxTrigger(locator)) return { ...(await openComboboxAndPick(page, locator, value, option || value)), ref };
+      return { ...(await pickAutocomplete(page, locator, value, option)), ref };
+    }
     if (kind === "upload") return { ...(await setFiles(locator, files)), ref };
     if (kind === "hover") return { ...(await hoverLocator(locator)), ref };
     if (kind === "drag") {
       return { ...(await dragLocator(locator, destLocator(page, to))), ref, to };
     }
     if (kind === "click") {
-      await locator.click({ timeout: 5_000 });
-    } else if (kind === "fill") {
+      // Frame-scoped refs ("<frame>:<local>") resolve outside the main frame
+      // (parseRef's `frame` ordinal into `page.frames()`, main frame = 0) —
+      // the hit-test's coordinate space only matches the main frame.
+      const isMainFrame = parseRef(ref).frame === 0;
+      const clicked = await robustClick(page, locator, 5_000, isMainFrame);
+      if (!clicked.ok) return { type: kind, ok: false, ref, error: clicked.error ?? "click_failed" };
+      return { type: kind, ok: true, ref, strategy: "ref", rung: clicked.rung };
+    }
+    if (kind === "fill") {
+      const slider = await sliderKind(locator);
+      if (slider) {
+        const snapped = await fillRange(page, locator, value, slider);
+        return { type: kind, ok: snapped.reached, ref, strategy: "range", value: snapped.value, reached: snapped.reached };
+      }
       await locator.fill(value, { timeout: 5_000 });
     } else {
       await locator.selectOption(value, { timeout: 5_000 });

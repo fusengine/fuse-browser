@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://forum.opnsense.org/Themes/Steyle-V4/css/minified_968dcd09b16625b1d14b1b2df5a9b74e.css?smf217_1773599850">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css">
+	<link rel="stylesheet" href="https://use.typekit.net/asa5fpa.css">
+	<style>
+	img.avatar { max-width: 65px !important; max-height: 65px !important; }
+	
+	</style>
+	<script>
+		var smf_theme_url = "https://forum.opnsense.org/Themes/Steyle-V4";
+		var smf_default_theme_url = "https://forum.opnsense.org/Themes/default";
+		var smf_images_url = "https://forum.opnsense.org/Themes/Steyle-V4/images";
+		var smf_smileys_url = "https://forum.opnsense.org/Smileys";
+		var smf_smiley_sets = "";
+		var smf_smiley_sets_default = "";
+		var smf_avatars_url = "https://forum.opnsense.org/avatars";
+		var smf_scripturl = "https://forum.opnsense.org/index.php";
+		var smf_iso_case_folding = false;
+		var smf_charset = "UTF-8";
+		var smf_session_id = "c6ff95e4c5360b9f25d48238474c54e8";
+		var smf_session_var = "efb5c8fd4";
+		var smf_member_id = 0;
+		var ajax_notification_text = 'Loading...';
+		var help_popup_heading_text = 'A little lost? Let me explain:';
+		var banned_text = 'Sorry Guest, you are banned from using this forum!';
+		var smf_txt_expand = 'Expand';
+		var smf_txt_shrink = 'Shrink';
+		var smf_collapseAlt = 'Hide';
+		var smf_expandAlt = 'Show';
+		var smf_quote_expand = false;
+		var allow_xhjr_credentials = false;
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+	<script src="https://forum.opnsense.org/Themes/Steyle-V4/scripts/minified_ef875bbe19ab3b00a58e34ea3d6857f4.js?smf217_1773599850"></script>
+	<script>
+	var smf_you_sure ='Are you sure you want to do this?';
+	</script>
+	<title>General Discussion</title>		<link rel="shortcut icon" href="/Themes/Steyle-V4/images/favicon/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/Themes/Steyle-V4/images/favicon/favicon.ico" type="image/x-icon">
+		<link rel="apple-touch-icon" sizes="57x57" href="/Themes/Steyle-V4/images/favicon/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/Themes/Steyle-V4/images/favicon/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/Themes/Steyle-V4/images/favicon/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/Themes/Steyle-V4/images/favicon/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/Themes/Steyle-V4/images/favicon/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/Themes/Steyle-V4/images/favicon/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/Themes/Steyle-V4/images/favicon/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/Themes/Steyle-V4/images/favicon/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/Themes/Steyle-V4/images/favicon/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/Themes/Steyle-V4/images/favicon/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/Themes/Steyle-V4/images/favicon/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/Themes/Steyle-V4/images/favicon/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/Themes/Steyle-V4/images/favicon/favicon-16x16.png">
+		<link rel="manifest" href="/Themes/Steyle-V4/images/favicon/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/Themes/Steyle-V4/images/favicon/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:site_name" content="OPNsense Forum">
+	<meta property="og:title" content="General Discussion">
+	<meta property="og:url" content="https://forum.opnsense.org/index.php?board=1.0">
+	<meta property="og:description" content="Discuss your own setups, firewalls, security and technology in general.">
+	<meta name="description" content="Discuss your own setups, firewalls, security and technology in general.">
+	<meta name="theme-color" content="#557EA0">
+	<link rel="canonical" href="https://forum.opnsense.org/index.php?board=1.0">
+	<link rel="help" href="https://forum.opnsense.org/index.php?action=help">
+	<link rel="contents" href="https://forum.opnsense.org/index.php">
+	<link rel="search" href="https://forum.opnsense.org/index.php?action=search">
+	<link rel="alternate" type="application/rss+xml" title="OPNsense Forum - RSS" href="https://forum.opnsense.org/index.php?action=.xml;type=rss2;board=1">
+	<link rel="alternate" type="application/atom+xml" title="OPNsense Forum - Atom" href="https://forum.opnsense.org/index.php?action=.xml;type=atom;board=1">
+	<link rel="next" href="https://forum.opnsense.org/index.php?board=1.20">
+	<link rel="index" href="https://forum.opnsense.org/index.php?board=1.0">
+		<script async src="https://www.googletagmanager.com/gtag/js?id='G-77ZHCN75PY'"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+
+			gtag('config',  'G-77ZHCN75PY');
+		</script>
+</head>
+<body id="chrome" class="action_messageindex board_1">
+<div id="footerfix">
+	<div id="top_section">
+       <div id="lkHeader_main">
+       <div class="inner_wrap">
+       <div class="floatleft forumtitle">
+	   <a id="top" href="https://forum.opnsense.org/index.php"> <img class="header-logo" src="https://forum.opnsense.org/Themes/Steyle-V4/images/OPNsense-logo.svg" alt="OPNsense Forum"></a>
+		</div>
+		<a class="mobile_user_menu floatright">
+		<i class="fa-solid fa-align-right"></i>
+		</a>
+				<div id="main_menu" class="floatright">
+					<div id="mobile_user_menu" class="popup_container">
+						<div class="popup_window description">
+							<div class="popup_heading">Main Menu
+								<a href="javascript:void(0);" class="main_icons hide_popup"></a>
+							</div>
+							
+					<ul class="dropmenu menu_nav lkNav_primary">
+						<li class="button_home">
+						<a class="active firstlevel" href="https://forum.opnsense.org/index.php">
+								<div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-home fa-lg"></i></div><span class="textmenu">Home</span>
+							</a>
+						</li>
+						<li class="button_search">
+						<a class="firstlevel" href="https://forum.opnsense.org/index.php?action=search">
+								<div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-search fa-lg"></i></div><span class="textmenu">Search</span>
+							</a>
+						</li><li><a class="firstlevel" href="https://shop.opnsense.com/" target="_blank"><div class="ipsMenuIcon ipsMenuIconType_fa"><i class="fa fa-shopping-cart"></i></div><span class="textmenu">Shop</span></a></li></ul><!-- .menu_nav -->
+						</div>
+					</div>
+				</div>
+      </div></div>
+    <div id="lkHeader_sub">
+    <div class="inner_wrap">
+			<form class="custom_search floatleft" action="https://forum.opnsense.org/index.php?action=search2" method="post" accept-charset="UTF-8">
+				<input type="search" name="search" value="" placeholder="Search">
+				<button><i class="fa-solid fa-magnifying-glass"></i></button>
+				<select name="search_selection">
+					<option value="all">Entire forum </option>
+					<option value="board" selected>This board</option>
+				</select>
+				<input type="hidden" name="sd_brd" value="1">
+				<input type="hidden" name="advanced" value="0">
+			</form>
+			<ul class="floatright" id="top_info">
+				<li class="welcome">
+					Welcome to <strong>OPNsense Forum</strong>.
+				</li>
+				<li class="button_login">
+					<a href="https://forum.opnsense.org/index.php?action=login" class="open" onclick="return reqOverlayDiv(this.href, 'Log in', 'login');">
+						<span class="main_icons login"></span>
+						<span class="textmenu">Log in</span>
+					</a>
+				</li>
+				<li class="button_signup">
+					<a href="https://forum.opnsense.org/index.php?action=signup" class="open">
+						<span class="main_icons regcenter"></span>
+						<span class="textmenu">Sign up</span>
+					</a>
+				</li>
+			</ul>
+		</div><!-- .inner_wrap -->
+     </div>
+	</div><!-- #top_section -->
+	<div id="header">
+		<div id="siteslogan"><img src="https://forum.opnsense.org/Themes/Steyle-V4/images/banner/docs-opnsense-header.jpg" alt="OPNSense"/>"</div>
+						<div class="p-title-pageAction">
+								<a href="https://forum.opnsense.org/index.php?action=unread" class="button button--icon button--icon--bolt" title="Show unread posts since last visit."><span class="button-text">Unread Posts</span></a>
+								<a href="https://forum.opnsense.org/index.php?action=unreadreplies" class="button--cta button button--icon button--icon--write" title="Show new replies to your posts."><span class="button-text">Updated Topics</span></a>
+						</div>
+	</div>
+	<div id="wrapper">
+				<div class="navigate_section">
+					<ul>
+						<li>
+							<a href="https://forum.opnsense.org/index.php"><span>OPNsense Forum</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php#c2"><span>English Forums</span></a>
+						</li>
+						<li class="last">
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?board=1.0"><span>General Discussion</span></a>
+						</li>
+					</ul>
+				</div><!-- .navigate_section -->
+		<div id="content_section">
+			<div id="main_content_section"><div id="display_head" class="information">
+			<h2 class="display_title">General Discussion</h2>
+			<p>Discuss your own setups, firewalls, security and technology in general.</p>
+		</div>
+	<div class="pagesection">
+		 
+		<div class="pagelinks floatleft">
+			<a href="#bot" class="button">Go Down</a>
+			<span class="pages">Pages</span><span class="current_page">1</span> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.20">2</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.40">3</a> <span class="expand_pages" onclick="expandPages(this, '&lt;a class=&quot;nav_page&quot; href=&quot;' + smf_scripturl + '?board=1.%1$d&quot;&gt;%2$s&lt;/a&gt; ', 60, 9400, 20);"> ... </span><a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.9400">471</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.20"><span class="main_icons next_page"></span></a> 
+		</div>
+		
+	</div>
+		<div id="messageindex">
+			<div class="title_bar" id="topic_header">
+				<div class="board_icon"></div>
+				<div class="info"><a href="https://forum.opnsense.org/index.php?board=1.0;sort=subject">Subject</a> / <a href="https://forum.opnsense.org/index.php?board=1.0;sort=starter">Started by</a></div>
+				<div class="board_stats centertext"><a href="https://forum.opnsense.org/index.php?board=1.0;sort=replies">Replies</a> / <a href="https://forum.opnsense.org/index.php?board=1.0;sort=views">Views</a></div>
+				<div class="lastpost"><a href="https://forum.opnsense.org/index.php?board=1.0;sort=last_post">Last post<span class="main_icons sort_down"></span></a></div>
+			</div><!-- #topic_header -->
+			<div id="topic_container">
+				<div class="windowbg sticky">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/thumbup.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+								<span class="main_icons sticky"></span>
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview bold_text" title="">
+									<span id="msg_6460"><a href="https://forum.opnsense.org/index.php?topic=2049.0">Please Make a Donation to OPNsense</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=79" title="View the profile of packet loss" class="preview">packet loss</a>
+							</p>
+							<span id="pages6460" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=2049.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=2049.15">2</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=2049.30">3</a> <span class="expand_pages" onclick="expandPages(this, '&lt;a class=&quot;nav_page&quot; href=&quot;' + smf_scripturl + '?topic=2049.%1$d&quot;&gt;%2$s&lt;/a&gt; ', 45, 225, 15);"> ... </span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=2049.225">16</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 228<br>Views: 512,940</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=2049.225#msg267835">May 29, 2026, 02:22:59 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=26898">Monviech (Cedrik)</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_271002"><a href="https://forum.opnsense.org/index.php?topic=52458.0">Unbound DNS Leaking Public IP Instead of Routing Requests Through Wireguard VPN</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=52004" title="View the profile of opnsense1" class="preview">opnsense1</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 0<br>Views: 1</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52458.0#msg271002"><strong>Today</strong> at 02:52:33 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=52004">opnsense1</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_271001"><a href="https://forum.opnsense.org/index.php?topic=52457.0">AT&amp;T Fiber full bypass on OPNsense 26.x: IPv6 persistence gotchas</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=71050" title="View the profile of grevelle" class="preview">grevelle</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 0<br>Views: 1</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52457.0#msg271001"><strong>Today</strong> at 02:52:02 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=71050">grevelle</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/question.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270943"><a href="https://forum.opnsense.org/index.php?topic=52453.0">Recovery with a backup file</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=18374" title="View the profile of tdalej" class="preview">tdalej</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 3<br>Views: 77</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52453.0#msg270954">July 18, 2026, 06:59:31 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=18374">tdalej</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_269994"><a href="https://forum.opnsense.org/index.php?topic=52342.0">How to set up Single NIC OPNsense (26.1) with 2x TP-Link Smart Switches &amp; Fritz!</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=70539" title="View the profile of Vectralis" class="preview">Vectralis</a>
+							</p>
+							<span id="pages269994" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52342.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52342.15">2</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 16<br>Views: 635</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52342.15#msg270942">July 18, 2026, 05:36:10 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=70539">Vectralis</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270895"><a href="https://forum.opnsense.org/index.php?topic=52450.0">Captive Portal Not Working</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=69065" title="View the profile of somanet" class="preview">somanet</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 7<br>Views: 128</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52450.0#msg270932">July 18, 2026, 02:53:50 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=43646">viragomann</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_269835"><a href="https://forum.opnsense.org/index.php?topic=52320.0">Unbound DNS keeps crashing every 2-3 mins.</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=57167" title="View the profile of apoorv569" class="preview">apoorv569</a>
+							</p>
+							<span id="pages269835" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52320.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52320.15">2</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52320.30">3</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 32<br>Views: 1,085</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52320.30#msg270909">July 18, 2026, 09:26:43 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=64727">lmoore</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/question.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_269423"><a href="https://forum.opnsense.org/index.php?topic=52253.0">Periodic NIC issues (?) with Protectli Vault, Intel i226-V</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=68937" title="View the profile of fornax" class="preview">fornax</a>
+							</p>
+							<span id="pages269423" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52253.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52253.15">2</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52253.30">3</a> <span class="expand_pages" onclick="expandPages(this, '&lt;a class=&quot;nav_page&quot; href=&quot;' + smf_scripturl + '?topic=52253.%1$d&quot;&gt;%2$s&lt;/a&gt; ', 45, 60, 15);"> ... </span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=52253.60">5</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 70<br>Views: 2,768</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52253.60#msg270903">July 18, 2026, 09:08:23 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=10">franco</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270478"><a href="https://forum.opnsense.org/index.php?topic=52402.0">Can one tell if the traffic shown below is from the ISP side or not?</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=27888" title="View the profile of pasha-19" class="preview">pasha-19</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 5<br>Views: 193</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52402.0#msg270849">July 17, 2026, 07:46:31 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=58574">BrandyWine</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270276"><a href="https://forum.opnsense.org/index.php?topic=52377.0">Feature Request: Add option to clean out configuration for plugins not installed</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=27773" title="View the profile of mrzaz" class="preview">mrzaz</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 7<br>Views: 261</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52377.0#msg270654">July 16, 2026, 07:58:44 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=10">franco</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_94020"><a href="https://forum.opnsense.org/index.php?topic=20280.0">Postfix/rspamd DKIM signing</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=18041" title="View the profile of bubbel" class="preview">bubbel</a>
+							</p>
+							<span id="pages94020" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=20280.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=20280.15">2</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 19<br>Views: 18,877</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=20280.15#msg270642">July 16, 2026, 06:43:02 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=20254">putt1ck</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_267112"><a href="https://forum.opnsense.org/index.php?topic=51916.0">NUT is Broken After Udating to 26.1.8_5</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=62243" title="View the profile of kiekar" class="preview">kiekar</a>
+							</p>
+							<span id="pages267112" class="topic_pages"><span class="pages">Pages</span><a class="nav_page" href="https://forum.opnsense.org/index.php?topic=51916.0">1</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?topic=51916.15">2</a> </span>
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 19<br>Views: 2,231</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=51916.15#msg270637">July 16, 2026, 06:23:09 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=25076">Patrick M. Hausen</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_269991"><a href="https://forum.opnsense.org/index.php?topic=52340.0">System memory cache is consistently at zero</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=60425" title="View the profile of camellia" class="preview">camellia</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 4<br>Views: 307</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52340.0#msg270614">July 16, 2026, 04:35:53 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=55836">sopex</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/question.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270449"><a href="https://forum.opnsense.org/index.php?topic=52397.0">Problem with local LAN address getting blocked through &quot;Default deny/state viol.</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=27773" title="View the profile of mrzaz" class="preview">mrzaz</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 7<br>Views: 230</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52397.0#msg270544">July 16, 2026, 11:51:08 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=64727">lmoore</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270459"><a href="https://forum.opnsense.org/index.php?topic=52398.0">Discussion: Sanity checking URL aliases</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=51806" title="View the profile of pfry" class="preview">pfry</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 0<br>Views: 80</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52398.0#msg270459">July 15, 2026, 11:06:51 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=51806">pfry</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270212"><a href="https://forum.opnsense.org/index.php?topic=52368.0">Lost GUI and &quot;Media disconnected&quot; on OPNsense after backup restore</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=70848" title="View the profile of AlexOd" class="preview">AlexOd</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 4<br>Views: 176</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52368.0#msg270230">July 14, 2026, 08:08:10 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=31894">patient0</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270178"><a href="https://forum.opnsense.org/index.php?topic=52360.0">Can interfaces switch on reboot or possibly opnsense update?</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=28672" title="View the profile of bimbar" class="preview">bimbar</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 3<br>Views: 210</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52360.0#msg270201">July 14, 2026, 08:54:24 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=28672">bimbar</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/question.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270096"><a href="https://forum.opnsense.org/index.php?topic=52352.0">Help with SSH and terminal modes for cli and vi</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=21254" title="View the profile of ciaduck" class="preview">ciaduck</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 8<br>Views: 330</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52352.0#msg270163">July 13, 2026, 11:02:58 AM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=64727">lmoore</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_270131"><a href="https://forum.opnsense.org/index.php?topic=52357.0">Unbound forwarding local FQDN</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=69510" title="View the profile of tbk49" class="preview">tbk49</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 3<br>Views: 192</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=52357.0#msg270137">July 12, 2026, 07:25:22 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=51337">nero355</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+				<div class="windowbg">
+					<div class="board_icon">
+						<img src="https://forum.opnsense.org/Themes/Steyle-V4/images/post/xx.png" alt="">
+						
+					</div>
+					<div class="info info_block">
+						<div >
+							<div class="icons floatright">
+							</div>
+							<div class="message_index_title">
+								
+								<span class="preview" title="">
+									<span id="msg_262207"><a href="https://forum.opnsense.org/index.php?topic=51210.0">[Solved] Opnsense DOSing upstream DNS with bursts of requests</a></span>
+								</span>
+							</div>
+							<p class="floatleft">
+								Started by <a href="https://forum.opnsense.org/index.php?action=profile;u=65754" title="View the profile of gardener" class="preview">gardener</a>
+							</p>
+							
+						</div><!-- #topic_[first_post][id] -->
+					</div><!-- .info -->
+					<div class="board_stats centertext">
+						<p>Replies: 12<br>Views: 2,689</p>
+					</div>
+					<div class="lastpost">
+						<p><a href="https://forum.opnsense.org/index.php?topic=51210.0#msg270105">July 11, 2026, 11:35:21 PM</a><br>by <a href="https://forum.opnsense.org/index.php?action=profile;u=51337">nero355</a></p>
+					</div>
+				</div><!-- $topic[css_class] -->
+			</div><!-- #topic_container -->
+		</div><!-- #messageindex -->
+	<div class="pagesection">
+		
+		 
+		<div class="pagelinks floatleft">
+			<a href="#main_content_section" class="button" id="bot">Go Up</a>
+			<span class="pages">Pages</span><span class="current_page">1</span> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.20">2</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.40">3</a> <span class="expand_pages" onclick="expandPages(this, '&lt;a class=&quot;nav_page&quot; href=&quot;' + smf_scripturl + '?board=1.%1$d&quot;&gt;%2$s&lt;/a&gt; ', 60, 9400, 20);"> ... </span><a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.9400">471</a> <a class="nav_page" href="https://forum.opnsense.org/index.php?board=1.20"><span class="main_icons next_page"></span></a> 
+		</div>
+	</div>
+				<div class="navigate_section">
+					<ul>
+						<li>
+							<a href="https://forum.opnsense.org/index.php"><span>OPNsense Forum</span></a>
+						</li>
+						<li>
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php#c2"><span>English Forums</span></a>
+						</li>
+						<li class="last">
+							<span class="dividers"> &#9658; </span>
+							<a href="https://forum.opnsense.org/index.php?board=1.0"><span>General Discussion</span></a>
+						</li>
+					</ul>
+				</div><!-- .navigate_section -->
+	<script>
+		var oQuickModifyTopic = new QuickModifyTopic({
+			aHidePrefixes: Array("lockicon", "stickyicon", "pages", "newicon"),
+			bMouseOnDiv: false,
+		});
+	</script>
+	<div class="tborder" id="topic_icons">
+		<div class="information">
+			<p id="message_index_jump_to"></p>
+			<p class="floatleft">
+				<span class="main_icons poll"></span> Poll<br>
+				<span class="main_icons move"></span> Moved Topic<br>
+			</p>
+			<p>
+				<span class="main_icons lock"></span> Locked Topic<br>
+				<span class="main_icons sticky"></span> Sticky Topic<br>
+				<span class="main_icons watch"></span> Topic you are watching<br>
+			</p>
+			<script>
+				if (typeof(window.XMLHttpRequest) != "undefined")
+					aJumpTo[aJumpTo.length] = new JumpTo({
+						sContainerId: "message_index_jump_to",
+						sJumpToTemplate: "<label class=\"smalltext jump_to\" for=\"%select_id%\">Jump to<" + "/label> %dropdown_list%",
+						iCurBoardId: 1,
+						iCurBoardChildLevel: 0,
+						sCurBoardName: "General Discussion",
+						sBoardChildLevelIndicator: "==",
+						sBoardPrefix: "=> ",
+						sCatSeparator: "-----------------------------",
+						sCatPrefix: "",
+						sGoButtonLabel: "Go"
+					});
+			</script>
+		</div><!-- .information -->
+	</div><!-- #topic_icons -->
+	<div id="mobile_action" class="popup_container">
+		<div class="popup_window description">
+			<div class="popup_heading">User actions
+				<a href="javascript:void(0);" class="main_icons hide_popup"></a>
+			</div>
+			
+		</div>
+	</div>
+			</div><!-- #main_content_section -->
+		</div><!-- #content_section -->
+	</div><!-- #wrapper -->
+</div><!-- #footerfix -->
+	<div id="footer">
+		<div class="wt_footer">
+		<div class="inner_wrap">
+		<div class="footer__align">
+		</div>
+	   </div>
+	</div>
+	<div class="bottom">
+	  <div class="inner_wrap">
+		<ul>
+			<li class="footer-terms"><a href="https://forum.opnsense.org/index.php?action=help">Help</a> | <a href="https://forum.opnsense.org/index.php?action=agreement">Terms and Rules</a> | <a href="#top_section">Go Up &#9650;</a></li>
+						<li class="copyright"><a href="https://forum.opnsense.org/index.php?action=credits" title="License" target="_blank" rel="noopener">SMF 2.1.7 &copy; 2026</a>, <a href="https://www.simplemachines.org" title="Simple Machines" target="_blank" rel="noopener">Simple Machines</a>, <a class="deciso-brand" href="https://deciso.com" target="_blank" rel="noopener">
+		<img class="regular-logo" src="/Themes/Steyle-V4/images/deciso-brand.svg">
+		<img class="hover-logo" src="/Themes/Steyle-V4/images/deciso-brand-hover.svg">
+	</a></li>
+		</ul>
+		</div>
+	  </div>
+	</div><!-- #footer -->
+<script>
+window.addEventListener("DOMContentLoaded", function() {
+	function triggerCron()
+	{
+		$.get('https://forum.opnsense.org' + "/cron.php?ts=1784423010");
+	}
+	window.setTimeout(triggerCron, 1);
+});
+</script>
+</body>
+</html>

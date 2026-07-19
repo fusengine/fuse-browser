@@ -1,6 +1,6 @@
 # MCP tools
 
-Complete reference for the 50 `browser_*` tools exposed by the fuse-browser MCP server.
+Complete reference for the 51 `browser_*` tools exposed by the fuse-browser MCP server.
 
 Tools fall into two families:
 
@@ -18,11 +18,11 @@ Every tool declares an `outputSchema` (zod) and returns a **typed `structuredCon
 
 ## Capability groups (`FUSE_CAPS`)
 
-By default all 50 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
+By default all 51 tools are registered. Set the `FUSE_CAPS` env var (comma-separated group names) to expose fewer tools — a lighter context for the LLM client:
 
 | Group | Tools |
 | --- | --- |
-| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`, `browser_vault`. |
+| `core` | Session lifecycle (`browser_open`/`browser_status`/`browser_close`/`browser_connect`), navigation (`browser_navigate`/`browser_back`/`browser_forward`), actions (`browser_click`/`browser_fill`/`browser_login`/`browser_scroll`/`browser_press`/`browser_type`/`browser_select`), `browser_tabs`, `browser_dialog`/`browser_downloads`, `browser_snapshot`/`browser_act`, `browser_wait`/`browser_wait_for`, `browser_screenshot`, `browser_autoscroll`, `browser_vault`. |
 | `batch` | `browser_probe`, `browser_probe_html`, `browser_fetch`, `browser_fetch_batch`, `browser_crawl`, `browser_collect_batch`, `browser_shots_batch`, `browser_site_shots`, `browser_serp_batch`. |
 | `extract` | `browser_collect`, `browser_run`, `browser_extract`, `browser_extract_schema`, `browser_products`. |
 | `debug` | `browser_inspect`, `browser_console`, `browser_network`, `browser_visual_diff`, `browser_metrics`, `browser_pdf`, `browser_cookies`. |
@@ -94,10 +94,15 @@ Accepts the full [agentOptionShape](#browser_open) plus the same probe flags as 
 
 HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; for JS/SPA pages set `browserFallback: true` (or use `browser_probe`). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher. The body download is capped at 10 MB.
 
+With `browserFallback: true`, escalation to a real browser render fires on **either** of two independent signals: (1) the raw HTML itself looks like an unrendered SPA shell (thin visible text + SPA/script markers), or (2) the raw HTML looks JS-rendered (SPA hydration mount point or heavy `<script>` count) **and** the fast-path extraction still came back empty/near-empty (`wordCount < 15`, not already recovered by the hollow-extraction path) — this covers chrome-heavy pages (nav/footer markup clearing 600+ visible chars) whose real content only exists after client-side hydration. Either path sets `escalated: true` and re-renders from the browser's rendered HTML; a body that already escalated is never escalated twice. If the content extractor still finds nothing on the real browser-rendered HTML (rare — a dense, non-article layout like an e-commerce grid homepage can defeat its content-scoring even post-render), the browser's own raw visible text is shipped instead of near-empty markdown, with `extraction: "recovered"` and a real `wordCount` — no extra browser launch.
+
+The markdown path auto-detects a **hollow extraction** — when the content extractor silently captures only a sliver of the page's real non-link prose (e.g. some forum threads whose posts sit inside a wrapper element the extractor drops as boilerplate) — and recovers the raw page text instead, gated so a genuinely sparse or link-heavy page (listing/index, login, 404) never gets dumped as raw link soup: recovery only fires when the page holds a substantial amount of reading content outside its `<a>` chrome that the extractor missed. The result carries `wordCount` and `extraction` (`"primary"` | `"recovered"`) so callers can see which path produced `text`. Pass `contentSelector` to pin the main content container yourself when auto-detection still picks the wrong element.
+
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `url` | string | yes | URL to fetch. |
 | `format` | enum `markdown` \| `text` | no | Output format (default `markdown`: main content + YAML frontmatter). Forced to raw `text` for non-HTML bodies (JSON, plain text). |
+| `contentSelector` | string | no | CSS selector pinning the main content element, bypassing auto-detection. Markdown path only. |
 | `extractPrices` | boolean | no | Run the price extractor on the body. |
 | `extractContacts` | boolean | no | Extract `{ emails, phones, hasContactForm }` from the fetched HTML (no browser). |
 | `contactFilter` | enum `strict` \| `off` | no | Drop placeholder/template emails (default `strict`). |
@@ -109,6 +114,8 @@ HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x fast
 ```json
 { "url": "https://example.com", "extractContacts": true }
 ```
+
+Returns `{ status, url, format, escalated, text, wordCount?, extraction? }` — `wordCount`/`extraction` are set on the markdown path only.
 
 ---
 
@@ -519,6 +526,19 @@ Press a key or shortcut (e.g. `Enter`, `ArrowDown`, `Control+a`).
 
 ```json
 { "sessionId": "s_abc123", "key": "Enter" }
+```
+
+### browser_type
+
+Type text into whatever element currently has focus — no `ref`/`target` (it drives `page.keyboard.type`, not a locator). Use for elements a ref can't reach, e.g. a closed shadow-DOM search input: `browser_click` the field first, then `browser_type`.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `sessionId` | string | yes | Target session. |
+| `text` | string | yes | Text to type into the focused element. |
+
+```json
+{ "sessionId": "s_abc123", "text": "iphone" }
 ```
 
 ### browser_select

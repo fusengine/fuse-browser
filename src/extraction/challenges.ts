@@ -11,6 +11,7 @@ const DOM_FLAGS_SCRIPT = `() => ({
   turnstile: Boolean(document.querySelector('input[name="cf-turnstile-response"], iframe[src*="turnstile"]')),
   hcaptcha: Boolean(document.querySelector('.h-captcha, iframe[src*="hcaptcha"]')),
   password: Boolean(document.querySelector('input[type="password"]')),
+  awsWaf: Boolean(window.awsWafCookieDomainList),
 })`;
 
 interface DomFlags {
@@ -18,6 +19,7 @@ interface DomFlags {
   turnstile: boolean;
   hcaptcha: boolean;
   password: boolean;
+  awsWaf: boolean;
 }
 
 /** Combine DOM and text signals to detect captcha, Cloudflare, login, OTP. */
@@ -38,5 +40,6 @@ export async function detectChallenges(page: Page, text: string): Promise<Challe
       lowered.includes("one-time") ||
       lowered.includes("verification code") ||
       lowered.includes("code de vérification"),
+    awsWaf: Boolean(flags.awsWaf || page.url().includes("chal_t=")),
   };
 }

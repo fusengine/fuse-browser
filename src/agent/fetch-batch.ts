@@ -6,9 +6,8 @@
  * @module agent/fetch-batch
  */
 import { mapConcurrent } from "../net/concurrent.js";
-import { fetchFast } from "../net/fetch-fast.js";
-import { renderFetch, type RenderedFetch } from "./fetch-render.js";
-import { resolveFetchBody } from "./fetch-resolve.js";
+import { fetchAndRender } from "./fetch-orchestrate.js";
+import type { RenderedFetch } from "./fetch-render.js";
 
 /** Default parallelism — polite for mixed hosts, multiplexes over HTTP/2. */
 const DEFAULT_CONCURRENCY = 8;
@@ -39,9 +38,13 @@ export async function fetchBatch(urls: string[], opts: FetchBatchOptions = {}): 
   let done = 0;
   const outcomes = await mapConcurrent(urls, concurrency, async (url) => {
     try {
-      const r = await fetchFast(url, opts.proxyUrl);
-      const body = await resolveFetchBody(url, r, { browserFallback: opts.browserFallback, proxyUrl: opts.proxyUrl });
-      return await renderFetch(body, { format: opts.format, maxChars: opts.maxChars });
+      const { rendered } = await fetchAndRender(url, {
+        browserFallback: opts.browserFallback,
+        proxyUrl: opts.proxyUrl,
+        format: opts.format,
+        maxChars: opts.maxChars,
+      });
+      return rendered;
     } finally {
       opts.onProgress?.(++done, urls.length, url);
     }

@@ -26,10 +26,16 @@ function client(proxyUrl?: string): Impit {
  * Extract readable body text from an HTML string (no browser, no layout).
  * linkedom's `body`/`documentElement` getters can THROW on rootless input, so
  * the access is guarded — a malformed body yields "" rather than crashing.
+ * `<script>`/`<style>` elements are removed from the DOM first — `textContent`
+ * includes their source verbatim, and pages that inject critical CSS/JS
+ * directly into `<body>` (common with CSS-in-JS SSR) would otherwise leak raw
+ * stylesheet/script source into this "readable text", corrupting both price
+ * extraction and hollow-extraction recovery downstream.
  */
 export function htmlToText(html: string): string {
   try {
     const { document } = parseHTML(html);
+    for (const el of document.querySelectorAll("script, style")) el.remove();
     const text = (document.body?.textContent ?? document.documentElement?.textContent ?? "").trim();
     if (text) return text;
   } catch {

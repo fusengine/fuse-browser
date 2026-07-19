@@ -39,6 +39,8 @@ export interface Challenges {
   cloudflare: boolean;
   login: boolean;
   otp: boolean;
+  /** AWS WAF Bot Control challenge (`chal_t=` query param or `window.awsWafCookieDomainList`). */
+  awsWaf: boolean;
 }
 
 /** An interactive element observed visually. Optional fields enrich snapshots. */

@@ -7,7 +7,9 @@ import type { Page } from "playwright";
 import { z } from "zod";
 import { actByRef, type RefActionKind } from "../../actions/act-by-ref.js";
 import { pickAutocomplete } from "../../actions/autocomplete.js";
+import { isComboboxTrigger, openComboboxAndPick } from "../../actions/combobox.js";
 import { drag, hover } from "../../actions/hover-drag.js";
+import { resolveClickTarget } from "../../actions/resolve-click-target.js";
 import { smartClick } from "../../actions/smart-click.js";
 import { smartFill } from "../../actions/smart-fill.js";
 import { type FilesInput, uploadFiles } from "../../actions/upload.js";
@@ -41,7 +43,14 @@ export async function runAct(
     return actByRef(page, a.ref, kind, value, option, files, to);
   if (typeof a.target !== "string") return null;
   const target = a.target;
-  if (kind === "pick") return pickAutocomplete(page, page.locator(target).first(), value, option);
+  if (kind === "pick") {
+    // Resolve through the same text/heuristic resolver as smart-click (not a
+    // raw CSS selector): a human-readable target (e.g. "Où allez-vous ?")
+    // throws "Unexpected token" when parsed as CSS by `page.locator()`.
+    const resolved = (await resolveClickTarget(page, target)) ?? { locator: page.locator(target).first(), strategy: "selector" };
+    if (await isComboboxTrigger(resolved.locator)) return openComboboxAndPick(page, resolved.locator, value, option || value);
+    return pickAutocomplete(page, resolved.locator, value, option);
+  }
   if (kind === "upload") return uploadFiles(page, target, files);
   if (kind === "hover") return hover(page, target);
   if (kind === "drag") return drag(page, target, to);

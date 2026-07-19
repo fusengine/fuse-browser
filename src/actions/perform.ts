@@ -5,9 +5,11 @@
 import type { Page } from "playwright";
 import type { ActionResult } from "../interfaces/types.js";
 import { pickAutocomplete } from "./autocomplete.js";
+import { isComboboxTrigger, openComboboxAndPick } from "./combobox.js";
 import { drag, hover } from "./hover-drag.js";
 import { login, type LoginAction } from "./login.js";
-import { navigateHistory, pressKey, scroll, selectOption } from "./navigation.js";
+import { navigateHistory, pressKey, scroll, selectOption, typeText } from "./navigation.js";
+import { resolveClickTarget } from "./resolve-click-target.js";
 import { smartClick } from "./smart-click.js";
 import { smartFill } from "./smart-fill.js";
 import { type FilesInput, uploadFiles } from "./upload.js";
@@ -37,6 +39,8 @@ export async function performAction(
       });
     case "press":
       return pressKey(page, String(action.key ?? ""));
+    case "type":
+      return typeText(page, String(action.text ?? action.value ?? ""));
     case "select":
       return selectOption(page, target, String(action.value ?? ""));
     case "upload":
@@ -45,8 +49,13 @@ export async function performAction(
       return hover(page, target);
     case "drag":
       return drag(page, target, String(action.to ?? ""));
-    case "pick":
-      return pickAutocomplete(page, page.locator(target).first(), String(action.value ?? ""), String(action.option ?? ""));
+    case "pick": {
+      const value = String(action.value ?? "");
+      const option = String(action.option ?? "");
+      const resolved = (await resolveClickTarget(page, target)) ?? { locator: page.locator(target).first(), strategy: "selector" };
+      if (await isComboboxTrigger(resolved.locator)) return openComboboxAndPick(page, resolved.locator, value, option || value);
+      return pickAutocomplete(page, resolved.locator, value, option);
+    }
     case "back":
     case "forward":
       return navigateHistory(page, action.type);

@@ -24,4 +24,5 @@ export const challengesSchema = z.object({
   cloudflare: z.boolean().optional(),
   login: z.boolean().optional(),
   otp: z.boolean().optional(),
+  awsWaf: z.boolean().optional(),
 });
