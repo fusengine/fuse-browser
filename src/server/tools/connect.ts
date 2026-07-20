@@ -6,7 +6,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { resolveConfig } from "../../agent/config.js";
-import { KNOWN_BROWSERS, spawnBrowser, waitForCdp } from "../../engine/cdp-launch.js";
+import type { BrowserName } from "../../engine/browser-paths.js";
+import { resolveBrowserBinary } from "../../engine/browser-paths.js";
+import { spawnBrowser, waitForCdp } from "../../engine/cdp-launch.js";
 import type { SessionManager } from "../../session/manager.js";
 import { errorResult, jsonResult } from "../result.js";
 
@@ -39,9 +41,24 @@ export function registerConnectTool(server: McpServer, sessions: SessionManager)
     async (args) => {
       const a = args as Record<string, unknown>;
       const port = (a.port as number | undefined) ?? 9222;
-      const binary = (a.executablePath as string | undefined) ?? KNOWN_BROWSERS[(a.browser as string) ?? "chrome"];
-      if (!binary) return errorResult(`Unknown browser: ${String(a.browser)}`);
-      if (a.launch !== false) spawnBrowser(binary, port, a.userDataDir as string | undefined);
+      let binary = a.executablePath as string | undefined;
+      if (!binary) {
+        const name = ((a.browser as string) ?? "chrome") as BrowserName;
+        const resolved = resolveBrowserBinary(name);
+        if (!resolved.binary) {
+          return errorResult(
+            `No installed browser found for "${name}" on ${process.platform} (tried: ${resolved.tried.join(", ")}). Pass \`executablePath\` explicitly.`,
+            "browser_not_found",
+          );
+        }
+        binary = resolved.binary;
+      }
+      if (a.launch !== false) {
+        const spawned = await spawnBrowser(binary, port, a.userDataDir as string | undefined);
+        if (!spawned.ok) {
+          return errorResult(`Failed to launch browser at "${binary}": ${spawned.error}`, "browser_spawn_failed");
+        }
+      }
       let endpoint: string;
       try {
         endpoint = await waitForCdp(port);

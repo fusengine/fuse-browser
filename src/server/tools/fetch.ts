@@ -9,7 +9,8 @@ import { z } from "zod";
 import { fetchAndRender } from "../../agent/fetch-orchestrate.js";
 import { contactsFromHtml } from "../../extraction/contacts/from-html.js";
 import { extractPrices } from "../../extraction/prices.js";
-import { jsonResult } from "../result.js";
+import { PrivateNetworkBlockedError } from "../../net/private-net-guard.js";
+import { errorResult, jsonResult } from "../result.js";
 import { contactsSchema } from "./schemas-contacts-output.js";
 import { renderedFetchSchema } from "./schemas-fetch-output.js";
 import { priceSchema } from "./schemas-price-output.js";
@@ -46,23 +47,28 @@ export function registerFetchTool(server: McpServer): void {
     async (args) => {
       const a = args as Record<string, unknown>;
       const proxyUrl = typeof a.proxyUrl === "string" ? a.proxyUrl : undefined;
-      // Escalates to a real browser render when browserFallback is on and either
-      // the raw HTML is an unrendered SPA shell, or the fast-path extraction came
-      // back empty on a page carrying JS-rendering markers (fetch-orchestrate.ts).
-      const { body, rendered } = await fetchAndRender(String(a.url), {
-        browserFallback: a.browserFallback === true,
-        proxyUrl,
-        format: typeof a.format === "string" ? a.format : undefined,
-        maxChars: typeof a.maxChars === "number" ? a.maxChars : undefined,
-        contentSelector: typeof a.contentSelector === "string" ? a.contentSelector : undefined,
-      });
-      const country = typeof a.countryCode === "string" ? a.countryCode : "CH";
-      const filter = a.contactFilter === "off" ? "off" : "strict";
-      return jsonResult({
-        ...rendered,
-        prices: a.extractPrices ? extractPrices(body.text) : undefined,
-        contacts: a.extractContacts ? contactsFromHtml(body.html, country, { url: body.url, filter }) : undefined,
-      });
+      try {
+        // Escalates to a real browser render when browserFallback is on and either
+        // the raw HTML is an unrendered SPA shell, or the fast-path extraction came
+        // back empty on a page carrying JS-rendering markers (fetch-orchestrate.ts).
+        const { body, rendered } = await fetchAndRender(String(a.url), {
+          browserFallback: a.browserFallback === true,
+          proxyUrl,
+          format: typeof a.format === "string" ? a.format : undefined,
+          maxChars: typeof a.maxChars === "number" ? a.maxChars : undefined,
+          contentSelector: typeof a.contentSelector === "string" ? a.contentSelector : undefined,
+        });
+        const country = typeof a.countryCode === "string" ? a.countryCode : "CH";
+        const filter = a.contactFilter === "off" ? "off" : "strict";
+        return jsonResult({
+          ...rendered,
+          prices: a.extractPrices ? extractPrices(body.text) : undefined,
+          contacts: a.extractContacts ? contactsFromHtml(body.html, country, { url: body.url, filter }) : undefined,
+        });
+      } catch (err) {
+        if (err instanceof PrivateNetworkBlockedError) return errorResult(err.message, err.code);
+        throw err;
+      }
     },
   );
 }

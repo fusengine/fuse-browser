@@ -8,7 +8,7 @@
  */
 import { extname } from "node:path";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { writeFileBytes } from "../../lib/fs.js";
+import { checkWriteConfinement, writeConfinedBytes } from "../../lib/write-guard.js";
 import { errorResult } from "../result.js";
 
 /** Extension(s) accepted for each mime type this tool ever produces. */
@@ -17,34 +17,46 @@ const MIME_EXTS: Record<string, readonly string[]> = {
   "image/jpeg": [".jpg", ".jpeg"],
 };
 
+/** A rejected write: the error message plus its machine-readable code. */
+interface WriteRejection {
+  code: string;
+  message: string;
+}
+
 /**
- * Writes `data` to `path` on disk, gated on `path`'s extension matching
+ * Writes `data` to `path` on disk, gated on (1) `path`'s extension matching
  * `mimeType` — the mime is known upfront from the capture branch (never
  * sniffed from bytes), so a mismatch (e.g. `.png` for the JPEG `annotate`
- * branch) is rejected rather than silently renamed. This extension gate is
- * stricter than `pdf.ts`, which performs no validation and accepts any path
- * verbatim; the trait actually shared with `pdf.ts`/`visual-diff.ts` is
- * accepting an arbitrary caller-supplied local path with no implicit
- * renaming, sandboxing, or traversal check (same accepted trust model).
- * Returns an error message on mismatch, else `undefined` once written.
+ * branch) is rejected rather than silently renamed — and (2), only when
+ * `FUSE_CONFINE_WRITES` is set, that `path` resolves under that root (see
+ * `lib/write-guard.ts`; a no-op by default). Returns the rejection on
+ * failure, else `undefined` once written.
  */
-export function writeScreenshotOrError(path: string, data: Buffer, mimeType: string): string | undefined {
+export function writeScreenshotOrError(path: string, data: Buffer, mimeType: string): WriteRejection | undefined {
   const valid = MIME_EXTS[mimeType] ?? [];
   const ext = extname(path).toLowerCase();
   if (!valid.includes(ext)) {
-    return `path extension "${ext || "(none)"}" does not match ${mimeType} output (expected ${valid.join(" or ")})`;
+    return {
+      code: "path_extension_mismatch",
+      message: `path extension "${ext || "(none)"}" does not match ${mimeType} output (expected ${valid.join(" or ")})`,
+    };
   }
-  writeFileBytes(path, data);
+  const confineErr = checkWriteConfinement(path);
+  if (confineErr) return { code: "path_outside_confinement", message: confineErr };
+  try {
+    writeConfinedBytes(path, data);
+  } catch (err) {
+    return { code: "path_outside_confinement", message: `refused to write through a symlink at "${path}": ${String(err)}` };
+  }
   return undefined;
 }
 
 /**
  * Runs the optional `path` write for a single-image capture, then delegates
- * to `onSuccess` for the branch's normal result — or short-circuits with a
- * `path_extension_mismatch` error `CallToolResult` when the write is
- * rejected. When `path` is `undefined`, `onSuccess` runs immediately (no-op
- * write), matching the caller's original "only write when `path` is set"
- * behavior.
+ * to `onSuccess` for the branch's normal result — or short-circuits with the
+ * rejection's error `CallToolResult` when the write is rejected. When `path`
+ * is `undefined`, `onSuccess` runs immediately (no-op write), matching the
+ * caller's original "only write when `path` is set" behavior.
  */
 export function withOptionalWrite(
   path: string | undefined,
@@ -53,8 +65,8 @@ export function withOptionalWrite(
   onSuccess: () => CallToolResult,
 ): CallToolResult {
   if (path) {
-    const err = writeScreenshotOrError(path, data, mimeType);
-    if (err) return errorResult(err, "path_extension_mismatch");
+    const rejection = writeScreenshotOrError(path, data, mimeType);
+    if (rejection) return errorResult(rejection.message, rejection.code);
   }
   return onSuccess();
 }

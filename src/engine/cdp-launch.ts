@@ -12,26 +12,43 @@
 import { spawn } from "node:child_process";
 import { logger } from "../lib/logger.js";
 
-/** Default macOS binary paths for common Chromium browsers. */
-export const KNOWN_BROWSERS: Record<string, string> = {
-  dia: "/Applications/Dia.app/Contents/MacOS/Dia",
-  chrome: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  edge: "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-  brave: "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-  arc: "/Applications/Arc.app/Contents/MacOS/Arc",
-};
+/** Result of a `spawnBrowser` attempt: whether the child process started. */
+export type SpawnResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Spawn a browser binary with remote debugging, fully detached from the parent.
  * Runs without a shell (no shell injection); `binary`/`userDataDir` are passed
  * as native argv. The opened debug port is a local attack surface (see module).
+ *
+ * A `child.on("error", ...)` handler is attached BEFORE `unref()` so an ENOENT
+ * (bad binary path) never surfaces as an unhandled `error` event — which would
+ * otherwise crash the whole process (and, for the stdio MCP server, kill every
+ * tool for the session). The handler settles the returned promise with a
+ * structured failure instead. A short `setImmediate` grace period lets that
+ * (typically next-tick) failure surface before we optimistically resolve
+ * success, so callers fail fast rather than sitting through the full
+ * `waitForCdp` polling timeout on a binary that never started.
  */
-export function spawnBrowser(binary: string, port: number, userDataDir?: string): void {
-  const args = [`--remote-debugging-port=${port}`, "--no-first-run", "--no-default-browser-check"];
-  if (userDataDir) args.push(`--user-data-dir=${userDataDir}`);
-  const child = spawn(binary, args, { detached: true, stdio: "ignore" });
-  child.unref();
-  logger.info("spawned browser for CDP", { binary, port });
+export function spawnBrowser(binary: string, port: number, userDataDir?: string): Promise<SpawnResult> {
+  return new Promise((resolve) => {
+    const args = [`--remote-debugging-port=${port}`, "--no-first-run", "--no-default-browser-check"];
+    if (userDataDir) args.push(`--user-data-dir=${userDataDir}`);
+    const child = spawn(binary, args, { detached: true, stdio: "ignore" });
+    let settled = false;
+    child.on("error", (err) => {
+      if (settled) return;
+      settled = true;
+      logger.error("failed to spawn browser", { binary, port, error: String(err) });
+      resolve({ ok: false, error: err.message });
+    });
+    setImmediate(() => {
+      if (settled) return;
+      settled = true;
+      child.unref();
+      logger.info("spawned browser for CDP", { binary, port });
+      resolve({ ok: true });
+    });
+  });
 }
 
 /** Poll http://localhost:PORT/json/version until it responds or retries run out. */
