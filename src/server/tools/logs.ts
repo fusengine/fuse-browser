@@ -15,7 +15,10 @@ export { CONSOLE_OUTPUT_SHAPE, NETWORK_OUTPUT_SHAPE } from "./logs-output.js";
 
 const CONSOLE_DESC =
   "Console messages captured in the session since open (last 80). Use to debug JS errors, CSP " +
-  'violations, or why a page misbehaves. Filter with `level` (e.g. "error"); `limit` = last N (default 50).';
+  'violations, or why a page misbehaves. Filter with `level` (e.g. "error"); `limit` = last N (default 50). ' +
+  "LIMITATION: the default `patchright` engine disables Chromium's Console API upstream (anti-detection " +
+  'patch) — on that engine an empty buffer returns `unavailable:"console_disabled_on_patchright"` instead ' +
+  'of a bare `count:0`; reopen the session with engine:"playwright" to actually capture console output.';
 
 const NETWORK_DESC =
   "Network requests captured in the session since open (last 80): method, url, status, resourceType. " +
@@ -44,6 +47,17 @@ export function registerLogTools(server: McpServer, sessions: SessionManager): v
           a.level as string | undefined,
           a.limit as number | undefined,
         );
+        // Patchright (default engine) deliberately disables the whole Console
+        // API upstream (anti-detection patch) — an empty buffer there means
+        // "unavailable", not "no console messages", so say so explicitly.
+        if (entries.length === 0 && s.config.engine === "patchright") {
+          return jsonResult({
+            count: 0,
+            entries: [],
+            unavailable: "console_disabled_on_patchright",
+            hint: 'reopen the session with engine:"playwright" to capture console output',
+          });
+        }
         return jsonResult({ count: entries.length, entries });
       });
     },

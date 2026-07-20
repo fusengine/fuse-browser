@@ -5,9 +5,11 @@
  * @module net/fetch-fast
  */
 import { Impit } from "impit";
-import { parseHTML } from "linkedom";
+import { assertNetworkAllowed } from "./private-net-guard.js";
 import { readCappedText } from "./read-body.js";
-import { visibleText } from "./thin-shell.js";
+
+export { htmlToText, isHtmlContentType } from "./fetch-fast-text.js";
+import { htmlToText, isHtmlContentType } from "./fetch-fast-text.js";
 
 /** Hard cap on the downloaded body — guards against decompression bombs / runaway streams. */
 const MAX_DOWNLOAD_BYTES = 10_485_760; // 10 MB
@@ -20,44 +22,6 @@ function client(proxyUrl?: string): Impit {
   if (proxyUrl) return new Impit({ browser: "chrome", proxyUrl });
   shared ??= new Impit({ browser: "chrome" });
   return shared;
-}
-
-/**
- * Extract readable body text from an HTML string (no browser, no layout).
- * linkedom's `body`/`documentElement` getters can THROW on rootless input, so
- * the access is guarded — a malformed body yields "" rather than crashing.
- * `<script>`/`<style>` elements are removed from the DOM first — `textContent`
- * includes their source verbatim, and pages that inject critical CSS/JS
- * directly into `<body>` (common with CSS-in-JS SSR) would otherwise leak raw
- * stylesheet/script source into this "readable text", corrupting both price
- * extraction and hollow-extraction recovery downstream.
- */
-export function htmlToText(html: string): string {
-  try {
-    const { document } = parseHTML(html);
-    for (const el of document.querySelectorAll("script, style")) el.remove();
-    const text = (document.body?.textContent ?? document.documentElement?.textContent ?? "").trim();
-    if (text) return text;
-  } catch {
-    /* fall through to the raw strip below */
-  }
-  return visibleText(html); // fragment / empty-body pages: recover text from raw HTML
-}
-
-/** MIME types linkedom/Defuddle can parse as markup. */
-const HTML_MIME = new Set(["text/html", "application/xhtml+xml"]);
-
-/**
- * Decide whether a `content-type` denotes HTML. Strips parameters (`; charset=…`)
- * and matches an exact MIME allowlist — `includes("html")` would wrongly match
- * payloads like `application/vnd.github.html+json`. An **empty** content-type is
- * treated as HTML: servers that omit it commonly serve HTML, and this preserves
- * the prior unconditional behavior.
- */
-export function isHtmlContentType(contentType: string): boolean {
-  if (contentType === "") return true;
-  const mime = (contentType.split(";", 1)[0] ?? "").trim();
-  return HTML_MIME.has(mime);
 }
 
 /** Result of a fast HTTP fetch. */
@@ -77,9 +41,16 @@ export interface FastResponse {
  * Non-HTML payloads (JSON, plain text, …) are returned **verbatim** — running them
  * through the linkedom HTML parser would mangle them — so the fast-path also serves
  * JSON APIs. Callers must consult `isHtml` before any HTML→markdown conversion.
+ *
+ * Single choke point for every fast-path consumer (`browser_fetch`,
+ * `browser_fetch_batch`, `browser_crawl`): `assertNetworkAllowed` is a no-op
+ * unless `FUSE_BLOCK_PRIVATE_NETS=1` (see `net/private-net-guard.ts` for the
+ * documented redirect/IP coverage gap).
  */
 export async function fetchFast(url: string, proxyUrl?: string): Promise<FastResponse> {
+  await assertNetworkAllowed(url);
   const res = await client(proxyUrl).fetch(url, { headers: { Accept: ACCEPT } });
+  await assertNetworkAllowed(res.url || url);
   const body = await readCappedText(res, MAX_DOWNLOAD_BYTES);
   const contentType = (res.headers.get("content-type") ?? "").toLowerCase();
   const isHtml = isHtmlContentType(contentType);

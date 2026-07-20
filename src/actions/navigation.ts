@@ -77,15 +77,3 @@ export async function selectOption(
     return { type: "select", ok: false, target, error: String(err).split("\n")[0] ?? "error" };
   }
 }
-
-/** Go back or forward in session history. */
-export async function navigateHistory(
-  page: Page,
-  direction: "back" | "forward",
-): Promise<ActionResult> {
-  const response =
-    direction === "back"
-      ? await page.goBack({ waitUntil: "domcontentloaded", timeout: 20_000 })
-      : await page.goForward({ waitUntil: "domcontentloaded", timeout: 20_000 });
-  return { type: direction, ok: response !== null, url: page.url() };
-}

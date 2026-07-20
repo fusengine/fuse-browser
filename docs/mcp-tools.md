@@ -92,7 +92,7 @@ Accepts the full [agentOptionShape](#browser_open) plus the same probe flags as 
 
 ### browser_fetch
 
-HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; for JS/SPA pages set `browserFallback: true` (or use `browser_probe`). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher. The body download is capped at 10 MB.
+HTTP fetch with browser TLS/HTTP2 impersonation — no browser launch, ~10x faster. For server-rendered HTML; for JS/SPA pages set `browserFallback: true` (or use `browser_probe`). Non-HTML responses (JSON APIs, `text/plain`) are returned **verbatim** — the markdown/HTML pipeline is skipped — so this also works as a fast JSON-API fetcher. The body download is capped at 10 MB. Shares its network layer with `browser_fetch_batch`/`browser_crawl`: set `FUSE_BLOCK_PRIVATE_NETS=1` to block loopback/link-local/RFC1918/CGNAT targets — including every IPv6 literal form (`[::1]`, IPv4-mapped, `[::]`) — for all three (see [configuration](./configuration.md) for exactly what is and isn't covered; off by default, so `http://127.0.0.1:3000` keeps working).
 
 With `browserFallback: true`, escalation to a real browser render fires on **either** of two independent signals: (1) the raw HTML itself looks like an unrendered SPA shell (thin visible text + SPA/script markers), or (2) the raw HTML looks JS-rendered (SPA hydration mount point or heavy `<script>` count) **and** the fast-path extraction still came back empty/near-empty (`wordCount < 15`, not already recovered by the hollow-extraction path) — this covers chrome-heavy pages (nav/footer markup clearing 600+ visible chars) whose real content only exists after client-side hydration. Either path sets `escalated: true` and re-renders from the browser's rendered HTML; a body that already escalated is never escalated twice. If the content extractor still finds nothing on the real browser-rendered HTML (rare — a dense, non-article layout like an e-commerce grid homepage can defeat its content-scoring even post-render), the browser's own raw visible text is shipped instead of near-empty markdown, with `extraction: "recovered"` and a real `wordCount` — no extra browser launch.
 
@@ -313,6 +313,8 @@ Launch an installed browser with remote debugging, attach to it, and return a se
 | `userDataDir` | string | no | Profile directory for the launched browser. |
 | `launch` | boolean | no | If `false`, attach to an already-running instance instead of spawning. |
 
+Browser lookup (when `browser` is used instead of `executablePath`) is **platform-aware**: macOS resolves fixed `.app` bundle paths, Linux resolves common binary names (`google-chrome`, `chromium`, `microsoft-edge`, `brave-browser`, …) via `PATH`, and Windows probes standard install roots (`%ProgramFiles%`, `%LOCALAPPDATA%`). Every candidate is checked to exist on disk before being spawned; if none resolves, the tool returns `browser_not_found` listing what was tried. A spawn failure (bad `executablePath`, missing binary) is also returned as a structured `browser_spawn_failed` error — it never crashes the server.
+
 ```json
 { "browser": "chrome", "port": 9222 }
 ```
@@ -402,13 +404,15 @@ Navigate back in session history.
 | --- | --- | --- | --- |
 | `sessionId` | string | yes | Target session. |
 
+Success (`ok`) is decided from the URL before vs. after, not from Playwright's navigation response — same-document SPA history (`history.pushState` then back/forward) resolves `ok:true` with the new URL even though Playwright itself returns no navigation response for it. A slow page whose load hasn't settled within the internal timeout still reports `ok:true` (URL already changed) with `warning:"load_timeout"`, instead of throwing. When there really is no history to go to, it returns `ok:false` with `reason:"no_history"`.
+
 ```json
 { "sessionId": "s_abc123" }
 ```
 
 ### browser_forward
 
-Navigate forward in session history.
+Navigate forward in session history. Same `ok`/`warning`/`reason` semantics as [`browser_back`](#browser_back).
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -774,6 +778,7 @@ When `path` is set, its extension must match the output mime — `.png` for elem
 
 - `path_multi_viewport_unsupported` — `path` given with `viewports.length > 1` (multiple images); use a single viewport with `path`.
 - `path_extension_mismatch` — `path`'s extension does not match the output mime (e.g. `.png` for the `annotate` JPEG, or `.jpg` for a PNG capture).
+- `path_outside_confinement` — only when `FUSE_CONFINE_WRITES=<root>` is set (see [configuration](./configuration.md)): `path` does not canonicalize under that root. Unset by default (`path` writes wherever the caller asks, unchanged).
 
 ```json
 { "sessionId": "s_abc123", "annotate": true, "colorScheme": "dark" }
@@ -865,7 +870,7 @@ Console messages captured in the session since open (last 80 kept). Use to debug
 | `level` | enum `error` \| `warning` \| `info` \| `log` \| `debug` | no | Keep only this console message type. |
 | `limit` | number | no | Last N entries returned (default `50`). |
 
-Returns `{ count, entries }`.
+Returns `{ count, entries }`. **Limitation**: the default `patchright` engine deliberately disables Chromium's whole Console API upstream (an anti-detection patch), so an empty buffer on that engine returns `{ count:0, entries:[], unavailable:"console_disabled_on_patchright", hint:"reopen the session with engine:\"playwright\" to capture console output" }` instead of a bare `count:0` — the tool never silently implies "no console messages" when the API itself is unavailable.
 
 ```json
 { "sessionId": "s_abc123", "level": "error", "limit": 20 }
@@ -890,7 +895,7 @@ Returns `{ count, requests }`.
 
 ### browser_pdf
 
-Render the live page to PDF. **Headless chromium only** — Playwright's `page.pdf()` throws in headed mode or on a non-chromium engine; in that case the tool returns a clear error (`code: pdf_unsupported`, message `browser_pdf requires headless chromium`). With `path` the PDF is written to disk; otherwise it is returned base64-encoded.
+Render the live page to PDF. **Headless chromium only** — Playwright's `page.pdf()` throws in headed mode or on a non-chromium engine; in that case the tool returns a clear error (`code: pdf_unsupported`, message `browser_pdf requires headless chromium`). With `path` the PDF is written to disk; otherwise it is returned base64-encoded. `path` must end in `.pdf`, else `path_extension_mismatch`; when `FUSE_CONFINE_WRITES` is set, `path` must also resolve under that root, else `path_outside_confinement` (see [configuration](./configuration.md); a no-op when unset).
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
